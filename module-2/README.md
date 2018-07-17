@@ -83,7 +83,7 @@ Successfully tagged 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous camm and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
+docker run -p 8080:8080 111111111111.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
 As a result you will see docker reporting that your container is up and running locally:
@@ -122,7 +122,7 @@ $(aws ecr get-login --no-include-email)
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
 
 ```
-docker push 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
+docker push 111111111111.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
 Run the following command to see your newly pushed docker image stored inside the ECR repository:
@@ -159,7 +159,7 @@ aws logs create-log-group --log-group-name mythicalmysfits-logs
 
 Now that we have a cluster created and a log group defined for where our container logs will be pushed to, we're ready to register an ECS **task definition**.  A task in ECS is a set of container images that should be scheduled together. A task definition declares that set of containers and the resources and configuration those containers require.  You will use the AWS CLI to create a new task definition for how your new container image should be scheduled to the ECS cluster we just created.  
 
-A JSON file has been provided that will serve as the input to the CLI command, stored at `~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition.json`. Open this file in the IDE and replace the indicated values with the appropriate ones from your created resources.  These values with be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest`
+A JSON file has been provided that will serve as the input to the CLI command, stored at `~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition.json`. Open this file in the IDE and replace the indicated values with the appropriate ones from your created resources.  These values with be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `111111111111.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest`
 
 Once you have replaced the values in `task-defintion.json` and saved it. Execute the following command to register a new task definition in ECS:
 
