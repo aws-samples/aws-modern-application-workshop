@@ -100,7 +100,7 @@ As a result you will see docker reporting that your container is up and running 
  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-To test our service with a local request, we're going to open up the build-in web browser within the Cloud9 IDE that can be used to preview applications that are running on the IDE instance.  To open the preview web browser, select **Preview > Preview Running Application** in the Cloud9 menu bar:
+To test our service with a local request, we're going to open up the built-in web browser within the Cloud9 IDE that can be used to preview applications that are running on the IDE instance.  To open the preview web browser, select **Preview > Preview Running Application** in the Cloud9 menu bar:
 
 ![preview-menu](/images/module-2/preview-menu.png)
 
