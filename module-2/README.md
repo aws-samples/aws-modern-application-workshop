@@ -65,13 +65,21 @@ Docker comes already installed on the Cloud9 IDE that you've created, so in orde
 cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
 
-* Then build the docker image, this will use the file in the current directory called Dockerfile that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in:
+* Then build the docker image, this will use the file in the current directory called Dockerfile that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in.
+
+To retrieve the needed information about your account and region, you can run the following CLI command that uses the AWS Security Token Service to return back information about the principal issuing the CLI command:
+
+```
+aws sts get-caller-identity
+```
+
+Once you have your Account ID, you are ready to build the docker image:
 
 ```
 docker build . -t REPLACE_ME_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  Copy the image tag for later reference.
+You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  **Copy the image tag for later reference. Below the example tag shown is: 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest**
 
 ```
 Successfully built 8bxxxxxxxxab
@@ -83,7 +91,7 @@ Successfully tagged 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous camm and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
+docker run -p 8080:8080 REPLACE_ME_WITH_DOCKER_IMAGE_TAG
 ```
 
 As a result you will see docker reporting that your container is up and running locally:
@@ -122,7 +130,7 @@ $(aws ecr get-login --no-include-email)
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
 
 ```
-docker push 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
+docker push REPLACE_ME_WITH_DOCKER_IMAGE_TAG
 ```
 
 Run the following command to see your newly pushed docker image stored inside the ECR repository:
