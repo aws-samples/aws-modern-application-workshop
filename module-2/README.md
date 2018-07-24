@@ -110,7 +110,7 @@ This will open another panel in the IDE where the web browser will be available.
 
 If successful you will see a response from the service that returns the JSON document stored at `/aws-modern-application-workshop/module-2/app/service/mysfits-response.json`
 
-When done testing the service you can stop it by pressing CTRL-c on PC or ⌘-c on Mac.
+When done testing the service you can stop it by pressing CTRL-c on PC or Mac.
 
 #### Pushing the Docker Image to Amazon ECR
 
