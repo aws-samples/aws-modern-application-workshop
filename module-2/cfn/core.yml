@@ -205,7 +205,7 @@ Resources:
       VpcId: !Ref 'VPC'
       SecurityGroupIngress:
           # Allow access to NLB from anywhere on the internet
-          - CidrIp: 0.0.0.0/0
+          - CidrIp: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
             IpProtocol: -1
 
   # This is an IAM role which authorizes ECS to manage resources on your
