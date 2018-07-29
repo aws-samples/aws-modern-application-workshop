@@ -254,7 +254,9 @@ Copy the DNS name you saved when creating the NLB and send a request to it using
 http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
 ```
 
-A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate.
+A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate. 
+
+Be sure to use http://, because https:// will not work. 
 
 ### Update Mythical Mysfits to Call the NLB
 
