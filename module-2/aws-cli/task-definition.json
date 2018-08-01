@@ -6,7 +6,7 @@
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "executionRoleArn": "REPLACE_ME_ECS_ROLE_ARN",
+  "executionRoleArn": "REPLACE_ME_ECS_SERVICE_ROLE_ARN",
   "taskRoleArn": "REPLACE_ME_ECS_TASK_ROLE_ARN",
   "containerDefinitions": [
     {
