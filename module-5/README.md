@@ -39,7 +39,7 @@ First, let's create a new CodeCommit repository where the streaming service code
 aws codecommit create-repository --repository-name MythicalMysfitsStreamingService-Repository
 ```
 
-In the response to that command, copy the value for `"cloneValueUrl"`.  It should be of the form:
+In the response to that command, copy the value for `"cloneUrlHttp"`.  It should be of the form:
 `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsStreamingService-Repository`
 
 Next, let's clone that new and empty repository into our IDE:
