@@ -104,9 +104,19 @@ Now that our new website bucket is configured appropriately, let's add the first
 aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html s3://REPLACE_ME_BUCKET_NAME/index.html
 ```
 
-Now, open up your favorite web browser and enter the below into the address bar. The string to replace YOUR_REGION should match whichever region you created, the possible region strings are listed above at the beginning of this modules instructions (eg: us-east-1):
+Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using. 
 
+The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you created the S3 bucket within (eg: us-east-1):
+
+For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
+```
 http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+```
+
+For us-east-2 (Ohio) use:
+```
+http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
+```
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
