@@ -9,9 +9,9 @@ import (
     "io/ioutil"
 )
 
-// Show "Hello world" for http://localhost:8088
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte ("Hello world"))
+// For http://localhost:8088
+func healthCheckResponse(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte ("Nothing here, used for health check. Try /mysfits instead."))
     webgo.R200(
         w,
         "",
@@ -36,10 +36,10 @@ func showMisfits(w http.ResponseWriter, r *http.Request) {
 func getRoutes() []*webgo.Route {
     return []*webgo.Route{
         &webgo.Route{
-            Name:     "hellowebgo",                   // A label for the API/URI, this is not used anywhere.
-            Method:   http.MethodGet,                 // request type
-            Pattern:  "/",                            // Pattern for the route
-            Handlers: []http.HandlerFunc{helloWorld}, // route handler
+            Name:     "healthwebgo",                           // A label for the API/URI, this is not used anywhere.
+            Method:   http.MethodGet,                          // request type
+            Pattern:  "/",                                     // Pattern for the route
+            Handlers: []http.HandlerFunc{healthCheckResponse}, // route handler
         },
         &webgo.Route{
             Name:     "misfits",                       // A label for the API/URI, this is not used anywhere.
