@@ -74,3 +74,6 @@ To remove all of the created resources, you can visit the following AWS Consoles
 
 
 [Proceed to Module 1](/module-1)
+
+
+## [AWS Developer Center](https://developer.aws)

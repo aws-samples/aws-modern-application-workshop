@@ -104,7 +104,7 @@ Now that our new website bucket is configured appropriately, let's add the first
 aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html s3://REPLACE_ME_BUCKET_NAME/index.html
 ```
 
-Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using. 
+Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using.
 
 The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you created the S3 bucket within (eg: us-east-1):
 
@@ -125,3 +125,6 @@ Congratulations, you have created the basic static Mythical Mysfits Website!
 That concludes Module 1.
 
 [Proceed to Module 2](/module-2)
+
+
+## [AWS Developer Center](https://developer.aws)

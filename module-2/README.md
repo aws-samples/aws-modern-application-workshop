@@ -44,7 +44,7 @@ You can check on the status of your stack creation either via the AWS Console or
 aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack
 ```
 
-Run the the `describe-stacks` command, until you see a status of ```"StackStatus": "CREATE_COMPLETE"``` 
+Run the the `describe-stacks` command, until you see a status of ```"StackStatus": "CREATE_COMPLETE"```
 
 When you get this response, CloudFormation has finished provisioning all of the core networking and security resources described above.
 
@@ -178,7 +178,7 @@ Replace the indicated values with the appropriate ones from your created resourc
 
 These values with be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest`
 
-If you need to retrieve the values from the CloudFormation respose, run this command: 
+If you need to retrieve the values from the CloudFormation respose, run this command:
 
 ```
 aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack
@@ -254,7 +254,7 @@ Copy the DNS name you saved when creating the NLB and send a request to it using
 http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
 ```
 
-A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate. 
+A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate.
 
 >Note: This Network Load Balancer only supports HTTP (http://) requests since no SSL/TLS certificates are installed on it. For this tutorial, be sure to submit requests using http:// only, https:// requests will not work properly.
 
@@ -417,3 +417,6 @@ You can view the progress of your code change through the CodePipeline console h
 This concludes Module 2.
 
 [Proceed to Module 3](/module-3)
+
+
+## [AWS Developer Center](https://developer.aws)

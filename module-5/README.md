@@ -206,3 +206,6 @@ As a great next step, to learn more about the inner workings of the Mythical Mys
 We hope you have enjoyed the AWS Modern Application Workshop!  If you find any issues or have feedback/questions, don't hesitate to open an issue or send an email to andbaird@amazon.com.
 
 Thank you!
+
+
+## [AWS Developer Center](https://developer.aws)
