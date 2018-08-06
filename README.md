@@ -26,7 +26,7 @@ Please be sure to terminate all of the resources created during this workshop to
 
 ### **Overview**
 
-Modern applications isolate business logic, optimize reuse and iteration, and remove overhead everywhere possible. Modern apps are built using services that enable you to focus on writing code while automating infrastructure maintenance tasks.
+Modern applications are resilient, scalable collections of independent services that abstract away the underlying infrastructure. Modern application development leverages agile development practices, immutable deployments, and programmable infrastructure to continuously release new features to the business and end users.
 
 AWS provides all the services and features required for a developer to create a modern application, and the tools to build it using modern development methodologies.  This tutorial will walk you through the steps to create a sample web application that leverages concepts and approaches such as containers, infrastructure as code, CI/CD, and serverless code functions.  You will build, from the ground up, a sample website called **Mythical Mysfits** that enables visitors to adopt a fantasy creature as a pet.  You can see a working sample of this website available at: www.mythicalmysfits.com
 
