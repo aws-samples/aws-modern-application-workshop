@@ -8,7 +8,7 @@
 * AWS Cloud9
 * Amazon Simple Storage Service (S3)
 
-In this module, follow the instructions to create your cloud-based IDE on AWS Cloud9 and deploy the first version of the static Mythical Mysfits website.  Amazon S3 is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
+In this module, follow the instructions to create your cloud-based IDE on AWS Cloud9 and deploy the first version of the static Mythical Mysfits website.  The content will be served from Amazon CloudFront content delivery service, with the source stored in Amazon S3. This combination allows highly scalable and secure serving in CloudFront, while S3 storage provides a highly durable, highly available, and inexpensive object storage service. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.
 
 ### Getting Started
 
@@ -69,10 +69,12 @@ In the terminal, change directory to the newly cloned repository directory:
 cd aws-modern-application-workshop
 ```
 
+### Creating a Website with Amazon CloudFront and Amazon S3
+
 ### Creating a Static Website in Amazon S3
 
-#### Create an S3 Bucket and Configure it for Website Hosting
-Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the AWS CLI.  
+#### Create an S3 Bucket for Storing Content
+Next, we will create the infrastructure components needed for storing static website in Amazon S3 via the AWS CLI.
 
 First, create an S3 bucket, replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name.  Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
@@ -85,6 +87,10 @@ Now that we have created a bucket, we need to set some configuration options tha
 ```
 aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
 ```
+
+#### Create CloudFront Distribution
+
+Start
 
 #### Update the S3 Bucket Policy
 
