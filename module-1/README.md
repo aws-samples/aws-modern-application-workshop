@@ -93,25 +93,23 @@ aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html 
 
 Using the AWS Management Console, we will create a CloudFront distribution, and configure the S3 bucket as the origin.
 1. Open the Amazon CloudFront console at https://console.aws.amazon.com/cloudfront/home.
-2. From the console dashboard, choose **Create Distribution**.
+2. From the console dashboard, click **Create Distribution**.
 ![cloudfront-create](/images/module-1/cloudfront-create-button.png)
 3. Click **Get Started** in the Web section.
 ![cloudfront-getstarted](/images/module-1/cloudfront-get-started.png)
 4. Specify the following settings for the distribution:
   * Drop down the Origin Domain Name to select the S3 bucket you just created.
-  ![cloudfront-create-distribution](/images/module-1/cloudfront-create-distribution.png)
-  * Check **Yes** to Restrict Bucket Access.
+  * Check **Yes** to Restrict Bucket Access. This setting is for S3 to trust CloudFront to read your objects in this bucket.
   * Check **Create a New identity** and accept default Comment
   * Check **Yes, Update Bucket Policy**
   * Under Distribution Settings section enter **index.html** as **Default Root Object**
   * Click Create Distrubution.
+  ![cloudfront-create-distribution](/images/module-1/cloudfront-create-distribution.png)
   * If this was a web site used for more than just testing you should enable logging, and consider the AWS Web Application Firewall (WAF) service to help protect. For more information on the other configuration options, see [Values That You Specify When You Create or Update a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html) in the CloudFront documentation.
 5. After CloudFront creates your distribution, the value of the Status column for your distribution will change from In Progress to Deployed.
 ![cloudfront-deployed](/images/module-1/cloudfront-deployed.png)
-6. When your distribution is deployed, confirm that you can access your new web site using your new CloudFront URL. Copy the Domain Name into a web browser to test.
-![cloudfront-test](/images/module-1/cloudfront-test.png)
 For more information, see [Testing a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-testing.html) in the CloudFront documentation.
-7. You have now configured Amazon CloudFront with basic settings and AWS WAF.
+7. You have now configured Amazon CloudFront with basic settings and S3 as origin.
 
 For more information on configuring CloudFront, see [Viewing and Updating CloudFront Distributions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowToUpdateDistribution.html) in the CloudFront documentation.
 
