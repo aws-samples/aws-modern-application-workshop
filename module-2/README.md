@@ -272,7 +272,7 @@ After pasting, the line should look similar to below:
 ![after replace](/images/module-2/after-replace.png)
 
 #### Upload to S3
-To upload this file to your S3 hosted website, use the bucket name again that was created during Module 1, and run the following command:
+To upload this file to your S3 stored website, use the bucket name again that was created during Module 1, and run the following command:
 
 ```
 aws s3 cp ~/environment/aws-modern-application-workshop/module-2/web/index.html s3://INSERT-YOUR-BUCKET-NAME/index.html

@@ -186,6 +186,7 @@ To remove all of the created resources, you can visit the following AWS Consoles
 * [AWS Lambda](https://console.aws.amazon.com/lambda/home)
 * [Amazon S3](https://console.aws.amazon.com/s3/home)
 * [Amazon API Gateway](https://console.aws.amazon.com/apigateway/home)
+* [Amazon CloudFront](https://console.aws.amazon.com/cloudfront/home)
 * [Amazon Cognito](https://console.aws.amazon.com/cognito/home)
 * [AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home)
 * [AWS CodeBuild](https://console.aws.amazon.com/codebuild/home)
