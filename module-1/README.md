@@ -117,9 +117,6 @@ For more information on configuring CloudFront, see [Viewing and Updating CloudF
 
 Now, it can take some time for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
 
-
-```
-
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
 Congratulations, you have created the basic static Mythical Mysfits Website!
