@@ -109,7 +109,9 @@ Using the AWS Management Console, we will create a CloudFront distribution, and 
   * Check **Create a New identity** and accept default Comment
   * Check **Yes, Update Bucket Policy**
   * Under Distribution Settings section enter **index.html** as **Default Root Object**
-  * Click Create Distrubution.
+  * Click Create Distrubution:
+
+
   ![cloudfront-create-distribution](/images/module-1/cloudfront-create-distribution.png)
 
 
