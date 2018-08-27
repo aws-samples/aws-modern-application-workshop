@@ -5,13 +5,13 @@
 **Time to complete:** 60 minutes
 
 **Services used:**
-* Amazon Cognito
-* Amazon API Gateway
-* Amazon Simple Storage Service (S3)
+* [Amazon Cognito](http://aws.amazon.com/cognito/)
+* [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+* [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
 
 ### Overview
 
-In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite mysfit and adopt a mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a **User Pool** in **AWS Cognito** - a fully managed user identity management service.  Then, to make sure that only registered users are authorized to like or adopt mysfits on the website, we will deploy an REST API with **Amazon API Gateway** to sit in front of our NLB. Amazon API Gateway is also a managed service, and provides commonly required REST API capabilities out of the box like SSL termination, request authorization, throttling, API stages and versioning, and much more.
+In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite mysfit and adopt a mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a [**User Pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) in [**AWS Cognito**](http://aws.amazon.com/cognito/) - a fully managed user identity management service.  Then, to make sure that only registered users are authorized to like or adopt mysfits on the website, we will deploy an REST API with [**Amazon API Gateway**](https://aws.amazon.com/api-gateway/) to sit in front of our NLB. Amazon API Gateway is also a managed service, and provides commonly required REST API capabilities out of the box like SSL termination, request authorization, throttling, API stages and versioning, and much more.
 
 ### Adding a User Pool for Website Users
 
@@ -40,10 +40,10 @@ Next, let's turn our attention to creating a new RESTful API in front of our exi
 Create the VPC Link for our upcoming REST API using the following CLI command (you will need to replace the indicated value with the Load Balancer ARN you saved when the NLB was created in module 2):
 
 ```
-aws apigateway create-vpc-link --name MysfitsApiVpcLink --target-arns REPLACE_ME_NLB_ARN
+aws apigateway create-vpc-link --name MysfitsApiVpcLink --target-arns REPLACE_ME_NLB_ARN > ~/environment/api-gateway-link-output.json
 ```
 
-The response to the above will indicate that a new VPC link is being provisioned and is in `PENDING` state. Copy the indicated `id` for future use when we create our REST API in the next step.
+The above command will create a file called `api-gateway-link-output.json` that contains the `id` for the VPC Link that is being created.  It will also show the status as `PENDING`, similar to below.  It will take about 5-10 minutes to finish being created, you can copy the `id` from this file and proceed on to the next step.
 
 ```
 {

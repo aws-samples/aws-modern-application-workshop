@@ -5,15 +5,15 @@
 **Time to complete:** 20 minutes
 
 **Services used:**
-* AWS Cloud9
-* Amazon Simple Storage Service (S3)
+* [AWS Cloud9](https://aws.amazon.com/cloud9/)
+* [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
 
-In this module, follow the instructions to create your cloud-based IDE on AWS Cloud9 and deploy the first version of the static Mythical Mysfits website.  Amazon S3 is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
+In this module, follow the instructions to create your cloud-based IDE on [AWS Cloud9](https://aws.amazon.com/cloud9/) and deploy the first version of the static Mythical Mysfits website.  [Amazon S3](https://aws.amazon.com/s3/) is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
 
 ### Getting Started
 
 #### Sign In to the AWS Console
-To begin, sign in to the AWS Console for the AWS account you will be using in this workshop.
+To begin, sign in to the [AWS Console](https://console.aws.amazon.com) for the AWS account you will be using in this workshop.
 
 This web application can be deployed in any AWS region that supports all the services used in this application. The supported regions include:
 
@@ -53,7 +53,7 @@ When the IDE has finished being created for you, you'll be presented with a welc
 
 #### Cloning the Mythical Mysfits Workshop Repository
 
-In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and read to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
+In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
 ```
 git clone https://github.com/aws-samples/aws-modern-application-workshop.git
@@ -72,15 +72,15 @@ cd aws-modern-application-workshop
 ### Creating a Static Website in Amazon S3
 
 #### Create an S3 Bucket and Configure it for Website Hosting
-Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the AWS CLI.  
+Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).  
 
-First, create an S3 bucket, replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name.  Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name. **Note: see the requirements for bucket names [here](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
 ```
-aws s3 mb s3://mythical-mysfits-bucket-name
+aws s3 mb s3://REPLACE_ME_BUCKET_NAME
 ```
 
-Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
+Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
 
 ```
 aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
@@ -88,7 +88,20 @@ aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
 
 #### Update the S3 Bucket Policy
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 **Bucket Policy** that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone). The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/bucket-policy.json`.  This file includes several places that you need to change to use the new bucket name you've created (indicated with `REPLACE_ME`).
+All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
+
+The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains a string that needs to be replaced with the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+
+**Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
+
+To **open a file** in Cloud9, use the File Explorer on the left panel and double click `bucket-policy.json`:
+
+![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
+
+This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
+
+![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
+
 
 Execute the following CLI command to add a public bucket policy to your website:
 

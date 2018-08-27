@@ -34,6 +34,8 @@ The site will present *mysfits* available for adoption with some different chara
 
 This sample application will use many different AWS services and features that modern applications leverage on AWS. But, learning about *what* those individual services and their features are is not the primary objective of this workshop.  Instead, this workshop is meant to give you an experience of *how* developers are able to build modern applications by interacting with those features and services through the development tools that AWS provides.
 
+To learn more about how to build your own **Well Architected** and modern application on AWS, please [visit here](https://aws.amazon.com/architecture/well-architected/) for additional content about following AWS best practices in your own architecture.
+
 ### Application Architecture
 
 ![Application Architecture](/images/arch-diagram.png)

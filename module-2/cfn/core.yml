@@ -417,62 +417,62 @@ Resources:
 # names so that the other task related CF templates can use them.
 Outputs:
   CurrentRegion:
-    Description: The string representation of the region being used.
+    Description: REPLACE_ME_REGION
     Value: !Ref AWS::Region
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'CurrentRegion' ] ]
   CurrentAccount:
-    Description: The ID of the Account being used.
+    Description: REPLACE_ME_ACCOUNT_ID
     Value: !Ref AWS::AccountId
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'CurrentAccount' ] ]
   EcsServiceRole:
-    Description: The ARN of the ECS Service role
+    Description: REPLACE_ME_ECS_SERVICE_ROLE_ARN
     Value: !GetAtt 'EcsServiceRole.Arn'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'EcsServiceRole' ] ]
   ECSTaskRole:
-    Description: The ARN of the ECS Task role
+    Description: REPLACE_ME_ECS_TASK_ROLE_ARN
     Value: !GetAtt 'ECSTaskRole.Arn'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECSTaskRole' ] ]
   VPCId:
-    Description: The ID of the VPC that this stack is deployed in
+    Description: REPLACE_ME_VPC_ID
     Value: !Ref 'VPC'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'VPCId' ] ]
   PublicSubnetOne:
-    Description: Public subnet one
+    Description: REPLACE_ME_PUBLIC_SUBNET_ONE
     Value: !Ref 'PublicSubnetOne'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PublicSubnetOne' ] ]
   PublicSubnetTwo:
-    Description: Public subnet two
+    Description: REPLACE_ME_PUBLIC_SUBNET_TWO
     Value: !Ref 'PublicSubnetTwo'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PublicSubnetTwo' ] ]
   PrivateSubnetOne:
-    Description: Private subnet one
+    Description: REPLACE_ME_PRIVATE_SUBNET_ONE
     Value: !Ref 'PrivateSubnetOne'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PrivateSubnetOne' ] ]
   PrivateSubnetTwo:
-    Description: Private subnet two
+    Description: REPLACE_ME_PRIVATE_SUBNET_TWO
     Value: !Ref 'PrivateSubnetTwo'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PrivateSubnetTwo' ] ]
   FargateContainerSecurityGroup:
-    Description: A security group used to allow Fargate containers to receive traffic
+    Description: REPLACE_ME_SECURITY_GROUP_ID
     Value: !Ref 'FargateContainerSecurityGroup'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'FargateContainerSecurityGroup' ] ]
   CodeBuildRole:
-    Description: The ARN of the CodeBuild role
+    Description: REPLACE_ME_CODEBUILD_ROLE_ARN
     Value: !GetAtt 'MythicalMysfitsServiceCodeBuildServiceRole.Arn'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'MythicalMysfitsServiceCodeBuildServiceRole' ] ]
   CodePipelineRole:
-    Description: The ARN of the CodePipeline role
+    Description: REPLACE_ME_CODEPIPELINE_ROLE_ARN
     Value: !GetAtt 'MythicalMysfitsServiceCodePipelineServiceRole.Arn'
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'MythicalMysfitsServiceCodePipelineServiceRole' ] ]

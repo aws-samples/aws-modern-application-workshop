@@ -6,7 +6,7 @@
         "Principal": {
           "AWS": [
             "REPLACE_ME_CODEBUILD_ROLE_ARN",
-            "REPLAECE_ME_CODEPIPELINE_ROLE_ARN"
+            "REPLACE_ME_CODEPIPELINE_ROLE_ARN"
           ]
         },
         "Action": [
@@ -25,7 +25,7 @@
         "Principal": {
           "AWS": [
             "REPLACE_ME_CODEBUILD_ROLE_ARN",
-            "REPLAECE_ME_CODEPIPELINE_ROLE_ARN"
+            "REPLACE_ME_CODEPIPELINE_ROLE_ARN"
           ]
         },
         "Action": "s3:PutObject",

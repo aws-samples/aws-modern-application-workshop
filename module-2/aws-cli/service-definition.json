@@ -11,7 +11,7 @@
     "awsvpcConfiguration": {
       "assignPublicIp": "DISABLED",
       "securityGroups": [
-        "REPLACE_ME_SG_ID"
+        "REPLACE_ME_SECURITY_GROUP_ID"
       ],
       "subnets": [
         "REPLACE_ME_PRIVATE_SUBNET_ONE",
