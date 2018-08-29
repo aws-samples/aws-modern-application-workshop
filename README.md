@@ -1,6 +1,6 @@
 # Build a Modern Application on AWS
 
-![mysfits-welcome](/images/module-1/mysfits-welcome.png)
+![mysfits-welcome](/images/mysfits-welcome.png)
 
 **Mythical Mysfits** is a (fictional) pet adoption non-profit dedicated to helping abandoned, and often misunderstood, mythical creatures find a new forever family! Mythical Mysfits believes that all creatures deserve a second chance, even if they spent their first chance hiding under bridges and unapologetically robbing helpless travelers.
 
