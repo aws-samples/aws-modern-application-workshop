@@ -81,6 +81,53 @@ First, create an S3 bucket, replace the name below (mythical-mysfits-bucket-name
 aws s3 mb s3://mythical-mysfits-bucket-name
 ```
 
+#### Update the S3 Bucket Policy
+
+All buckets created in Amazon S3 are fully private by default.  In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by CloudFront. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
+
+First we need to create a CloudFront Access Identity using the following CLI command.
+
+```
+aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config CallerReference=Mysfits,Comment=Mysfits
+```
+
+Record the **Id** from the output as we will need to update the bucket policy with this.
+
+```
+{
+    "CloudFrontOriginAccessIdentity": {
+        "CloudFrontOriginAccessIdentityConfig": {
+            "Comment": "Mysfits", 
+            "CallerReference": "Mysfits"
+        }, 
+        "S3CanonicalUserId": "MIICiTCCAfICCQD6m7oRw0uXOjANBgkqhkiG9w0BAQUFADCBiDELMAkGA1UEBhMC", 
+        "Id": "ANPAJ2UCCR6DPCEXAMPLE"
+    }, 
+    "ETag": "ANPAJ2UCCR6DPCEXAMPLE", 
+    "Location": "https://cloudfront.amazonaws.com/2017-10-30/origin-access-identity/cloudfront/ANPAJ2UCCR6DPCEXAMPLE"
+}
+
+```
+
+The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+
+**Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
+
+To **open a file** in Cloud9, use the File Explorer on the left panel and double click `bucket-policy.json`:
+
+![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
+
+This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
+
+![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
+
+
+Execute the following CLI command to add a public bucket policy to allow CloudFront:
+
+```
+aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json
+```
+
 #### Publish the Website Content to S3
 
 Now that our S3 bucket is created, let's add the first iteration of the Mythical Mysfits homepage to the bucket.  Use the following S3 CLI command that mimics the linux command for copying files (**cp**) to copy the provided index.html page locally from your IDE up to the new S3 bucket (replacing the bucket name appropriately).
@@ -91,35 +138,20 @@ aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html 
 
 #### Create CloudFront Distribution
 
-Using the AWS Management Console, we will create a CloudFront distribution, and configure the S3 bucket as the origin.
-1. Open the Amazon CloudFront console at https://console.aws.amazon.com/cloudfront/home.
+Using the AWS CLI, we will create a CloudFront distribution, and configure the S3 bucket as the origin. The JSON document for the necessary CloudFront configuration is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-cloudfront-distribution.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
 
-
-2. From the console dashboard, click **Create Distribution**.
-![cloudfront-create](/images/module-1/cloudfront-create-button.png)
-
-
-3. Click **Get Started** in the Web section.
-![cloudfront-getstarted](/images/module-1/cloudfront-get-started.png)
-
-
-4. Specify the following settings for the distribution:
-  * Drop down the Origin Domain Name to select the S3 bucket you just created.
-  * Check **Yes** to Restrict Bucket Access. This setting is for S3 to trust CloudFront to read your objects in this bucket.
-  * Check **Create a New identity** and accept default Comment
-  * Check **Yes, Update Bucket Policy**
-  * Under Distribution Settings section enter **index.html** as **Default Root Object**
-  * Click Create Distrubution:
-
-
-  ![cloudfront-create-distribution](/images/module-1/cloudfront-create-distribution.png)
-
+```
+aws cloudfront create-distribution --distribution-config file://website-cloudfront-distribution.json
+```
 
   * If this was a web site used for more than just testing you should enable logging, and consider the AWS Web Application Firewall (WAF) service to help protect. For more information on the other configuration options, see [Values That You Specify When You Create or Update a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html) in the CloudFront documentation.
 
 
-5. After CloudFront creates your distribution, the value of the Status column for your distribution will change from In Progress to Deployed.
-![cloudfront-deployed](/images/module-1/cloudfront-deployed.png)
+5. You can check on the status of the CloudFront distribution by using the CLI command:
+```
+aws cloudfront list-distributions
+```
+Note the `DomainName` as that will be your web site. After CloudFront creates your distribution, the value of `Status` will change from In Progress to Deployed.
 For more information, see [Testing a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-testing.html) in the CloudFront documentation.
 
 
@@ -129,7 +161,7 @@ For more information on configuring CloudFront, see [Viewing and Updating CloudF
 
 #### Test Website
 
-Now, it can take some time for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
+Now, it can take some time for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ edge locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 

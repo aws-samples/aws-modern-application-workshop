@@ -1,0 +1,46 @@
+{
+  "CallerReference": "Mysfits",
+  "Aliases": {
+    "Quantity": 0
+  },
+  "DefaultRootObject": "index.html",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "Mysfits",
+        "DomainName": "REPLACE_ME_BUCKET_NAME.s3.amazonaws.com",
+        "S3OriginConfig": {
+          "OriginAccessIdentity": "origin-access-identity/cloudfront/REPLACE_ME_ID"
+        }2
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "Mysfits",
+    "ForwardedValues": {
+      "QueryString": true,
+      "Cookies": {
+        "Forward": "none"
+      }
+    },
+    "TrustedSigners": {
+      "Enabled": false,
+      "Quantity": 0
+    },
+    "ViewerProtocolPolicy": "allow-all",
+    "MinTTL": 3600
+  },
+  "CacheBehaviors": {
+    "Quantity": 0
+  },
+  "Comment": "",
+  "Logging": {
+    "Enabled": false,
+    "IncludeCookies": true,
+    "Bucket": "",
+    "Prefix": ""
+  },
+  "PriceClass": "PriceClass_All",
+  "Enabled": true
+}
