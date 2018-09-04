@@ -94,7 +94,7 @@ The JSON document for the necessary bucket policy is located at: `~/environment/
 
 **Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
 
-To **open a file** in Cloud9, use the File Explorer on the left panel and double click `bucket-policy.json`:
+To **open a file** in Cloud9, use the File Explorer on the left panel and double click `website-bucket-policy.json`:
 
 ![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
 
