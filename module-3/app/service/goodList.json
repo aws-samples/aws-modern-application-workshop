@@ -1,0 +1,148 @@
+Got filter value: GoodEvil
+Got value value: Good
+{
+  Count: 4,
+  Items: [
+    {
+      ThumbImageUri: {
+        S: "https://www.mythicalmysfits.com/images/haetae_thumb.png"
+      },
+      Adopted: {
+        BOOL: false
+      },
+      Age: {
+        N: "2000000000"
+      },
+      Species: {
+        S: "Haetae"
+      },
+      Description: {
+        S: "Hasla's presence warms every room. For the last 2 billion years, she's made visitors from far-away lands and the galaxy next door feel immediately at ease. Usually it's because of her big heart, but sometimes it's because of the fire she breathes'especially after eating garlic and starlight. Hasla loves togetherness, board games, and asking philosophical questions that leave people pondering the meaning of life as they fall asleep at night."
+      },
+      Likes: {
+        N: "0"
+      },
+      LawChaos: {
+        S: "Neutral"
+      },
+      MysfitId: {
+        S: "a901bb08-1985-42f5-bb77-27439ac14300"
+      },
+      GoodEvil: {
+        S: "Good"
+      },
+      ProfileImageUri: {
+        S: "https://www.mythicalmysfits.com/images/haetae_hover.png"
+      },
+      Name: {
+        S: "Hasla"
+      }
+    },
+    {
+      Age: {
+        N: "6"
+      },
+      Name: {
+        S: "Twilight Glitter"
+      },
+      Adopted: {
+        BOOL: false
+      },
+      Species: {
+        S: "Pegasus"
+      },
+      Description: {
+        S: "Twilight's personality sparkles like the night sky and is looking for a forever home with a Greek hero or God. While on the smaller side at 14 hands, he is quite adept at accepting riders and can fly to 15,000 feet. Twilight needs a large area to run around in and will need to be registered with the FAA if you plan to fly him above 500 feet. His favorite activities include playing with chimeras, going on epic adventures into battle, and playing with a large inflatable ball around the paddock. If you bring him home, he'll quickly become your favorite little Pegasus."
+      },
+      ThumbImageUri: {
+        S: "https://www.mythicalmysfits.com/images/pegasus_thumb.png"
+      },
+      ProfileImageUri: {
+        S: "https://www.mythicalmysfits.com/images/pegasus_hover.png"
+      },
+      Likes: {
+        N: "0"
+      },
+      LawChaos: {
+        S: "Lawful"
+      },
+      GoodEvil: {
+        S: "Good"
+      },
+      MysfitId: {
+        S: "ac3e95f3-eb40-4e4e-a605-9fdd0224877c"
+      }
+    },
+    {
+      Species: {
+        S: "Dragon"
+      },
+      MysfitId: {
+        S: "0e37d916-f960-4772-a25a-01b762b5c1bd"
+      },
+      Likes: {
+        N: "0"
+      },
+      ThumbImageUri: {
+        S: "https://www.mythicalmysfits.com/images/dragon_thumb.png"
+      },
+      Description: {
+        S: "CoCo wears sunglasses at night. His hobbies include dressing up for casual nights out, accumulating debt, and taking his friends on his back for a terrifying ride through the mesosphere after a long night of revelry, where you pick up the bill, of course. For all his swagger, CoCo has a heart of gold. His loyalty knows no bounds, and once bonded, you've got a wingman (literally) for life."
+      },
+      LawChaos: {
+        S: "Chaotic"
+      },
+      GoodEvil: {
+        S: "Good"
+      },
+      Adopted: {
+        BOOL: false
+      },
+      ProfileImageUri: {
+        S: "https://www.mythicalmysfits.com/images/dragon_hover.png"
+      },
+      Age: {
+        N: "501"
+      },
+      Name: {
+        S: "CoCo"
+      }
+    },
+    {
+      ThumbImageUri: {
+        S: "https://www.mythicalmysfits.com/images/phoenix_thumb.png"
+      },
+      Adopted: {
+        BOOL: false
+      },
+      Description: {
+        S: "Cole is a loving companion and the perfect starter pet for kids. Cole's tears can fix almost any boo-boo your children may receive (up to partial limb amputation). You never have to worry about your kids accidentally killing him as he'll just be reborn in a fun burst of flame if they do. Even better, Cole has the uncanny ability to force all those around him to tell the truth, so say goodbye to fibs about not eating a cookie before dinner or where your teenager actually went that night. Adopt him today and find out how he will be the perfect family member for you, your children, their children, their children's children, and so on."
+      },
+      ProfileImageUri: {
+        S: "https://www.mythicalmysfits.com/images/phoenix_hover.png"
+      },
+      Likes: {
+        N: "0"
+      },
+      Name: {
+        S: "Cole"
+      },
+      LawChaos: {
+        S: "Chaotic"
+      },
+      GoodEvil: {
+        S: "Good"
+      },
+      Species: {
+        S: "Phoenix"
+      },
+      Age: {
+        N: "1393"
+      },
+      MysfitId: {
+        S: "33e1fbd4-2fd8-45fb-a42f-f92551694506"
+      }
+    }
+  ],
+  ScannedCount: 12
+}

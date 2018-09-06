@@ -1,0 +1,88 @@
+{
+    "Table": {
+        "TableArn": "arn:aws:dynamodb:us-west-2:188580781645:table/MysfitsTable", 
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "GoodEvil", 
+                "AttributeType": "S"
+            }, 
+            {
+                "AttributeName": "LawChaos", 
+                "AttributeType": "S"
+            }, 
+            {
+                "AttributeName": "MysfitId", 
+                "AttributeType": "S"
+            }
+        ], 
+        "GlobalSecondaryIndexes": [
+            {
+                "IndexSizeBytes": 0, 
+                "IndexName": "LawChaosIndex", 
+                "Projection": {
+                    "ProjectionType": "ALL"
+                }, 
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0, 
+                    "WriteCapacityUnits": 5, 
+                    "ReadCapacityUnits": 5
+                }, 
+                "IndexStatus": "ACTIVE", 
+                "KeySchema": [
+                    {
+                        "KeyType": "HASH", 
+                        "AttributeName": "LawChaos"
+                    }, 
+                    {
+                        "KeyType": "RANGE", 
+                        "AttributeName": "MysfitId"
+                    }
+                ], 
+                "IndexArn": "arn:aws:dynamodb:us-west-2:188580781645:table/MysfitsTable/index/LawChaosIndex", 
+                "ItemCount": 0
+            }, 
+            {
+                "IndexSizeBytes": 0, 
+                "IndexName": "GoodEvilIndex", 
+                "Projection": {
+                    "ProjectionType": "ALL"
+                }, 
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0, 
+                    "WriteCapacityUnits": 5, 
+                    "ReadCapacityUnits": 5
+                }, 
+                "IndexStatus": "ACTIVE", 
+                "KeySchema": [
+                    {
+                        "KeyType": "HASH", 
+                        "AttributeName": "GoodEvil"
+                    }, 
+                    {
+                        "KeyType": "RANGE", 
+                        "AttributeName": "MysfitId"
+                    }
+                ], 
+                "IndexArn": "arn:aws:dynamodb:us-west-2:188580781645:table/MysfitsTable/index/GoodEvilIndex", 
+                "ItemCount": 0
+            }
+        ], 
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0, 
+            "WriteCapacityUnits": 5, 
+            "ReadCapacityUnits": 5
+        }, 
+        "TableSizeBytes": 0, 
+        "TableName": "MysfitsTable", 
+        "TableStatus": "ACTIVE", 
+        "TableId": "780a079d-e7ed-4896-a2fe-31cee5ff7037", 
+        "KeySchema": [
+            {
+                "KeyType": "HASH", 
+                "AttributeName": "MysfitId"
+            }
+        ], 
+        "ItemCount": 0, 
+        "CreationDateTime": 1536084281.186
+    }
+}
