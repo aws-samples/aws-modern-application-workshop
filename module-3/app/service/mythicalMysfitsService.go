@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	L "./client"
 )
 
 // For http://localhost:8088
@@ -16,7 +18,7 @@ func showMisfits(w http.ResponseWriter, r *http.Request) {
 	// http://localhost:8088/misfits?filter=value1&value=value2
 	fmt.Println("GET params were:", r.URL.Query())
 
-	var items Items
+	var items string
 
 	// if only one expected
 	filter := r.URL.Query().Get("filter")
@@ -24,14 +26,14 @@ func showMisfits(w http.ResponseWriter, r *http.Request) {
 		value := r.URL.Query().Get("value")
 		if value != "" {
 			// Call Getall
-			items = queryMysfits(filter, value)
+			items = L.QueryMysfits(filter, value)
 		}
 
 	} else {
-		items = getAllMysfits()
+		items = L.GetAllMysfits()
 	}
 
-	// Read Misfits data from file and show it
+	// Loop through items and add that info to web page
 	body := []byte(items)
 
 	// Let the web server know it's JSON

@@ -4,7 +4,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
+	"encoding/json"
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -21,11 +25,64 @@ func Init(
 		log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-func getJSONStringFromItems(items []map[string]*dynamodb.AttributeValue) string {
-	return ""
+// Item is a value returned by query
+type Item struct {
+	MysfitId        string `json:"MysfitId"`
+	Name            string `json:"Name"`
+	Species         string `json:"Species"`
+	Description     string `json:"Description"`
+	Age             int    `json:"Age"`
+	GoodEvil        string `json:"GoodEvil"`
+	LawChaos        string `json:"LawChaos"`
+	ThumbImageUri   string `json:"ThumbImageUri"`
+	ProfileImageUri string `json:"ProfileImageUri"`
+	Likes           int    `json:"Likes"`
+	Adopted         bool   `json:"Adopted"`
 }
 
-func getAllMysfitsDebug() string {
+// Items stores a list of Items
+type Items []Item
+
+// Get items as array of structs
+func getItems(items []map[string]*dynamodb.AttributeValue) Items {
+	var mysfitList Items
+
+	err := dynamodbattribute.UnmarshalListOfMaps(items, &mysfitList)
+	if err != nil {
+		println("Got error unmarshalling items:")
+		println(err.Error())
+		return nil
+	}
+
+	return mysfitList
+}
+
+// getJSONStringFromItems creates a JSON string from the items from a scan or query
+func getJSONStringFromItems(items []map[string]*dynamodb.AttributeValue) string {
+	output := "{\"mysfits\": ["
+	myItems := getItems(items)
+
+	len := len(myItems)
+
+	for i, item := range myItems {
+		iJSON, err := json.Marshal(item)
+		if err != nil {
+			fmt.Println(err)
+			return ""
+		}
+
+		if i == len-1 {
+			output += string(iJSON)
+		} else {
+			output += string(iJSON) + ","
+		}
+	}
+
+	return output + "]}"
+}
+
+// GetAllMysfits gets all table items
+func GetAllMysfits() string {
 	// Create a DynamoDB client using our default credentials and region.
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -65,8 +122,11 @@ func getAllMysfitsDebug() string {
 	return jsonValue
 }
 
-func queryMysfitsDebug(filter string, value string) string {
+// QueryMysfits gets only the specified items
+func QueryMysfits(filter string, value string) string {
 	Init(os.Stdout)
+	Info.Println("Filter: " + filter)
+	Info.Println("Value: " + value)
 
 	// We only have two secondary indexes: GoodEvil(Index) and LawChaos(Index)
 	if filter != "GoodEvil" && filter != "LawChaos" {
@@ -104,4 +164,25 @@ func queryMysfitsDebug(filter string, value string) string {
 	Info.Print(jsonValue)
 
 	return jsonValue
+}
+
+// main to test from command line
+func main() {
+	filterPtr := flag.String("filter", "", "The table attribute to query")
+	valuePtr := flag.String("value", "", "The value of the table attribute")
+	flag.Parse()
+	filter := *filterPtr
+	value := *valuePtr
+
+	var output string
+
+	if filter != "" && value != "" {
+		fmt.Println("Getting filtered values")
+		output = QueryMysfits(filter, value)
+	} else {
+		fmt.Println("Getting all values")
+		output = GetAllMysfits()
+	}
+
+	fmt.Print(output)
 }
