@@ -2,14 +2,39 @@ import boto3
 import json
 import logging
 from collections import defaultdict
+import argparse
 
 # create a DynamoDB client using boto3. The boto3 library will automatically
 # use the credentials associated with our ECS task role to communicate with
 # DynamoDB, so no credentials need to be stored/managed at all by our code!
 client = boto3.client('dynamodb')
 
-def getAllMysfits():
+def getMysfitsJson(items):
+    # loop through the returned mysfits and add their attributes to a new dict
+    # that matches the JSON response structure expected by the frontend.
+    mysfitList = defaultdict(list)
+    
+    for item in items:
+        mysfit = {}
+        
+        mysfit["MysfitId"] = item["MysfitId"]["S"]
+        mysfit["Name"] = item["Name"]["S"]
+        mysfit["Species"] = item["Species"]["S"]
+        mysfit["Description"] = item["Description"]["S"]
+        mysfit["Age"] = int(item["Age"]["N"])
+        mysfit["GoodEvil"] = item["GoodEvil"]["S"]
+        mysfit["LawChaos"] = item["LawChaos"]["S"]   
+        mysfit["ThumbImageUri"] = item["ThumbImageUri"]["S"]
+        mysfit["ProfileImageUri"] = item["ProfileImageUri"]["S"]
+        mysfit["Likes"] = item["Likes"]["N"]                
+        mysfit["Adopted"] = item["Adopted"]["BOOL"]
 
+        mysfitList["mysfits"].append(mysfit)
+
+    # convert the create list of dicts in to JSON
+    return json.dumps(mysfitList)
+
+def getAllMysfits():
     # Retrieve all Mysfits from DynamoDB using the DynamoDB scan operation.
     # Note: The scan API can be expensive in terms of latency when a DynamoDB
     # table contains a high number of records and filters are applied to the
@@ -28,37 +53,22 @@ def getAllMysfits():
 
     # loop through the returned mysfits and add their attributes to a new dict
     # that matches the JSON response structure expected by the frontend.
-    mysfitList = defaultdict(list)
-    for item in response["Items"]:
-        mysfit = {}
-        mysfit["mysfitId"] = item["MysfitId"]["S"]
-        mysfit["name"] = item["Name"]["S"]
-        mysfit["age"] = int(item["Age"]["N"])
-        mysfit["goodevil"] = item["GoodEvil"]["S"]
-        mysfit["lawchaos"] = item["LawChaos"]["S"]
-        mysfit["species"] = item["Species"]["S"]
-        mysfit["description"] = item["Description"]["S"]
-        mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
-        mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfitList["mysfits"].append(mysfit)
+    mysfitList = getMysfitsJson(response["Items"])
 
     # convert the create list of dicts in to JSON
     return json.dumps(mysfitList)
 
-def queryMysfits(queryParam):
-
-    logging.info(json.dumps(queryParam))
-
+def queryMysfitItems(filter, value):
     # Use the DynamoDB API Query to retrieve mysfits from the table that are
     # equal to the selected filter values.
     response = client.query(
         TableName='MysfitsTable',
-        IndexName=queryParam['filter']+'Index',
+        IndexName=filter+'Index',
         KeyConditions={
-            queryParam['filter']: {
+            filter: {
                 'AttributeValueList': [
                     {
-                        'S': queryParam['value']
+                        'S': value
                     }
                 ],
                 'ComparisonOperator': "EQ"
@@ -68,18 +78,38 @@ def queryMysfits(queryParam):
 
     # loop through the returned mysfits and add their attributes to a new dict
     # that matches the JSON response structure expected by the frontend.
-    mysfitList = defaultdict(list)
-    for item in response["Items"]:
-        mysfit = {}
-        mysfit["mysfitId"] = item["MysfitId"]["S"]
-        mysfit["name"] = item["Name"]["S"]
-        mysfit["age"] = int(item["Age"]["N"])
-        mysfit["goodevil"] = item["GoodEvil"]["S"]
-        mysfit["lawchaos"] = item["LawChaos"]["S"]   
-        mysfit["species"] = item["Species"]["S"]
-        mysfit["description"] = item["Description"]["S"]
-        mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
-        mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfitList["mysfits"].append(mysfit)
+    mysfitList = getMysfitsJson(response["Items"])
 
+    # convert the create list of dicts in to JSON
     return json.dumps(mysfitList)
+
+def queryMysfits(queryParam):
+
+    logging.info(json.dumps(queryParam))
+
+    filter = queryParam['filter']
+    value = queryParam['value']
+
+    return queryMysfitItems(filter, value)
+
+# So we can test from the command line
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--filter')
+    parser.add_argument('-v', '--value')
+    args = parser.parse_args()
+
+    filter = args.filter
+    value = args.value
+
+    if args.filter and args.value:
+        print 'filter is '+args.filter
+        print 'value is '+args.value
+
+        print "Getting filtered values"
+        items = queryMysfitItems(args.filter, args.value)
+    else:
+        print "Getting all values"
+        items = getAllMysfits()
+
+    print items
