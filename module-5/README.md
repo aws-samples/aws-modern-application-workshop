@@ -147,7 +147,7 @@ In future scenarios where only code changes have been made to your Lambda functi
 #### Update the Website Content
 With the streaming stack up and running, we now need to publish a new version of our Mythical Mysfits frontend that includes the JavaScript that sends events to our service whenever a mysfit profile is clicked by a user.
 
-The new index.html file is included at: `~/environment/aws-modern-application-workshop/module-5/app/web/index.html`
+The new index.html file is included at: `~/environment/aws-modern-application-workshop/module-5/web/index.html`
 
 This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-4.
 
