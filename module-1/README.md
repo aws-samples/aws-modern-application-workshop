@@ -74,10 +74,10 @@ cd aws-modern-application-workshop
 #### Create an S3 Bucket and Configure it for Website Hosting
 Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).  
 
-First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name. **Note: see the requirements for bucket names [here](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name. **Note: see the [requirements for bucket names](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
 ```
-aws s3 mb s3://REPLACE_ME_BUCKET_NAME
+aws s3 mb s3://mythical-mysfits-bucket-name
 ```
 
 Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
