@@ -16,19 +16,17 @@ def getMysfitsJson(items):
     
     for item in items:
         mysfit = {}
-        
-        mysfit["MysfitId"] = item["MysfitId"]["S"]
-        mysfit["Name"] = item["Name"]["S"]
-        mysfit["Species"] = item["Species"]["S"]
-        mysfit["Description"] = item["Description"]["S"]
-        mysfit["Age"] = int(item["Age"]["N"])
-        mysfit["GoodEvil"] = item["GoodEvil"]["S"]
-        mysfit["LawChaos"] = item["LawChaos"]["S"]   
-        mysfit["ThumbImageUri"] = item["ThumbImageUri"]["S"]
-        mysfit["ProfileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfit["Likes"] = item["Likes"]["N"]                
-        mysfit["Adopted"] = item["Adopted"]["BOOL"]
 
+        mysfit["mysfitId"] = item["MysfitId"]["S"]
+        mysfit["name"] = item["Name"]["S"]
+        mysfit["age"] = int(item["Age"]["N"])
+        mysfit["goodevil"] = item["GoodEvil"]["S"]
+        mysfit["lawchaos"] = item["LawChaos"]["S"]   
+        mysfit["species"] = item["Species"]["S"]
+        mysfit["description"] = item["Description"]["S"]
+        mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
+        mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
+        
         mysfitList["mysfits"].append(mysfit)
 
     # convert the create list of dicts in to JSON
@@ -56,7 +54,7 @@ def getAllMysfits():
     mysfitList = getMysfitsJson(response["Items"])
 
     # convert the create list of dicts in to JSON
-    return json.dumps(mysfitList)
+    return mysfitList
 
 def queryMysfitItems(filter, value):
     # Use the DynamoDB API Query to retrieve mysfits from the table that are
@@ -81,7 +79,7 @@ def queryMysfitItems(filter, value):
     mysfitList = getMysfitsJson(response["Items"])
 
     # convert the create list of dicts in to JSON
-    return json.dumps(mysfitList)
+    mysfitList
 
 def queryMysfits(queryParam):
 
@@ -112,4 +110,4 @@ if __name__ == "__main__":
         print "Getting all values"
         items = getAllMysfits()
 
-    print items
+    print items    
