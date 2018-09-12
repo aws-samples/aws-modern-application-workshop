@@ -13,26 +13,25 @@ def getMysfitsJson(items):
     # loop through the returned mysfits and add their attributes to a new dict
     # that matches the JSON response structure expected by the frontend.
     mysfitList = defaultdict(list)
-    
+
     for item in items:
         mysfit = {}
-        
-        mysfit["MysfitId"] = item["MysfitId"]["S"]
-        mysfit["Name"] = item["Name"]["S"]
-        mysfit["Species"] = item["Species"]["S"]
-        mysfit["Description"] = item["Description"]["S"]
-        mysfit["Age"] = int(item["Age"]["N"])
-        mysfit["GoodEvil"] = item["GoodEvil"]["S"]
-        mysfit["LawChaos"] = item["LawChaos"]["S"]   
-        mysfit["ThumbImageUri"] = item["ThumbImageUri"]["S"]
-        mysfit["ProfileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfit["Likes"] = item["Likes"]["N"]                
-        mysfit["Adopted"] = item["Adopted"]["BOOL"]
+
+        mysfit["mysfitId"] = item["MysfitId"]["S"]
+        mysfit["name"] = item["Name"]["S"]
+        mysfit["species"] = item["Species"]["S"]
+        mysfit["description"] = item["Description"]["S"]
+        mysfit["age"] = int(item["Age"]["N"])
+        mysfit["goodevil"] = item["GoodEvil"]["S"]
+        mysfit["lawchaos"] = item["LawChaos"]["S"]
+        mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
+        mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
+        mysfit["likes"] = item["Likes"]["N"]
+        mysfit["adopted"] = item["Adopted"]["BOOL"]
 
         mysfitList["mysfits"].append(mysfit)
 
-    # convert the create list of dicts in to JSON
-    return json.dumps(mysfitList)
+    return mysfitList
 
 def getAllMysfits():
     # Retrieve all Mysfits from DynamoDB using the DynamoDB scan operation.
@@ -55,7 +54,6 @@ def getAllMysfits():
     # that matches the JSON response structure expected by the frontend.
     mysfitList = getMysfitsJson(response["Items"])
 
-    # convert the create list of dicts in to JSON
     return json.dumps(mysfitList)
 
 def queryMysfitItems(filter, value):
