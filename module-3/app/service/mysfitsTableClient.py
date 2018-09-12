@@ -13,25 +13,24 @@ def getMysfitsJson(items):
     # loop through the returned mysfits and add their attributes to a new dict
     # that matches the JSON response structure expected by the frontend.
     mysfitList = defaultdict(list)
-
+    
     for item in items:
         mysfit = {}
 
         mysfit["mysfitId"] = item["MysfitId"]["S"]
         mysfit["name"] = item["Name"]["S"]
-        mysfit["species"] = item["Species"]["S"]
-        mysfit["description"] = item["Description"]["S"]
         mysfit["age"] = int(item["Age"]["N"])
         mysfit["goodevil"] = item["GoodEvil"]["S"]
-        mysfit["lawchaos"] = item["LawChaos"]["S"]
+        mysfit["lawchaos"] = item["LawChaos"]["S"]   
+        mysfit["species"] = item["Species"]["S"]
+        mysfit["description"] = item["Description"]["S"]
         mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
         mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfit["likes"] = item["Likes"]["N"]
-        mysfit["adopted"] = item["Adopted"]["BOOL"]
-
+        
         mysfitList["mysfits"].append(mysfit)
 
-    return mysfitList
+    # convert the create list of dicts in to JSON
+    return json.dumps(mysfitList)
 
 def getAllMysfits():
     # Retrieve all Mysfits from DynamoDB using the DynamoDB scan operation.
@@ -54,7 +53,8 @@ def getAllMysfits():
     # that matches the JSON response structure expected by the frontend.
     mysfitList = getMysfitsJson(response["Items"])
 
-    return json.dumps(mysfitList)
+    # convert the create list of dicts in to JSON
+    return mysfitList
 
 def queryMysfitItems(filter, value):
     # Use the DynamoDB API Query to retrieve mysfits from the table that are
@@ -79,7 +79,7 @@ def queryMysfitItems(filter, value):
     mysfitList = getMysfitsJson(response["Items"])
 
     # convert the create list of dicts in to JSON
-    return json.dumps(mysfitList)
+    mysfitList
 
 def queryMysfits(queryParam):
 
@@ -110,4 +110,4 @@ if __name__ == "__main__":
         print "Getting all values"
         items = getAllMysfits()
 
-    print items
+    print items    
