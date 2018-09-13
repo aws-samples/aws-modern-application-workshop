@@ -1,4 +1,4 @@
-package client
+package main
 
 import (
     "github.com/aws/aws-sdk-go/aws"
@@ -11,6 +11,7 @@ import (
     "fmt"
     "io"
     "log"
+    "os" // for logging in main routine
 )
 
 // Info is for logging
@@ -25,7 +26,7 @@ const (
     STRING      // 2
 )
 
-var defaultFormat = HTML
+var defaultFormat = JSON
 
 // Init initializes the logger and output format
 func Init(infoHandle io.Writer, f Outformat) {
@@ -113,27 +114,44 @@ func (m Mysfit) toHtml() string {
     return output
 }
 
-func (m Mysfit) toJson() string {
-    output := ""
+// getItemStringAsJson(a, b) should return:
+// "a": "b"
+func getItemStringAsJson(name string, item string) string {
+    return "\"" + name + "\": \"" + item + "\""
+}
 
-    output += "{\\\"MysfitId\\\": \\\"" + m.MysfitId + "\\\", "
-    output += "\\\"Name\\\": \\\"" + m.Name + "\\\", "
-    output += "\\\"Species\\\": \\\"" + m.Species + "\\\", "
-    output += "\\\"Description\\\": \\\"" + m.Description + "\\\", "
+func getItemIntAsJson(name string, item int) string {
+    return "\"" + name + "\": " + strconv.Itoa(item)
+}
 
-    output += "\\\"Age\\\": " + strconv.Itoa(m.Age) + ", "  // \"Age\": 501,
-
-    output += "\\\"GoodEvil\\\": \\\"" + m.GoodEvil + "\\\", "
-    output += "\\\"LawChaos\\\": \\\"" + m.LawChaos + "\\\", "
-    output += "\\\"ThumbImageUri\\\": " + m.ThumbImageUri + ", "
-    output += "\\\"ProfileImageUri\\\": \\\"" + m.ProfileImageUri + "\\\", "
-    output += "\\\"Likes\\\": " + strconv.Itoa(m.Likes) + ", "
-
-    if m.Adopted {
-        output += "\\\"Adopted\\\": true}"
+func getItemBoolAsJson(name string, item bool) string {
+    if item {
+        return "\"" + name + "\": true"
     } else {
-        output += "\\\"Adopted\\\": false}"
+        return "\"" + name + "\": false"
     }
+}
+
+func (m Mysfit) toJson() string {
+    output := "{"
+
+    output += getItemStringAsJson("mysfitId",        m.MysfitId)        + ", "
+    output += getItemStringAsJson("name",            m.Name)            + ", "
+    output += getItemStringAsJson("species",         m.Species)         + ", "
+    output += getItemStringAsJson("description",     m.Description)     + ", "
+
+    output += getItemIntAsJson("age",                m.Age)             + ", "
+
+    output += getItemStringAsJson("goodEvil",        m.GoodEvil)        + ", "
+    output += getItemStringAsJson("lawChaos",        m.LawChaos)        + ", "
+    output += getItemStringAsJson("thumbImageUri",   m.ThumbImageUri)   + ", "
+    output += getItemStringAsJson("profileImageUri", m.ProfileImageUri) + ", "
+    
+    output += getItemIntAsJson("likes",              m.Likes)           + ", "
+
+    output += getItemBoolAsJson("adopted",           m.Adopted)
+
+    output += "}"
 
     return output
 }
@@ -164,7 +182,7 @@ func (ms Mysfits) toHtml() string {
 func (ms Mysfits) toJson() string {
     length := len(ms)
 
-    output := "\"{\\\"mysfits\\\": ["
+    output := "{\"mysfits\": ["
 
     for i, m := range ms {
         output += m.toJson()
@@ -174,7 +192,7 @@ func (ms Mysfits) toJson() string {
         }
     }
 
-    output += "]}\""
+    output += "]}"
 
     return output
 }
@@ -346,7 +364,7 @@ func QueryMysfits(filter string, value string) string {
 }
 
 // To test from command line change this and the top package name to main
-func dummy() {
+func main() {
 	filterPtr := flag.String("filter", "", "The table attribute to query")
 	valuePtr := flag.String("value", "", "The value of the table attribute")
 	flag.Parse()
@@ -354,6 +372,9 @@ func dummy() {
 	value := *valuePtr
 
 	var output string
+
+        // Initialize logging
+	Init(os.Stderr, JSON)
 
 	if filter != "" && value != "" {
 		fmt.Println("Getting filtered values")
