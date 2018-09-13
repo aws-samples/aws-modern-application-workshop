@@ -83,7 +83,7 @@ aws s3 mb s3://mythical-mysfits-bucket-name
 Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
 
 ```
-aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
+aws s3 website s3://mythical-mysfits-bucket-name --index-document index.html
 ```
 
 #### Update the S3 Bucket Policy
@@ -93,7 +93,7 @@ All buckets created in Amazon S3 are fully private by default.  In order to be u
 Execute the following CLI command to add a public bucket policy to your website:
 
 ```
-aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json
+aws s3api put-bucket-policy --bucket mythical-mysfits-bucket-name --policy file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json
 ```
 
 #### Publish the Website Content to S3
