@@ -5,17 +5,17 @@
 **Time to complete:** 60 minutes
 
 **Services used:**
-* AWS CloudFormation
-* AWS Identity and Access Management (IAM)
-* Amazon Virtual Private Cloud (VPC)
-* Amazon Elastic Load Balancing
-* Amazon Elastic Container Service (ECS)
-* AWS Fargate
-* AWS Elastic Container Registry (ECR)
-* AWS CodeCommit
-* AWS CodePipeline
-* AWS CodeDeploy
-* AWS CodeBuild
+* [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
+* [AWS Identity and Access Management (IAM)](https://aws.amazon.com/iam/)
+* [Amazon Virtual Private Cloud (VPC)](https://aws.amazon.com/vpc/)
+* [Amazon Elastic Load Balancing](https://aws.amazon.com/elasticloadbalancing/)
+* [Amazon Elastic Container Service (ECS)](https://aws.amazon.com/ecs/)
+* [AWS Fargate](https://aws.amazon.com/fargate/)
+* [AWS Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/)
+* [AWS CodeCommit](https://aws.amazon.com/codecommit/)
+* [AWS CodePipeline](https://aws.amazon.com/codepipeline/)
+* [AWS CodeDeploy](https://aws.amazon.com/codedeploy/)
+* [AWS CodeBuild](https://aws.amazon.com/codebuild/)
 
 
 ### Overview

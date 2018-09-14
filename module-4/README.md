@@ -5,9 +5,10 @@
 **Time to complete:** 60 minutes
 
 **Services used:**
-* Amazon Cognito
-* Amazon API Gateway
-* Amazon Simple Storage Service (S3)
+* [Amazon Cognito](https://aws.amazon.com/cognito/)
+* [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+* [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
+* [AWS Amplify](https://aws-amplify.github.io/)
 
 ### Overview
 

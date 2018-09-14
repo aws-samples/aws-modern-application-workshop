@@ -5,7 +5,7 @@
 **Time to complete:** 20 minutes
 
 **Services used:**
-* Amazon DynamoDB
+* [Amazon DynamoDB](https://aws.amazon.com/dynamodb/)
 
 ### Overview
 

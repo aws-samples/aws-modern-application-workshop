@@ -5,12 +5,12 @@
 **Time to complete:** 30 minutes
 
 **Services used:**
-* AWS CloudFormation
-* AWS Kinesis Firehose
-* Amazon S3
-* Amazon API Gateway
-* AWS Lambda
-* AWS CodeCommit
+* [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
+* [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/)
+* [Amazon S3](https://aws.amazon.com/s3/)
+* [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+* [AWS Lambda](https://aws.amazon.com/lambda/)
+* [AWS CodeCommit](https://aws.amazon.com/codecommit/)
 * [AWS Extensions for .NET CLI](https://github.com/aws/aws-extensions-for-dotnet-cli)
 
 ### Overview

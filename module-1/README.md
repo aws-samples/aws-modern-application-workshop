@@ -5,18 +5,19 @@
 **Time to complete:** 20 minutes
 
 **Services used:**
-* Amazon Simple Storage Service (S3)
+* [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
 
-In this module, follow the instructions to set up your environment with Visual Studio Code and to deploy the first version of the static Mythical Mysfits website.  Amazon S3 is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
+In this module, follow the instructions to set up your environment with Visual Studio Code to deploy the first version of the static Mythical Mysfits website.  Amazon S3 is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
 
-### Getting Started
-
-### Configuring your environment for Mythical Mysfits
+### Getting Started: Configuring your environment for Mythical Mysfits
 
 #### Install required tools
 * [Visual Studio Code](https://code.visualstudio.com/)
 * [git](https://git-scm.com/downloads)
 * [AWS CLI](https://aws.amazon.com/cli/) or [AWS Tools for PowerShell](https://aws.amazon.com/powershell/)
+    * Pick a tool based on the environment you're more comfortable with:
+        * Bash -- AWS CLI
+        * PowerShell -- AWS Tools for PowerShell
 * [Node.js and NPM](https://nodejs.org/en/)
 * [.NET Core 2.1](https://www.microsoft.com/net/download)
 * [Angular CLI](https://cli.angular.io/)
@@ -24,7 +25,7 @@ In this module, follow the instructions to set up your environment with Visual S
 * [AWS Amplify](https://aws-amplify.github.io/)
     * npm install -g @aws-amplify/cl
 
-#### Cloning the Mythical Mysfits Workshop Repository
+#### Clone the Mythical Mysfits Workshop Repository
 
 Open the terminal in Visual Studio Code, located under **View > Terminal**
 
