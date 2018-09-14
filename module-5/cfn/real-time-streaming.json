@@ -1,0 +1,407 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "A stack that gives Mythical Mysfits the abillity to ingest user clicks and process them in real time.",
+    "Parameters": {
+        "ServiceStackName": {
+            "Type": "String",
+            "Default": "MythicalMysfitsCoreStack",
+            "Description": "The name of the parent Fargate service stack that you created. Necessary to locate and reference resources created by that stack."
+        },
+        "MysfitsApiUrl": {
+            "Type": "String",
+            "Description": "The name of the parent Fargate service stack that you created. Necessary to locate and reference resources created by that stack."
+        }
+    },
+    "Resources": {
+        "MysfitsFireHoseToS3": {
+            "DependsOn": [
+                "FirehoseDeliveryPolicy",
+                "MysfitsClicksProcessor"
+            ],
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:aws:s3:::",
+                                {
+                                    "Ref": "ClicksDestinationBucket"
+                                }
+                            ]
+                        ]
+                    },
+                    "BufferingHints": {
+                        "IntervalInSeconds": "60",
+                        "SizeInMBs": "50"
+                    },
+                    "CompressionFormat": "UNCOMPRESSED",
+                    "Prefix": "firehose/",
+                    "RoleARN": {
+                        "Fn::GetAtt": [
+                            "FirehoseDeliveryRole",
+                            "Arn"
+                        ]
+                    },
+                    "ProcessingConfiguration": {
+                        "Enabled": "true",
+                        "Processors": [
+                            {
+                                "Parameters": [
+                                    {
+                                        "ParameterName": "LambdaArn",
+                                        "ParameterValue": {
+                                            "Fn::GetAtt": [
+                                                "MysfitsClicksProcessor",
+                                                "Arn"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "Type": "Lambda"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ClicksDestinationBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            }
+        },
+        "FirehoseDeliveryRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "firehose.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole",
+                            "Condition": {
+                                "StringEquals": {
+                                    "sts:ExternalId": {
+                                        "Ref": "AWS::AccountId"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "FirehoseDeliveryPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "DependsOn": [
+                "MysfitsClicksProcessor",
+                "ClicksDestinationBucket"
+            ],
+            "Properties": {
+                "PolicyName": "firehose_delivery_policy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:AbortMultipartUpload",
+                                "s3:GetBucketLocation",
+                                "s3:GetObject",
+                                "s3:ListBucket",
+                                "s3:ListBucketMultipartUploads",
+                                "s3:PutObject"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "ClicksDestinationBucket"
+                                            }
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "ClicksDestinationBucket"
+                                            },
+                                            "*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "lambda:InvokeFunction"
+                            ],
+                            "Resource": {
+                                "Fn::GetAtt": [
+                                    "MysfitsClicksProcessor",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "FirehoseDeliveryRole"
+                    }
+                ]
+            }
+        },
+        "MysfitsClicksProcessor": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "Handler": "streaming_lambda::streaming_lambda.Function::FunctionHandlerAsync",
+                "Runtime": "dotnetcore2.1",
+                "CodeUri": ".",
+                "Description": "An Amazon Kinesis Firehose stream processor that enriches click records to not just include a mysfitId, but also other attributes that can be analyzed later.",
+                "MemorySize": 128,
+                "Timeout": 30,
+                "Policies": [
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "dynamodb:GetItem"
+                                ],
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:dynamodb:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":table/MysfitsTable"
+                                        ]
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "Environment": {
+                    "Variables": {
+                        "MYSFITS_API_URL": { "Ref" : "MysfitsApiUrl" }
+                    }
+                }
+            }
+        },
+        "MysfitsClicksProcessorPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "MysfitsClicksProcessor"
+                },
+                "Principal": "firehose.amazonaws.com",
+                "SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                },
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "MysfitsFireHoseToS3",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "ClickProcessingApiRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "apigateway.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                }
+            }
+        },
+        "ClickProcessingApiPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "DependsOn": [
+                "ClickProcessingApiRole"
+            ],
+            "Properties": {
+                "PolicyName": "api_gateway_firehose_proxy_role",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "firehose:PutRecord"
+                            ],
+                            "Resource": {
+                                "Fn::GetAtt": [
+                                    "MysfitsFireHoseToS3",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "ClickProcessingApiRole"
+                    }
+                ]
+            }
+        },
+        "ClickProcessingApi": {
+            "Type": "AWS::Serverless::Api",
+            "DependsOn": [
+                "MysfitsFireHoseToS3",
+                "ClickProcessingApiRole"
+            ],
+            "Properties": {
+                "EndpointConfiguration": "REGIONAL",
+                "StageName": "prod",
+                "Cors": {
+                    "AllowOrigin": "'*'",
+                    "AllowHeaders": "'Content-Type'"
+                },
+                "DefinitionBody": {
+                    "swagger": 2.0,
+                    "info": {
+                        "title": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    "paths": {
+                        "/clicks": {
+                            "put": {
+                                "consumes": [
+                                    "application/json"
+                                ],
+                                "produces": [
+                                    "application/json"
+                                ],
+                                "responses": {
+                                    "200": {
+                                        "statusCode": 200,
+                                        "headers": {
+                                            "Access-Control-Allow-Headers": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Methods": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Origin": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "x-amazon-apigateway-integration": {
+                                    "responses": {
+                                        "default": {
+                                            "statusCode": 200,
+                                            "responseParameters": {
+                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS, PUT'",
+                                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                            }
+                                        }
+                                    },
+                                    "credentials": {
+                                        "Fn::GetAtt": [
+                                            "ClickProcessingApiRole",
+                                            "Arn"
+                                        ]
+                                    },
+                                    "connectionType": "INTERNET",
+                                    "httpMethod": "POST",
+                                    "type": "AWS",
+                                    "uri": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:apigateway:",
+                                                {
+                                                    "Ref": "AWS::Region"
+                                                },
+                                                ":firehose:action/PutRecord"
+                                            ]
+                                        ]
+                                    },
+                                    "requestTemplates": {
+                                        "application/json": {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "{ \"DeliveryStreamName\": \"",
+                                                    {
+                                                        "Ref": "MysfitsFireHoseToS3"
+                                                    },
+                                                    "\",    \"Record\": {   \"Data\": \"$util.base64Encode($input.json('$'))\" } }"
+                                                ]
+                                            ]
+                                        }
+                                    },
+                                    "requestParameters": {
+                                        "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "StreamingApiEndpoint": {
+            "Description": "The endpoint for the REST API created with API Gateway",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Ref": "ClickProcessingApi"
+                        },
+                        ".execute-api.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/prod"
+                    ]
+                ]
+            }
+        }
+    }
+}

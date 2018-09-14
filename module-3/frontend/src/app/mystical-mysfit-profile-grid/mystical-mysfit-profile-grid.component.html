@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="row">
+    <ul class="nav nav-pills">
+      <div class="col" *ngFor="let filterCategory of filterOptionsList.categories">
+        <li class="nav-item dropdown">
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-primary" id="dropdown{{filterCategory.title}}" ngbDropdownToggle>{{filterCategory.title}}</button>
+            <div ngbDropdownMenu>
+              <button class="dropdown-item" (click)="queryMysfits(filterCategory.filter, filterCategorySelection)" *ngFor="let filterCategorySelection of filterCategory.selections">{{filterCategorySelection}}</button>
+            </div>
+          </div>
+        </li>
+      </div>
+      <div class="col">
+        <li class="nav-item">
+          <button type="button" class="btn btn-success" (click)="removeFilter()">View All</button>
+        </li>
+      </div>
+    </ul>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 border border-warning" *ngFor="let mysfit of mysfits">
+      <br>
+      <p>
+        <strong> {{mysfit.name}}</strong>
+        <br>
+        <img src="{{mysfit.thumbImageUri}}" alt="{{mysfit.name}}">
+      </p>
+      <p>
+        <br>
+        <b>Species:</b> {{mysfit.species}}
+        <br>
+        <b>Age:</b> {{mysfit.age}}
+        <br>
+        <b>Good/Evil:</b> {{mysfit.goodEvil}}
+        <br>
+        <b>Lawful/Chaotic:</b> {{mysfit.lawChaos}}
+      </p>
+    </div>
+  </div>
+</div>

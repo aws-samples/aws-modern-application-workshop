@@ -1,0 +1,34 @@
+{
+    "Statement": [
+        {
+            "Sid": "WhitelistedGet",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                ]
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketVersioning"
+            ],
+            "Resource": [
+                "arn:aws:s3:::REPLACE_ME_ARTIFACTS_BUCKET_NAME/*",
+                "arn:aws:s3:::REPLACE_ME_ARTIFACTS_BUCKET_NAME"
+            ]
+        },
+        {
+            "Sid": "WhitelistedPut",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                ]
+            },
+            "Action": "s3:PutObject",
+            "Resource": [
+                "arn:aws:s3:::REPLACE_ME_ARTIFACTS_BUCKET_NAME/*",
+                "arn:aws:s3:::REPLACE_ME_ARTIFACTS_BUCKET_NAME"
+            ]
+        }
+    ]
+}
