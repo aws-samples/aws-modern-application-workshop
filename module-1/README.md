@@ -83,7 +83,7 @@ aws s3 mb s3://mythical-mysfits-bucket-name
 
 #### Update the S3 Bucket Policy
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by CloudFront. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
+All buckets created in Amazon S3 are fully private by default.  In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by a CloudFront origin access identity that we also create. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or explicitly denied) to be performed by different *Principals* (in our case the CloudFront service).
 
 First we need to create a CloudFront Access Identity using the following CLI command.
 
@@ -100,8 +100,8 @@ Record the **Id** from the output as we will need to update the bucket policy wi
             "Comment": "Mysfits", 
             "CallerReference": "Mysfits"
         }, 
-        "S3CanonicalUserId": "MIICiTCCAfICCQD6m7oRw0uXOjANBgkqhkiG9w0BAQUFADCBiDELMAkGA1UEBhMC", 
-        "Id": "ANPAJ2UCCR6DPCEXAMPLE"
+        "S3CanonicalUserId": "ABCABCCCAfICCQD6m7oRw0uXOjANBgkqhkiG9w0BAQUFADCBiDELMAkGA1EXAMPLE", 
+        "Id": "ABCAJ2UCCR6DPCEXAMPLE"
     }, 
     "ETag": "ANPAJ2UCCR6DPCEXAMPLE", 
     "Location": "https://cloudfront.amazonaws.com/2017-10-30/origin-access-identity/cloudfront/ANPAJ2UCCR6DPCEXAMPLE"
@@ -117,7 +117,7 @@ To **open a file** in Cloud9, use the File Explorer on the left panel and double
 
 ![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
 
-This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
+This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown on both lines 9 and 12 with your chosen bucket name used in the previous commands:
 
 ![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
 
