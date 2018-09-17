@@ -155,13 +155,13 @@ Note the `DomainName` as that will be your web site. After CloudFront creates yo
 For more information, see [Testing a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-testing.html) in the CloudFront documentation.
 
 
-7. You have now configured Amazon CloudFront with basic settings and S3 as origin.
+6. You have now configured Amazon CloudFront with basic settings and S3 as origin.
 
 For more information on configuring CloudFront, see [Viewing and Updating CloudFront Distributions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowToUpdateDistribution.html) in the CloudFront documentation.
 
 #### Test Website
 
-Now, it can take some time for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ edge locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
+Now, it can take some time e.g. 15 to 30 minutes for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ edge locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
