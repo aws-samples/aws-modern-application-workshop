@@ -115,12 +115,15 @@ The JSON document for the necessary bucket policy is located at: `~/environment/
 
 To **open a file** in Cloud9, use the File Explorer on the left panel and double click `bucket-policy.json`:
 
-![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
+![bucket-policy-image.png](/images/module-1/bucket-policy.png)
 
-This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown on both lines 9 and 12 with your chosen bucket name used in the previous commands:
+This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown on both lines 9 and 12 with your Id and chosen bucket name used in the previous commands:
 
 ![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
 
+In Cloud9, open the `website-cloudfront-distribution.json` file and edit the bucket name on line 12 and the Id on line 14:
+
+![bucket-policy-image.png](/images/module-1/cloudfront-distribution.png)
 
 Execute the following CLI command to add a public bucket policy to allow CloudFront:
 
