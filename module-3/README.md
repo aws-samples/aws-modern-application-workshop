@@ -9,7 +9,7 @@
 
 ### Overview
 
-Now that you have a service deployed and a working CI/CD pipeline to deliver changes to that service automatically whenever you update your code repository, you can quickly move new application features from conception to available for your Mythical Mysfits customers.  With this increased agility, let's add another foundational piece of functionality to the Mythical Mysfits website architecture: a data tier.  In this module you will create a table in Amazon DynamoDB, a managed and scalable NoSQL database service on AWS with super fast performance.  Rather than have all of the Mysfits be stored in a static JSON file, we will store them in a database to make the website's future more extensible and scalable.
+Now that you have a service deployed and a working CI/CD pipeline to deliver changes to that service automatically whenever you update your code repository, you can quickly move new application features from conception to available for your Mythical Mysfits customers. With this increased agility, let's add another foundational piece of functionality to the Mythical Mysfits website architecture: a data tier. A data tier allows you to persistently store data used by your application and provides one place to manage data about the Mysfits. In this module you will create a table in [Amazon DynamoDB](https://aws.amazon.com/dynamodb/), a managed and scalable NoSQL database service on AWS with super fast performance. Rather than have all of the Mysfits be stored in a static JSON file, we will store them in a database to make the website's future more extensible and scalable.
 
 ### Adding a NoSQL Database to Mythical Mysfits
 

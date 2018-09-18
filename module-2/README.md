@@ -20,11 +20,11 @@
 
 ### Overview
 
-In Module 2, you will create a new microservice hosted with AWS Fargate on Amazon Elastic Container Service so that your Mythical Mysfits website can have an application backend to integrate with. [AWS Fargate](https://aws.amazon.com/fargate/) is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use [.NET Core 2.1](https://docs.microsoft.com/en-us/dotnet/core/) and create a [Web API app](https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1) in a [Docker container](https://www.docker.com/) behind a [Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html). These will form the microservice backend for the frontend website to integrate with.
+In Module 2, you will create a new microservice hosted with [AWS Fargate](https://aws.amazon.com/fargate/) on [Amazon Elastic Container Service](https://aws.amazon.com/ecs/) so that your Mythical Mysfits website can have an application backend to integrate with. AWS Fargate is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use [.NET Core 2.1](https://docs.microsoft.com/en-us/dotnet/core/) and create a [Web API app](https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1) in a [Docker container](https://www.docker.com/) behind a [Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html). These will form the microservice backend for the frontend website to integrate with.
 
 ### Creating the Core Infrastructure using AWS CloudFormation
 
-Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in Amazon VPC, and the AWS Identity and Access Management Roles that will define the permissions that ECS and our containers will have on top of AWS.  We will use AWS CloudFormation to accomplish this. AWS CloudFormation is a service that can programmatically provision AWS resources that you declare within JSON or YAML files called *CloudFormation Templates*, enabling the common best practice of *Infrastructure as Code*. We have provided a CloudFormation template to create all of the necessary Network and Security resources in /module-2/cfn/core.yml.  This template will create the following resources:
+Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the AWS Identity and Access Management Roles that will define the permissions that ECS and our containers will have on top of AWS.  We will use [AWS CloudFormation](https://aws.amazon.com/cloudformation/) to accomplish this. AWS CloudFormation is a service that can programmatically provision AWS resources that you declare within JSON or YAML files called *CloudFormation Templates*, enabling the common best practice of *Infrastructure as Code*. We have provided a CloudFormation template to create all of the necessary Network and Security resources in /module-2/cfn/core.yml.  This template will create the following resources:
 
 * **An Amazon VPC** - a network environment that contains four subnets (two public and two private) in the 10.0.0.0/16 private IP space, as well as all the needed Route Table configurations.
 * **Two NAT Gateways** (one for each public subnet) - allows the containers we will eventually deploy into our private subnets to communicate out to the Internet to download necessary packages, etc.
@@ -302,7 +302,7 @@ New-ELB2Listener -DefaultAction @{'TargetGroupArn'='REPLACE_WITH_TARGET_GROUP_AR
 
 #### Creating a Service Linked Role for ECS
 
-If you have already used ECS in the past you can skip over this step and move on to the next step.  If you have never used ECS before, we need to create a **service linked role** in IAM that grants the ECS service itself permissions to make ECS API requests within your account.  This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling Docker images, creating new tasks, etc.
+If you have already used ECS in the past you can skip over this step and [move on to the next step](#create-the-service).  If you have never used ECS before, we need to create a **service linked role** in IAM that grants the ECS service itself permissions to make ECS API requests within your account.  This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling Docker images, creating new tasks, etc.
 
 Without creating this role, the ECS service would not be granted permissions to perform the actions required.  To create the role, execute the following command in the terminal using either the AWS CLI or the PowerShell command:
 
@@ -555,8 +555,7 @@ git push
 
 After the change is pushed into the repository, you can open the CodePipeline service in the AWS Console to view your changes as they progress through the CI/CD pipeline. After committing your code change, it will take about 5 to 10 minutes for the changes to be deployed to your live service running in Fargate. Refresh your Mythical Mysfits website in the browser to see that the changes have taken effect.
 
-You can view the progress of your code change through the CodePipeline console here (no actions needed, just watch the automation in action!):
-[AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home)
+You can view the progress of your code change through the [AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home) console -- no actions needed, just watch the automation in action!
 
 This concludes Module 2.
 

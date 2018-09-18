@@ -1,4 +1,4 @@
-# Module 4: Adding User and API features with Amazon API Gateway and AWS Cognito
+# Module 4: Adding User and API Features with Amazon API Gateway and AWS Cognito
 
 ![Architecture](/images/module-4/architecture-module-4.png)
 
@@ -12,9 +12,9 @@
 
 ### Overview
 
-In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a **User Pool** in **Amazon Cognito**, a fully managed user identity management service. We'll use [**AWS Amplify**](https://aws-amplify.github.io/) to help us set up Cognito. We will install the **AWS Amplify** CLI to add this feature. 
+In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a User Pool in Amazon Cognito, a fully managed user identity management service. We'll use [AWS Amplify](https://aws-amplify.github.io/) to help us set up Cognito. We will install the AWS Amplify CLI to add this feature. 
 
-We want to restrict liking and adopting Mysfits to registered users, so we'll need to restrict access to those paths in our .NET API running on ECS with Fargate. Our Fargate service is currently using an NLB, which doesn't support validating request authorization headers. We have a few options: we can switch to an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html), we can have our .NET API validate our authorization headers, or we can use Amazon API Gateway.
+We want to restrict liking and adopting Mysfits to registered users, so we'll need to restrict access to those paths in our .NET API running on ECS with Fargate. Our Fargate service is currently using an NLB, which doesn't support validating request authorization headers. We have a few options: we can switch to an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html), we can have our .NET API validate our authorization headers, or we can use [Amazon API Gateway](https://aws.amazon.com/api-gateway/).
 
 [Amazon API Gateway](https://aws.amazon.com/api-gateway/) provides commonly required REST API capabilities out of the box like SSL termination, CORS, request authorization, throttling, API stages and versioning, and much more. For these reasons, we'll choose to deploy an API Gateway in front of our NLB.
 
