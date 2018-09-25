@@ -72,12 +72,14 @@ cd aws-modern-application-workshop
 ### Creating a Static Website in Amazon S3
 
 #### Create an S3 Bucket and Configure it for Website Hosting
-Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).  
+Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).
 
-First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name. **Note: see the [requirements for bucket names](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+**Note: This workshop uses placeholders for names that you must supply. These placeholders use the prefix `REPLACE_ME_` to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.**
+
+First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace *REPLACE_ME_BUCKET_NAME* with your own unique bucket name, as described in [requirements for bucket names](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
 ```
-aws s3 mb s3://mythical-mysfits-bucket-name
+aws s3 mb s3://REPLACE_ME_BUCKET_NAME
 ```
 
 Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
@@ -91,8 +93,6 @@ aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
 All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
 
 The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains a string that needs to be replaced with the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
-
-**Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
 
 To **open a file** in Cloud9, use the File Explorer on the left panel and double click `website-bucket-policy.json`:
 
