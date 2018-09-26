@@ -124,7 +124,7 @@ As a result you will see docker reporting that your container is up and running 
  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-To test our service with a local request, open up the above ip address in your browser of choice. Append /mysfits to the end of the URI in the address bar of the preview browser and hit enter:
+To test our service with a local request, open up the above ip address in your browser of choice. Append /api/mysfits to the end of the URI in the address bar of the preview browser and hit enter:
 
 ![preview-menu](/images/module-2/address-bar.png)
 
