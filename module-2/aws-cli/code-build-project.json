@@ -5,7 +5,7 @@
   },
   "environment": {
     "computeType": "BUILD_GENERAL1_SMALL",
-    "image": "aws/codebuild/python:3.5.2",
+    "image": "aws/codebuild/java:openjdk-8",
     "privilegedMode": true,
     "environmentVariables": [
       {
