@@ -17,6 +17,12 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - echo Building the jar
+      # Go to build dir for the java project
+      - cd service
+      - mvn clean install
+      # Go back to root folder
+      - cd ..
       - echo Building the Docker image...
       - docker build -t mythicalmysfits/service:latest .
       # Tag the built docker image using the appropriate Amazon ECR endpoint and relevant
