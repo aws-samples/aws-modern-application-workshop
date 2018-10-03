@@ -295,8 +295,9 @@ Next, use the CLI to create a load balancer **listener** for the NLB.  This info
 aws elbv2 create-listener --default-actions TargetGroupArn=REPLACE_WITH_TARGET_GROUP_ARN,Type=forward --load-balancer-arn REPLACE_WITH_LOAD_BALANCER_ARN --port 80 --protocol TCP
 ```
 `PowerShell`
+**Note:** This command autoretrieves your NLB ARN and your NLB Target Group ARN.
 ```
-New-ELB2Listener -DefaultAction @{'TargetGroupArn'='REPLACE_WITH_TARGET_GROUP_ARN';'Type'='forward'} -LoadBalancerArn REPLACE_WITH_LOAD_BALANCER_ARN -Port 80 -Protocol TCP
+New-ELB2Listener -DefaultAction @{'TargetGroupArn'=$(Get-ELB2TargetGroup | Where-Object {$_.TargetGroupName -eq "MythicalMysfits-TargetGroup"} | Select-Object -ExpandProperty TargetGroupArn);'Type'='forward'} -LoadBalancerArn $(Get-ELB2LoadBalancer | Where-Object {$_.LoadBalancerName -eq "mysfits-nlb"} | Select-Object -ExpandProperty LoadBalancerArn) -Port 80 -Protocol TCP
 ```
 ### Creating a Service with Fargate
 
