@@ -38,7 +38,7 @@ try {
     # try manually replacing the values between the following block:
     
     ######## BEGIN VARIABLE BLOCK -- REPLACE ONLY IF SCRIPT ISN'T WORKING ##########
-    $region = Get-DefaultAWSRegion | Select-Object -ExpandProperty Account
+    $region = Get-DefaultAWSRegion | Select-Object -ExpandProperty Region
     $accountId = Get-STSCallerIdentity | Select-Object -ExpandProperty Account
     
     $family = "mythicalmysfitsservice"
