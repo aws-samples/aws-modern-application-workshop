@@ -1,4 +1,4 @@
-package com.example;
+package com.amazonaws.lambda.streamprocessor;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -121,3 +121,4 @@ public class Mysfit {
         this.adopted = adopted;
     }
 }
+

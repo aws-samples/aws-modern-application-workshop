@@ -17,7 +17,7 @@ public class Mysfit {
     private String thumbImageUri;
     private String profileImageUri;
     private Integer likes;
-    private Boolean Adopted;
+    private Boolean adopted;
 
     public Mysfit() {
     }
@@ -112,12 +112,12 @@ public class Mysfit {
         this.likes = likes;
     }
 
-    @DynamoDBAttribute(attributeName="Adopted")
+    @DynamoDBAttribute(attributeName="adopted")
     public Boolean getAdopted() {
-        return Adopted;
+        return adopted;
     }
 
     public void setAdopted(Boolean adopted) {
-        Adopted = adopted;
+        this.adopted = adopted;
     }
 }

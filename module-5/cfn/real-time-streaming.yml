@@ -6,7 +6,7 @@ Description: A stack that gives Mythical Mysfits the abillity to ingest user
 Parameters:
   ServiceStackName:
     Type: String
-    Default: MythicalMysfitsServiceStack
+    Default: MythicalMysfitsCoreStack
     Description: The name of the parent Fargate service stack that you created. Necessary
                  to locate and reference resources created by that stack.
 Resources:
@@ -105,9 +105,9 @@ Resources:
   MysfitsClicksProcessor:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: streamProcessor.processRecord
-      Runtime: python3.6
-      CodeUri: .
+      Handler: com.amazonaws.lambda.streamprocessor.LambdaFunctionHandler
+      Runtime: java8
+      CodeUri: ./target/streamProcessor-1.0.0.jar
       Description: An Amazon Kinesis Firehose stream processor that enriches click
                    records to not just include a mysfitId, but also other
                    attributes that can be analyzed later.
