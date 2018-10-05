@@ -144,7 +144,7 @@ aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html 
 Using the AWS CLI, we will create a CloudFront distribution, and configure the S3 bucket as the origin. The JSON document for the necessary CloudFront configuration is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-cloudfront-distribution.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
 
 ```
-aws cloudfront create-distribution --distribution-config file://website-cloudfront-distribution.json
+aws cloudfront create-distribution --distribution-config file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-cloudfront-distribution.json
 ```
 
   * If this was a web site used for more than just testing you should enable logging, and consider the AWS Web Application Firewall (WAF) service to help protect. For more information on the other configuration options, see [Values That You Specify When You Create or Update a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html) in the CloudFront documentation.

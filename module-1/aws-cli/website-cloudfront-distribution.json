@@ -12,7 +12,7 @@
         "DomainName": "REPLACE_ME_BUCKET_NAME.s3.amazonaws.com",
         "S3OriginConfig": {
           "OriginAccessIdentity": "origin-access-identity/cloudfront/REPLACE_ME_ID"
-        }2
+        }
       }
     ]
   },
