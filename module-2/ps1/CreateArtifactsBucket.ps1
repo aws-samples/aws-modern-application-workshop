@@ -32,8 +32,8 @@ try {
     $accountId = Get-STSCallerIdentity | Select-Object -ExpandProperty Account
 
     $bucketName = "mythical-mysfits-artifacts-{0}" -f $accountId
-    $codeBuildRoleARN = Get-CFNStack -StackName MythicalMysfitsCoreStack | Select-Object -ExpandProperty Outputs | Select-Object ExportName,OutputValue | Where-Object { $_.ExportName -eq "MythicalMysfitsCoreStack:MythicalMysfitsServiceCodeBuildServiceRole" } | Select-Object -ExpandProperty OutputValue
-    $codePipelineRoleARN = Get-CFNStack -StackName MythicalMysfitsCoreStack | Select-Object -ExpandProperty Outputs | Select-Object ExportName,OutputValue | Where-Object { $_.ExportName -eq "MythicalMysfitsCoreStack:MythicalMysfitsServiceCodePipelineServiceRole" } | Select-Object -ExpandProperty OutputValue
+    $codeBuildRoleARN = Get-CFNStack -StackName MythicalMysfitsCoreStack | Select-Object -ExpandProperty Outputs | Select-Object ExportName, OutputValue | Where-Object { $_.ExportName -eq "MythicalMysfitsCoreStack:MythicalMysfitsServiceCodeBuildServiceRole" } | Select-Object -ExpandProperty OutputValue
+    $codePipelineRoleARN = Get-CFNStack -StackName MythicalMysfitsCoreStack | Select-Object -ExpandProperty Outputs | Select-Object ExportName, OutputValue | Where-Object { $_.ExportName -eq "MythicalMysfitsCoreStack:MythicalMysfitsServiceCodePipelineServiceRole" } | Select-Object -ExpandProperty OutputValue
     
     $artifactsPolicy = (Get-Content $(Join-Path -Path $scriptDir -ChildPath "artifacts-bucket-policy.json") | ConvertFrom-Json)     
     # ######## END VARIABLE BLOCK -- REPLACE ONLY IF SCRIPT ISN'T WORKING ##########
@@ -43,18 +43,16 @@ try {
     }
     catch {
         $bucketError = $_ | Out-String
-    }
-    if ($bucketError -and -not $bucketError.Contains("you already own it")) {
-        Write-Output "found error"
-        throw $error
-    } else {
-        foreach($p in $artifactsPolicy.Statement)
-        {
-            $p.Principal.AWS = @($codeBuildRoleARN, $codePipelineRoleARN)
-            $p.Resource = @(("arn:aws:s3:::{0}/*" -f $bucketName), ("arn:aws:s3:::{0}" -f $bucketName))
+        if ($bucketError -and -not $bucketError.Contains("you already own it")) {
+            Write-Output "found error"
+            throw $error
         }
-        Write-S3BucketPolicy -BucketName $bucketName -Policy $($artifactsPolicy | ConvertTo-Json -Depth 4)
     }
+    foreach ($p in $artifactsPolicy.Statement) {
+        $p.Principal.AWS = @($codeBuildRoleARN, $codePipelineRoleARN)
+        $p.Resource = @(("arn:aws:s3:::{0}/*" -f $bucketName), ("arn:aws:s3:::{0}" -f $bucketName))
+    }
+    Write-S3BucketPolicy -BucketName $bucketName -Policy $($artifactsPolicy | ConvertTo-Json -Depth 4)
 }
 finally {
     Set-Location $startingLoc

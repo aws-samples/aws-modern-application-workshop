@@ -154,7 +154,7 @@ $(aws ecr get-login --no-include-email)
 ```
 `PowerShell`
 ```
-$user,$token = $([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($(Get-ECRAuthorizationToken | Select -ExpandProperty AuthorizationToken))) -split ":"); Write-Output $token | docker login -u $user --password-stdin $(echo https://$(Get-STSCallerIdentity | Select -ExpandProperty Account).dkr.ecr.$(Get-DefaultAWSRegion | Select -ExpandProperty Region).amazonaws.com); $user, $token = @();
+Invoke-Expression $(Get-ECRLoginCommand | Select-Object -ExpandProperty Command)
 ```
 
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
