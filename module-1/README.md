@@ -23,7 +23,7 @@ In this module, follow the instructions to set up your environment with Visual S
 * [Angular CLI](https://cli.angular.io/)
     * npm install -g @angular/cli
 * [AWS Amplify](https://aws-amplify.github.io/)
-    * npm install -g @aws-amplify/cl
+    * npm install -g @aws-amplify/cli
 
 #### Clone the Mythical Mysfits Workshop Repository
 
