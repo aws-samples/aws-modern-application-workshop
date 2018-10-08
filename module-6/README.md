@@ -20,11 +20,11 @@
 Next, we will show you how to deeply inspect and analyze request behavior on new functionality for the Mythical Mysfits site, using [**AWS X-Ray**](https://aws.amazon.com/kinesis/data-firehose/).  The new functionality will enable users to contact the Mythical Mysfits staff, via a **Contact Us** button we'll place on the site.  Since much of the steps required to create a new microservice to handle receiving user questions mimics activities you've performed earlier in this workshop, we have provided a CloudFormation template that will programmatically create the new service using AWS SAM.
 
 The CloudFormation template includes:
-* An [**API Gateway API**]:  A new microservice will be created that has a single REST resource, `/questions`.  This API will receive the text of a user question and the email address for the user who submitted it.
-* A [**DynamoDB Table**]: A new DynamoDB table where the user questions will be stored and persisted.  This DynamoDB table will be created with a [**DynamoDB Stream**](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) enabled.  The stream will provide a real-time even stream for all of the new questions that are stored within the database so that they can be immediate processed.
-* An [**AWS SNS Topic**]: AWS SNS allows applications to publish messages and to subscribe to message topics.  We will use a new topic as a way to send notifications to a subscribed email address for a email address.
-* Two [**AWS Lambda Functions**]: One AWS Lambda function will be used as the service backend for the question API requests. The other AWS Lambda function will receive events from the questions DynamoDB table and publish a message for each of them to the above SNS topic.  If you view the CloudFormation resource definitions for these functions in the file `~/environment/aws-modern-application-workshop/module-6/app/cfn/customer-question.yml`, you'll see a Property listed that indicates `Tracing: Active`.  This means that all invocations of the Lambda function will automatically be traced by **AWS X-Ray**.
-* [**IAM Roles**] required for each of the above resources and actions.
+* An **API Gateway API**:  A new microservice will be created that has a single REST resource, `/questions`.  This API will receive the text of a user question and the email address for the user who submitted it.
+* A **DynamoDB Table**: A new DynamoDB table where the user questions will be stored and persisted.  This DynamoDB table will be created with a [**DynamoDB Stream**](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) enabled.  The stream will provide a real-time even stream for all of the new questions that are stored within the database so that they can be immediate processed.
+* An **AWS SNS Topic**: AWS SNS allows applications to publish messages and to subscribe to message topics.  We will use a new topic as a way to send notifications to a subscribed email address for a email address.
+* Two **AWS Lambda Functions**: One AWS Lambda function will be used as the service backend for the question API requests. The other AWS Lambda function will receive events from the questions DynamoDB table and publish a message for each of them to the above SNS topic.  If you view the CloudFormation resource definitions for these functions in the file `~/environment/aws-modern-application-workshop/module-6/app/cfn/customer-question.yml`, you'll see a Property listed that indicates `Tracing: Active`.  This means that all invocations of the Lambda function will automatically be traced by **AWS X-Ray**.
+* **IAM Roles** required for each of the above resources and actions.
 
 Bring your command line terminal back to your root Cloud9 environment directory so that our subsequent commands are executed from the same place:
 
@@ -104,7 +104,7 @@ Now, to start seeing the request behavior for this microservice, visit the AWS X
 
 Upon visiting the X-Ray Console you'll be immediate viewing a **service map**, which shows the dependency relationship between all the components that X-Ray receives **trace segments** for:  
 
-![X-Ray Lambda Only](/images/module-6/lambda-only-xray.png)
+![X-Ray Lambda Only](/images/module-6/lambda-only-x-ray.png)
 
 At first, this service map only includes our AWS Lambda functions.  Feel free to explore the X-Ray console to learn more about drilling into the data automatically made visible just by listing the `Tracing: Active` property in the CloudFormation template you deployed.
 
