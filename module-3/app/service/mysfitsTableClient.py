@@ -26,7 +26,7 @@ def getMysfitsJson(items):
         mysfit["lawchaos"] = item["LawChaos"]["S"]
         mysfit["thumbImageUri"] = item["ThumbImageUri"]["S"]
         mysfit["profileImageUri"] = item["ProfileImageUri"]["S"]
-        mysfit["likes"] = int(item["Likes"]["N"])
+        mysfit["likes"] = item["Likes"]["N"]
         mysfit["adopted"] = item["Adopted"]["BOOL"]
 
         mysfitList["mysfits"].append(mysfit)
