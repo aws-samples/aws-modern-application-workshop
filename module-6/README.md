@@ -118,7 +118,7 @@ aws apigateway update-stage --rest-api-id REPLACE_ME_QUESTIONS_REST_API_ID --sta
 
 Now, submit another question to the Mythical Mysfits website and you'll see that the REST API is also included in the service map!
 
-
+![API Gateway Traced](/images/module-6/api-x-ray.png)
 
 Next, you will use the [AWS X-Ray SDK for Python](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python.html) so that the services being called by the two Lambda functions as part of the questions stack are also represented in the X-Ray service map.  The code has been written already to accomplish this, you just need to uncomment the relevant lines (uncommenting is performed by deleting the preceding `#` in a line of python code).  In the Lambda function code, you will see comments that indicate `#UNCOMMENT_BEFORE_2ND_DEPLOYMENT` or `#UNCOMMENT_BEFORE_3RD_DEPLOYMENT`.  
 
