@@ -4,11 +4,11 @@ import logging
 import uuid
 import random
 import time
-# UNCOMMENT BEFORE 2ND DEPLOYMENT - below 2 lines
+# UNCOMMENT_BEFORE_2ND_DEPLOYMENT - below 2 lines
 #from aws_xray_sdk.core import xray_recorder
 #from aws_xray_sdk.core import patch_all
 
-# UNCOMMENT BEFORE 2ND DEPLOYMENT - below 1 line
+# UNCOMMENT_BEFORE_2ND_DEPLOYMENT - below 1 line
 #patch_all()
 
 ddb = boto3.client('dynamodb')
@@ -32,7 +32,7 @@ def postQuestion(event, context):
         "S": payload["email"]
         }
 
-    # UNCOMENT BEFORE 3RD DEPLOYMENT - below 4 lines
+    # UNCOMENT_BEFORE_3RD_DEPLOYMENT - below 4 lines
     #throwError = random.randint(0,5)
     #if throwError:
     #   errorMsg = 'FATAL: This question did not get entered into the database. Email Address: ' + payload["email"]  + " Question Text: " + payload["questionText"]
@@ -52,7 +52,7 @@ def postQuestion(event, context):
     logger.info(response)
     return response
 
-# UNCOMENT BEFORE 3RD DEPLOYMENT - below 4 lines
+# UNCOMENT_BEFORE_3RD_DEPLOYMENT - below 4 lines
 #@xray_recorder.capture('hangingException')
 #def hangingException(msg):
 #    time.sleep(5)

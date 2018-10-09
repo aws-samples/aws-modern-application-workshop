@@ -21,7 +21,7 @@ Next, we will show you how to deeply inspect and analyze request behavior on new
 
 The CloudFormation template includes:
 * An **API Gateway API**:  A new microservice will be created that has a single REST resource, `/questions`.  This API will receive the text of a user question and the email address for the user who submitted it.
-* A **DynamoDB Table**: A new DynamoDB table where the user questions will be stored and persisted.  This DynamoDB table will be created with a [**DynamoDB Stream**](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) enabled.  The stream will provide a real-time even stream for all of the new questions that are stored within the database so that they can be immediate processed.
+* A **DynamoDB Table**: A new DynamoDB table where the user questions will be stored and persisted.  This DynamoDB table will be created with a [**DynamoDB Stream**](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) enabled.  The stream will provide a real-time event stream for all of the new questions that are stored within the database so that they can be immediately processed.
 * An **AWS SNS Topic**: AWS SNS allows applications to publish messages and to subscribe to message topics.  We will use a new topic as a way to send notifications to a subscribed email address for a email address.
 * Two **AWS Lambda Functions**: One AWS Lambda function will be used as the service backend for the question API requests. The other AWS Lambda function will receive events from the questions DynamoDB table and publish a message for each of them to the above SNS topic.  If you view the CloudFormation resource definitions for these functions in the file `~/environment/aws-modern-application-workshop/module-6/app/cfn/customer-question.yml`, you'll see a Property listed that indicates `Tracing: Active`.  This means that all invocations of the Lambda function will automatically be traced by **AWS X-Ray**.
 * **IAM Roles** required for each of the above resources and actions.
@@ -56,7 +56,7 @@ cp -r ~/environment/aws-modern-application-workshop/module-6/app/* .
 ```
 
 ```
-cp -r ~/environment/module6/cfn/* .
+ cp -r ~/environment/aws-modern-application-workshop/module-6/cfn/* .
 ```
 
 For this new microservice, we have included all of the packages necessary for the AWS Lambda functions to be deployed and invoked. Before deploying it, you are required to create another S3 bucket to be used by AWS SAM as a destination for your packaged QuestionService code (remember all S3 bucket names need to be unique and have naming constraints):
@@ -70,7 +70,7 @@ aws s3 mb s3://REPLACE_ME_NEW_QUESTIONS_SERVICE_CODE_BUCKET_NAME
 sam package --template-file ~/environment/MythicalMysfitsQuestionsService-Repository/customer-questions.yml --output-template-file ~/environment/MythicalMysfitsQuestionsService-Repository/transformed-questions.yml --s3-bucket REPLACE_ME_NEW_QUESTIONS_SERVICE_CODE_BUCKET_NAME
 ```
 
-...and then deploy the CloudFormation stack. **Note: provide an email address you have access to as the REPLACE_ME_EMAIL_ADDRESS parameter. This will be the email address that user questions are published to by the SNS topic**:
+...and then deploy the CloudFormation stack. **Note: provide an email address you have access to as the REPLACE_ME_EMAIL_ADDRESS parameter (replace it prior to pasting this command, the stack creation will fail if you execute the command without providing a valid email address). This will be the email address that user questions are published to by the SNS topic**:
 
 ```
 aws cloudformation deploy --template-file /home/ec2-user/environment/MythicalMysfitsQuestionsService-Repository/transformed-questions.yml --stack-name MythicalMysfitsQuestionsService-Stack --capabilities CAPABILITY_IAM --parameter-overrides AdministratorEmailAddress=REPLACE_ME_YOUR_EMAIL_ADDRESS
@@ -93,7 +93,7 @@ Now, with the new backend service running, let's make the required changes to `i
 Once you've made the necessary change to `index.html` run the following command to copy it to your website S3 bucket.
 
 ```
-aws s3 cp ~/environment/aws-modern-application-workshop/module-5/web/index.html s3://YOUR-S3-BUCKET/
+aws s3 cp ~/environment/aws-modern-application-workshop/module-6/web/index.html s3://YOUR-S3-BUCKET/
 ```
 
 Now that the new Contact Us functionality is deployed, visit the website and submit a question or two.  If you've confirmed the subscription to SNS in the step above, you'll start to see those questions arrive in your inbox! When you've seen that email arrive, you can move on to explore and analyze the request lifecycle.
@@ -102,7 +102,7 @@ Now, to start seeing the request behavior for this microservice, visit the AWS X
 
 [AWS X-Ray Console](https://console.aws.amazon.com/xray/home)
 
-Upon visiting the X-Ray Console you'll be immediate viewing a **service map**, which shows the dependency relationship between all the components that X-Ray receives **trace segments** for:  
+Upon visiting the X-Ray Console you'll be immediately viewing a **service map**, which shows the dependency relationship between all the components that X-Ray receives **trace segments** for:  
 
 ![X-Ray Lambda Only](/images/module-6/lambda-only-x-ray.png)
 
@@ -120,7 +120,7 @@ Now, submit another question to the Mythical Mysfits website and you'll see that
 
 
 
-Next, you will use the [AWS X-Ray SDK for Python](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python.html) so that the services being called by the two Lambda functions as part of the questions stack are also represented in the X-Ray service map.  The code has been written already to accomplish this, you just need to uncomment the relevant lines (uncommenting is performed by deleting the preceding `#` in a line of python code).  In the Lambda function code, you will see comments that indicate `#UNCOMMENT BEFORE 2ND DEPLOYMENT` or `#UNCOMMENT BEFORE 3RD DEPLOYMENT`.  
+Next, you will use the [AWS X-Ray SDK for Python](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python.html) so that the services being called by the two Lambda functions as part of the questions stack are also represented in the X-Ray service map.  The code has been written already to accomplish this, you just need to uncomment the relevant lines (uncommenting is performed by deleting the preceding `#` in a line of python code).  In the Lambda function code, you will see comments that indicate `#UNCOMMENT_BEFORE_2ND_DEPLOYMENT` or `#UNCOMMENT_BEFORE_3RD_DEPLOYMENT`.  
 
 You've already completed the first deployment of these functions using CloudFormation, so this will be your **2nd Deployment**.  Uncomment each of the lines indicated below all cases of `UNCOMMENT_BEFORE_2ND_DEPLOYMENT` in the following files, and save the files after making the required changes:
 * `~/environment/MythicalMysfitsQuestionsStack-Repository/PostQuestionsService/mysfitsPostQuestion.py`
@@ -147,7 +147,7 @@ Once that command completes, submit an additional question to the Mythical Mysfi
 
 The final step in this module is to familiarize yourself with using AWS X-Ray to triage problems in your application.  To accomplish this, we're going to by *mysfits* ourselves and have you add some terrible code to your application.  All this code will do is cause your web service to add 5 seconds of latency and throw an exception for randomized requests :) .
 
-Go back into the following file and remove the comments indicated by `#UNCOMMENT BEFORE 3RD DEPLOYMENT`:  
+Go back into the following file and remove the comments indicated by `#UNCOMMENT_BEFORE_3RD_DEPLOYMENT`:  
 * `~/environment/MythicalMysfitsQuestionsStack-Repository/PostQuestionsService/mysfitsPostQuestion.py`
 
 This is the code that will cause your Lambda function to throw an exception.  Also, you can note above the `hangingException()` function that we're using out-of-the-box functionality of the **AWS X-Ray SDK** to record a trace subsegment each time that function is called.  Now when you drill into the Trace for a particular request, you'll be able to see that all requests are stuck sitting within this function for at least 5 seconds before they throw the exception.
