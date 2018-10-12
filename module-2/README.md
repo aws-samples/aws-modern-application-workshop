@@ -74,7 +74,7 @@ Docker comes already installed on the Cloud9 IDE that you've created, so in orde
 cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
 
-* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks** command.
+* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks
 
 * Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
 
