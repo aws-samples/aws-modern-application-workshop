@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
     "github.com/aws/aws-sdk-go/aws"
@@ -324,9 +324,9 @@ func QueryMysfits(filter string, value string) string {
 	Info.Println("Filter: " + filter)
 	Info.Println("Value: " + value)
 
-	// We only have two secondary indexes: GoodEvil(Index) and LawChaos(Index)
-	if filter != "GoodEvil" && filter != "LawChaos" {
-		Info.Print("We only allow quering for GoodEvil or LawChaos")
+	// We only have two secondary indexes: GoodEvil(Index) and LawChaos(Index) and one primary index MysfitId(Index)
+	if filter != "MysfitId" && filter != "GoodEvil" && filter != "LawChaos" {
+		Info.Print("We only allow quering for MysfitId, GoodEvil, or LawChaos")
 		return ""
 	}
 
@@ -364,7 +364,7 @@ func QueryMysfits(filter string, value string) string {
 }
 
 // To test from command line change this and the top package name to main
-func main() {
+func dummy() {
 	filterPtr := flag.String("filter", "", "The table attribute to query")
 	valuePtr := flag.String("value", "", "The value of the table attribute")
 	flag.Parse()
