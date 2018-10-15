@@ -9,22 +9,7 @@ import (
     L "../client"
 )
 
-// For http://localhost:8088
-func healthCheckResponse(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("Nothing here, used for health check. Try /misfits instead."))
-}
-
-func showMisfits(w http.ResponseWriter, r *http.Request) {
-    // Does request contain a 'filter' arg?, ala:
-    // http://localhost:PORT/misfits?filter=value1&value=value2
-
-    fmt.Println("GET params were:", r.URL.Query())
-
-    items := ""
-
-    // Initialize log output to stderr, use HTML output for web page
-    // Set the second arg to L.JSON for JSON; L.STRING for a plain string
-
+func getContentType() string {
     contentType := "application/json"
 
     switch DefaultFormat {
@@ -42,71 +27,118 @@ func showMisfits(w http.ResponseWriter, r *http.Request) {
         contentType = "application/json"
     }
 
-    if r.Method == "GET" {
-        // We support:
-        // /misfits                              returns all misfits
-        // /misfits?filter=FILTER&value=VALUE    returns a misfit where FILTER is has VALUE
-        // /misfits/{mysfitsId}                  returns a misfit by their MysfitId
+    return contentType
+}
 
-        var path= r.URL.Path
+// Handle GET requests
+func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
+    // We handle (in local testing):
+    // /misfits                              returns all misfits
+    // /misfits?filter=FILTER&value=VALUE    returns a misfit where FILTER is has VALUE
+    // /misfits/{mysfitsId}                  returns a misfit by their MysfitId
 
-        // If just /misfits, get them all
-        if path == "/misfits" {
-            items = L.GetAllMysfits()
-        } else {
-            // Did we get a filter request?
-            filter := r.URL.Query().Get("filter")
-            if filter != "" {
-                fmt.Println("Got filter: " + filter)
-                value := r.URL.Query().Get("value")
-                if value != "" {
-                    fmt.Println("Got value: " + value)
-                    items = L.QueryMysfits(filter, value)
-                }
-            } else {
-                // We have a path like: /misfits/abc123
-                // First make sure it's not /misfits/abc123/xyz
-                s := strings.Split(path, "/")
+    var path= r.URL.Path
 
-                if len(s) > 2 {
-                    items = "Got bad request"
-                    fmt.Println(items)
-                } else {
-                    id := s[1]
-                    items = L.GetMysfit(id)
-                }
-            }
-        }
-    } else if r.Method == "POST" {
-        // We support:
-        // /mysfits/<mysfitId>/like              increments the likes for misfit with mysfitId
-        // /mysfits/<mysfitId>/adopt             enables adopt for misfit with mysfitId
+    // If just /, return simple message
+    if path == "/" {
+        // We must set the format to text, otherwise we get a JSON format error
+        return "Nothing here, used for health check. Try /misfits instead.", "TEXT"
+    }
 
-        path := r.URL.Path
+    // If just /misfits, get them all
+    if path == "/misfits" {
+        return L.GetAllMysfits(), t
+    }
 
-        s := strings.Split(path, "/")
-
-        if len(s) != 2 {
-            items = "Got bad request"
-            fmt.Println(items)
-        } else {
-            id := s[1]
-
-            if s[2] == "like" {
-                L.IncMysfitLikes(id)
-            } else {
-                L.SetMysfitAdopt(id)
-            }
+    // Did we get a filter request?
+    filter := r.URL.Query().Get("filter")
+    if filter != "" {
+        fmt.Println("Got filter: " + filter)
+        value := r.URL.Query().Get("value")
+        if value != "" {
+            fmt.Println("Got value: " + value)
+            return L.QueryMysfits(filter, value), t
         }
     }
 
+    // We have a path like: /misfits/abc123
+    // First make sure it's not /misfits/abc123/xyz
+    s := strings.Split(path, "/")
 
-    // Add items to web page
-    body := []byte(items)
+    // Splitting /misfits/abc123 gives us:
+    // s[0]: ""
+    // s[1]: "misfits"
+    // s[2]: "abc123"
 
-    // Set the type of content
+    if len(s) == 3 {
+        id := s[2]
+        return L.GetMysfit(id), t
+    }
+
+    // We must set the format to text, otherwise we get a JSON format error
+    return "Got bad GET request", "TEXT"
+}
+
+// Handle POST requests
+func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
+    // We support:
+    // /misfits/<mysfitId>/like     increments the likes for misfit with mysfitId
+    // /misfits/<mysfitId>/adopt    enables adopt for misfit with mysfitId
+
+    path := r.URL.Path
+
+    s := strings.Split(path, "/")
+
+    // Splitting /misfits/abc123/adopt gives us:
+    // s[0] == ""
+    // s[1] == "misfits"
+    // s[2] == "abc123"
+    // s[3] == "adopt"
+
+    if len(s) == 4 {
+        id := s[2]
+        action := s[3]
+
+        switch action {
+        case "like":
+            L.IncMysfitLikes(id)
+            return "Incremented likes for " + id, "TEXT"
+        case "adopt":
+            L.SetMysfitAdopt(id)
+            return "Enabled adoption for " + id, "TEXT"
+        default:
+            return "Unknown action: " + action, "TEXT"
+        }
+    }
+
+    return "Unknown request", "TEXT"
+}
+
+// Handle everything here
+func mainHandler(w http.ResponseWriter, r *http.Request) {
+    // Show path and method
+    fmt.Println("")
+    fmt.Println("In mainHandler")
+    fmt.Println("Method: " + r.Method)
+    fmt.Println("Path:   " + r.URL.Path)
+
+    content := ""
+    contentType := getContentType()
+
+    // If GET, send it to getHandler
+    switch r.Method {
+    case "GET":
+        content, contentType = getHandler(w, r, contentType)
+    case "POST":
+        content, contentType = postHandler(w, r, contentType)
+    default:
+        content = "Bad HTTP request method: " + r.Method
+        contentType = "TEXT"
+    }
+
+    // Add content to web page
+    body := []byte(content)
     w.Header().Set("Content-Type", contentType)
-
     w.Write(body)
 }
 
@@ -127,9 +159,6 @@ func main() {
     }
 
     mux := http.NewServeMux()
-
-	mux.Handle("/", http.HandlerFunc(healthCheckResponse))
-	mux.Handle("/misfits", http.HandlerFunc(showMisfits))
-
+	mux.Handle("/", http.HandlerFunc(mainHandler))
 	http.ListenAndServe(DefaultPort, mux)
 }

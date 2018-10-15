@@ -313,7 +313,7 @@ func GetAllMysfits() string {
 }
 
 func SetMysfitAdopt(mysfitId string) {
-    Info.Println("ID: " + mysfitId)
+    Info.Println("Setting adoption for misfit with ID: " + mysfitId)
 
     // Create a DynamoDB client using our default credentials and region.
     sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -328,7 +328,7 @@ func SetMysfitAdopt(mysfitId string) {
     input := &dynamodb.UpdateItemInput{
         TableName: aws.String("MysfitsTable"),
         Key:       map[string]*dynamodb.AttributeValue{
-            "mysfitId": {
+            "MysfitId": {
                 S: aws.String(mysfitId),
             },
         },
@@ -346,11 +346,10 @@ func SetMysfitAdopt(mysfitId string) {
     } else {
         Info.Print("Success")
     }
-
 }
 
 func IncMysfitLikes(mysfitId string) {
-    Info.Println("ID: " + mysfitId)
+    Info.Println("Incrementing likes for misfit with ID: " + mysfitId)
 
     // Create a DynamoDB client using our default credentials and region.
     sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -365,7 +364,7 @@ func IncMysfitLikes(mysfitId string) {
     input := &dynamodb.UpdateItemInput{
         TableName: aws.String("MysfitsTable"),
         Key:       map[string]*dynamodb.AttributeValue{
-            "mysfitId": {
+            "MysfitId": {
                 S: aws.String(mysfitId),
             },
         },
@@ -401,7 +400,7 @@ func GetMysfit(mysfitId string) string {
     input := &dynamodb.GetItemInput{
         TableName: aws.String("MysfitsTable"),
         Key:       map[string]*dynamodb.AttributeValue{
-            "mysfitId": {
+            "MysfitId": {
                 S: aws.String(mysfitId),
             },
         },
@@ -419,7 +418,6 @@ func GetMysfit(mysfitId string) string {
 
     return output
 }
-
 
 // QueryMysfits gets only the specified items
 func QueryMysfits(filter string, value string) string {
