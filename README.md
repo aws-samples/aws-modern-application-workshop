@@ -1,3 +1,5 @@
+**NOTE:** The version of this workshop located at https://aws.amazon.com/getting-started/projects/build-modern-app-fargate-lambda-dynamodb-python/ is unfortunately out of date.  Please use the README files within this GitHub repository to follow the most up-to-date version of this workshop. After reading the description below, choose the programming language of your choice and follow that link to full instructions to complete this tutorial.  You will clone a specific branch of this repository for complete instructions, **not** this master branch where only a description of the workshop exists.
+
 # Build a Modern Application on AWS
 
 ![mysfits-welcome](/images/mysfits-welcome.png)
@@ -44,4 +46,6 @@ This workshop is offered in different programming languages so that you can choo
 * [**.NET**](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet)
 * More coming soon!
 
-## [AWS Developer Center](https://developer.aws)
+
+### AWS Developer Center
+For more details on tools and services for developers provided by AWS, please visit our [Developer Center](https://developer.aws).
