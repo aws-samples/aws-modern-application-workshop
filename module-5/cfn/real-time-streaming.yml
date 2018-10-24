@@ -106,7 +106,7 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: streamProcessor.processRecord
-      Runtime: python3.6
+      Runtime: go1.x
       CodeUri: .
       Description: An Amazon Kinesis Firehose stream processor that enriches click
                    records to not just include a mysfitId, but also other
