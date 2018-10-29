@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "./node_modules/@angular/cli/bin/ng",
     "start": "./node_modules/@angular/cli/bin/ng serve",
-    "build": "./node_modules/@angular/cli/bin/ng build",
+    "build": "./node_modules/@angular/cli/bin/ng build --prod",
     "test": "./node_modules/@angular/cli/bin/ng test",
     "lint": "./node_modules/@angular/cli/bin/ng lint",
     "e2e": "./node_modules/@angular/cli/bin/ng e2e"

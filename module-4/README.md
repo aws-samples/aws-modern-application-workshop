@@ -212,11 +212,35 @@ git push
 While those service updates are being automatically pushed through your CI/CD pipeline, continue on to the next step.
 
 #### Update the Mythical Mysfits Website in S3
-**Note:** Even though we aren't making any changes to the `environment` file, be sure that the `environment.prod.ts` file exists in `./module-4/frontend/src/environments/environment.prod.ts` and has the same values as the previous module.
+**Note:** Be sure that the `environment.prod.ts` file exists in `./module-4/frontend/src/environments/environment.prod.ts` and has the same values as the previous module.
 
-To update your Angular app, you can use the deploy scripts that you have previously used in modules 1, 2 and 3 located at `./module-4/deploy-frontend-scripts`.
+You'll need to add our new API as an environment value in the `environment.prod.ts` file. Navigate to `./module-4/frontend/src/environments/environment.prod.ts` and create a key/value pair like the following:
 
-Another alternative is to use AWS Amplify to publish your Angular application, but you'll need to create a new S3 Bucket when prompted by the AWS Amplify CLI. If you attempt to reuse an existing S3 Bucket, you'll experience some errors.
+```js
+export const environment = {
+    ...
+    mysfitsApiUrl: 'https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/api'
+    ...
+}
+```
+**Note:** Reference the `./module-4/frontend/src/environments/environment.ts` file to see an example.
+
+To retrieve the values you need to replace in the URL, you can visit the API Gateway console in AWS, or use one of the following commands:
+
+`Bash`
+```
+aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output text
+aws configure get region
+```
+`PowerShell`
+```
+Get-AGRestApiList | Where-Object {$_.Name -eq 'MysfitsApi' } |  Select-Object -ExpandProperty Id
+Get-DefaultAWSRegion | Select-Object -ExpandProperty Region
+```
+
+Once you've updated the `environment.prod.ts` file, update your Angular app with the deploy scripts located at `./module-4/deploy-frontend-scripts` or with AWS Amplify.
+
+To use AWS Amplify to publish your Angular application, but you'll need to create a new S3 Bucket when prompted by the AWS Amplify CLI. If you attempt to reuse an existing S3 Bucket, you'll experience some errors.
 
 AWS Amplify allows you to host your Angular app in S3 and also distribute the app through our CDN, Amazon CloudFront.
 

@@ -15,7 +15,6 @@ namespace ModernWebAppNET.Controllers
     public class MysfitsController : ControllerBase
     {
         private readonly MysfitsService _mysfitsService;
-
         public MysfitsController(MysfitsService mysfitsService)
         {
             _mysfitsService = mysfitsService;
@@ -27,7 +26,6 @@ namespace ModernWebAppNET.Controllers
             var mysfits = new List<Mysfit>();
             if (String.IsNullOrEmpty(filter.filter) && String.IsNullOrEmpty(filter.value))
             {
-
                 mysfits = await _mysfitsService.GetMysfits();
             }
             else
@@ -36,6 +34,5 @@ namespace ModernWebAppNET.Controllers
             }
             return new JsonResult(new { mysfits = mysfits });
         }
-
     }
 }

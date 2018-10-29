@@ -18,7 +18,6 @@ namespace streaming_lambda
 {
     public class Function
     {
-
         public async Task<KinesisFirehoseResponse> FunctionHandlerAsync(KinesisFirehoseEvent evnt, ILambdaContext context)
         {
             context.Logger.LogLine($"InvocationId: {evnt.InvocationId}");
@@ -70,16 +69,12 @@ namespace streaming_lambda
                     //Exception in parsing json
                     context.Logger.Log(jex.Message);
                 }
-
-
             }
-
             return response;
         }
 
         public async Task<Mysfit> retrieveMysfit(string mysfitId, ILambdaContext context)
         {
-       
             Mysfit mysfit = new Mysfit();
             string apiEndpoint = System.Environment.GetEnvironmentVariable("MYSFITS_API_URL");
 
@@ -93,10 +88,9 @@ namespace streaming_lambda
 
                 var result = await client.GetAsync(route);
                 result.EnsureSuccessStatusCode();
-               
+
                 string resultContent = await result.Content.ReadAsStringAsync();
                 //if mysfit received, convert to mysfit and return
-
                 if (result.IsSuccessStatusCode)
                 {
                     mysfit = JsonConvert.DeserializeObject<Mysfit>(resultContent);
@@ -107,11 +101,8 @@ namespace streaming_lambda
                 {
                     return mysfit;
                 }
-
-
             }
         }
-
         public class EnrichedClick
         {
 

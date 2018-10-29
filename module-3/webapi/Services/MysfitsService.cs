@@ -10,12 +10,9 @@ namespace ModernWebAppNET
 {
     public class MysfitsService
     {
-
         private DynamoDBContext _dynamoContext;
-
         public MysfitsService(IAmazonDynamoDB dynamoDbClient)
         {
-
             _dynamoContext = new DynamoDBContext(dynamoDbClient);
         }
 
@@ -28,7 +25,6 @@ namespace ModernWebAppNET
 
         public async Task<List<Mysfit>> GetMysfitsWithFilter(FilterRequest filter)
         {
-
             ScanFilter scanFilter = new ScanFilter();
             scanFilter.AddCondition(filter.filter, ScanOperator.Equal, filter.value);
 

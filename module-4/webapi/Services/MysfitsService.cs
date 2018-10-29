@@ -10,22 +10,17 @@ namespace ModernWebAppNET
 {
     public class MysfitsService
     {
-
         private DynamoDBContext _dynamoContext;
-
         public MysfitsService(IAmazonDynamoDB dynamoDbClient)
         {
-
             _dynamoContext = new DynamoDBContext(dynamoDbClient);
         }
-
         public async Task<List<Mysfit>> GetMysfits()
         {
             List<ScanCondition> conditions = new List<ScanCondition>();
             List<Mysfit> mysfits = await _dynamoContext.ScanAsync<Mysfit>(conditions).GetRemainingAsync();
             return mysfits;
         }
-
         public async Task<List<Mysfit>> GetMysfitsWithFilter(FilterRequest filter)
         {
             ScanFilter scanFilter = new ScanFilter();
@@ -50,27 +45,22 @@ namespace ModernWebAppNET
 
             return mysfits;
         }
-
         public async Task<Mysfit> GetMysfitById(string mysfitId)
         {
             return await _dynamoContext.LoadAsync<Mysfit>(mysfitId);
         }
-
         public async Task LikeMysfit(string mysfitId)
         {
             Mysfit mysfitToBeUpdated = await _dynamoContext.LoadAsync<Mysfit>(mysfitId);
             mysfitToBeUpdated.Likes += 1;
             await _dynamoContext.SaveAsync(mysfitToBeUpdated);
-
         }
-
         public async Task AdoptMysfit(string mysfitId)
         {
             Mysfit mysfitToBeUpdated = await _dynamoContext.LoadAsync<Mysfit>(mysfitId);
             mysfitToBeUpdated.Adopted = true;
             await _dynamoContext.SaveAsync(mysfitToBeUpdated);
         }
-
     }
 }
 

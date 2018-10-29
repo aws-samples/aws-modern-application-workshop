@@ -18,7 +18,6 @@ namespace ModernWebAppNET.Utilities
             this.next = next;
             this._logger = logger;
         }
-
         public async Task Invoke(HttpContext context)
         {
             try

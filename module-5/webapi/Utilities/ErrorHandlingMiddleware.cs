@@ -18,7 +18,6 @@ namespace ModernWebAppNET.Utilities
             this.next = next;
             this._logger = logger;
         }
-
         public async Task Invoke(HttpContext context)
         {
             try
@@ -33,7 +32,6 @@ namespace ModernWebAppNET.Utilities
                 await HandleExceptionAsync(context, ex);
             }
         }
-
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var code = HttpStatusCode.InternalServerError;
