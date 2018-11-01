@@ -27,7 +27,7 @@ In Module 2, you will create a new microservice hosted using [AWS Fargate](https
 Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the [AWS Identity and Access Management](https://aws.amazon.com/iam/) Roles that will define the permissions that ECS and our containers will have on top of AWS.  We will use [AWS CloudFormation](https://aws.amazon.com/cloudformation/) to accomplish this. AWS CloudFormation is a service that can programmatically provision AWS resources that you declare within JSON or YAML files called *CloudFormation Templates*, enabling the common best practice of *Infrastructure as Code*.  We have provided a CloudFormation template to create all of the necessary Network and Security resources in /module-2/cfn/core.yml.  This template will create the following resources:
 
 * [**An Amazon VPC**](https://aws.amazon.com/vpc/) - a network environment that contains four subnets (two public and two private) in the 10.0.0.0/16 private IP space, as well as all the needed Route Table configurations.  The subnets for this network are created in separate AWS Availability Zones (AZ) to enable high availability across multiple physical facilities in an AWS Region. Learn more about how AZs can help you achieve High Availability [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
-* [**Two NAT Gateways**](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) (one for each public subnet, also panning multiple AZs) - allows the containers we will eventually deploy into our private subnets to communicate out to the Internet to download necessary packages, etc.
+* [**Two NAT Gateways**](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) (one for each public subnet, also spanning multiple AZs) - allow the containers we will eventually deploy into our private subnets to communicate out to the Internet to download necessary packages, etc.
 * [**A DynamoDB VPC Endpoint**](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/vpc-endpoints-dynamodb.html) - our microservice backend will eventually integrate with [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) for persistence (as part of module 3).
 * [**A Security Group**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) - Allows your docker containers to receive traffic on port 8080 from the Internet through the Network Load Balancer.
 * [**IAM Roles**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) - Identity and Access Management Roles are created. These will be used throughout the workshop to give AWS services or resources you create access to other AWS services like DynamoDB, S3, and more.
@@ -68,21 +68,15 @@ All of the code required to run our service backend is stored within the `/modul
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
-* First change directory to `~/environment/module-2/app`
+* Navigate to `~/environment/module-2/app`
 
 ```
 cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
 
-* Then build the docker image, this will use the file in the current directory called Dockerfile that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in.
+* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks
 
-To retrieve the needed information about your account and region, you can run the following CLI command that uses the AWS Security Token Service to return back information about the principal issuing the CLI command:
-
-```
-aws sts get-caller-identity
-```
-
-Once you have your Account ID, you are ready to build the docker image.  You will tag the image when performing the build command (using `-t`) with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
+* Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
 
 ```
 docker build . -t REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
@@ -113,7 +107,7 @@ To test our service with a local request, we're going to open up the built-in we
 
 ![preview-menu](/images/module-2/preview-menu.png)
 
-This will open another panel in the IDE where the web browser will be available.  Append /mysfits to the end of the URI in the address bar of the preview browser and hit enter:
+This will open another panel in the IDE where the web browser will be available.  Append /mysfits to the end of the URI in the address bar of the preview browser in the new panel and hit enter:
 
 ![preview-menu](/images/module-2/address-bar.png)
 
@@ -223,18 +217,6 @@ aws elbv2 create-listener --default-actions TargetGroupArn=REPLACE_ME_NLB_TARGET
 ```
 
 ### Creating a Service with Fargate
-
-#### Creating a Service Linked Role for ECS
-
-If you have already used ECS in the past you can skip over this step and move on to the next step.  If you have never used ECS before, we need to create an **service linked role** in IAM that grants the ECS service itself permissions to make ECS API requests within your account.  This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling docker images, creating new tasks, etc.
-
-Without creating this role, the ECS service would not be granted permissions to perform the actions required.  To create the role, execute the following command in the terminal:
-
-```
-aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
-```
-
-If the above returns an error about the role existing already, you can ignore it, as it would indicate the role has automatically been created in your account in the past.
 
 #### Create the Service
 
