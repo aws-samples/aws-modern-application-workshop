@@ -1,11 +1,9 @@
 This file lists the requirements for executing the Go code in this repository.
 
-The code was tested using Go go1.9.4 windows/amd64
+The code was tested using Go 1.9.4 on windows/amd64
 
-All of the Go apps run under http://localhost:8088
+By default, the Go apps run under http://localhost:8088
 
 Packages
 --------
 
-github.com/bnkamalesh/webgo/middleware
-github.com/bnkamalesh/webgo
