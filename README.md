@@ -11,8 +11,8 @@
 * No AWS experience is required for this tutorial, we'll go step-by-step!
 * This workshop is designed to run at minimal cost (less than $1/day), and mostly covered by the [AWS Free Tier](https://aws.amazon.com/free).
 *Assuming little to no traffic will be served by your demo website created as part of this workshop.*
-* After you complete the workshop, make sure you delete all AWS resrouces to avoid further costs.
-* This workshop requires Administrator level access to an AWS account.
+* After you complete the workshop, make sure you delete all AWS resrouces to avoid further costs, as described below in this page.
+* This workshop requires Administrator level access to an AWS account. Open your account now, new accounts have extra benefits in the first 12 months of the [AWS Free Tier](https://aws.amazon.com/free/)
 * Use an AWS account dedicated to development and education, without access to production systems or data, to avoid security issues. 
 
 ### Application Architecture
@@ -27,23 +27,25 @@ The initial Mythical Mysfits architecture features:
 * Authentication, authorization and secure data sync with [Amazon Cognito](https://aws.amazon.com/fargate/)
 * Click record streams are ingested at scale by by [Amazon Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/). From there records are processed by serverless AWS Lambda functions and then stored in Amazon S3.
 
-You will be creating and deploying changes to this application completely programmatically. You will use the AWS Command Line Interface to execute commands that create the required infrastructure components, which includes a fully managed CI/CD stack utilizing AWS CodeCommit, CodeBuild, and CodePipeline.  Finally, you will complete the development tasks required all within your own browser by leveraging the cloud-based IDE, AWS Cloud9.
+In this workshope we are going to use the [AWS Command Line Interface](https://aws.amazon.com/cli/) to create resources, instead of the [AWS Console](https://aws.amazon.com/console/) that you may be more familiar. This allows all changes to be automatically pushed to production and continuously delivering value to customers. This workshop includes a fully managed build and deployment pipeline utilizing [AWS CodeCommit](https://aws.amazon.com/codecommit/), [AWS CodeBuild](https://aws.amazon.com/codebuild/), and [AWS CodePipeline](https://aws.amazon.com/codepipeline/).  There is no specific software requirements, any modern browser should work, leveraging the cloud-based IDE, [AWS Cloud9](https://aws.amazon.com/cloud9/).
+ 
 
-## Begin the Modern Application Workshop
+## Before you begin
+If this is your first time using AWS, also visit our [Getting Started](https://aws.amazon.com/getting-started/) page and get familiar with using your AWS account.
 
-[Proceed to Module 1](/module-1)
+When you are redy, begin the workshop in the [Module 1: IDE Setup and Static Website Hosting](/module-1)
 
 
-### Workshop Clean-Up (Once Complete)
-Be sure to delete all of the resources created during the workshop in order to ensure that billing for the resources does not continue for longer than you intend.  We recommend that you utilize the AWS Console to explore the resources you've created and delete them when you're ready.  
+## After you complete
+Be sure to delete all of the resources created during the workshop in order to ensure that billing for the resources does not continue for longer than you intend.  We recommend that you utilize the [AWS Console](https://aws.amazon.com/console/) to explore the resources you've created and delete them when you're ready.  
 
-For the two cases where you provisioned resources using AWS CloudFormation, you can remove those resources by simply running the following CLI command for each stack:
+For the two cases where you provisioned resources using AWS CloudFormation, you can remove all resources at once by deleting the given stack with the following command:
 
 ```
 aws cloudformation delete-stack --stack-name STACK-NAME-HERE
 ```
 
-To remove all of the created resources, you can visit the following AWS Consoles, which contain resources you've created during the Mythical Mysfits workshop:
+To explore and remove the resources created individually, visit the the AWS Console for services used during the Mythical Mysfits workshop:
 * [AWS Kinesis](https://console.aws.amazon.com/kinesis/home)
 * [AWS Lambda](https://console.aws.amazon.com/lambda/home)
 * [Amazon S3](https://console.aws.amazon.com/s3/home)
@@ -60,7 +62,7 @@ To remove all of the created resources, you can visit the following AWS Consoles
 * [AWS CloudFormation](https://console.aws.amazon.com/cloudformation/home)
 
 
-[Proceed to Module 1](/module-1)
+Redy to start again? Go to [Module 1: IDE Setup and Static Website Hosting](/module-1)
 
 
-## [AWS Developer Center](https://developer.aws)
+[AWS Developer Center](https://developer.aws)
