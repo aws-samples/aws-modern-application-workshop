@@ -1,28 +1,31 @@
-# Build a Modern Application on AWS (Python)
+# Build a Modern Application on AWS (Java)
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
-### Welcome to the **Python** version of the Build a Modern Application on AWS Workshop!
+**Welcome to the **Java** version of the Build a Modern Application on AWS Workshop!**
 
-**AWS Experience: Beginner**
+**Time to Complete:** 3-4 hours
 
-**Time to Complete: 3-4 hours**
+**! Attention !**
 
-**Cost to Complete: Many of the services used are included in the AWS Free Tier. For those that are not, the sample application will cost, in total, less than $1/day.**
-
-**Tutorial Prereqs:**
-
-* **An AWS Account and Administrator-level access to it**
-
-Please be sure to terminate all of the resources created during this workshop to ensure that you are no longer charged.
-
-**Note:**  Estimated workshop costs assume little to no traffic will be served by your demo website created as part of this workshop.
+* No AWS experience is required for this tutorial, we'll go step-by-step!
+* This workshop is designed to run at minimal cost (less than $1/day), and mostly covered by the [AWS Free Tier](https://aws.amazon.com/free).
+*Assuming little to no traffic will be served by your demo website created as part of this workshop.*
+* After you complete the workshop, make sure you delete all AWS resrouces to avoid further costs.
+* This workshop requires Administrator level access to an AWS account.
+* Use an AWS account dedicated to development and education, without access to production systems or data, to avoid security issues. 
 
 ### Application Architecture
 
 ![Application Architecture](/images/arch-diagram.png)
 
-The Mythical Mysfits website serves it's static content directly from Amazon S3, provides a microservice API backend deployed as a container through AWS Fargate on Amazon ECS, stores data in a managed NoSQL database provided by Amazon DynamoDB, with authentication and authorization for the application enabled through AWS API Gateway and it's integration with Amazon Cognito.  The user website clicks will be sent as records to an Amazon Kinesis Firehose Delivery stream where those records will be processed by serverless AWS Lambda functions and then stored in Amazon S3.
+The initial Mythical Mysfits architecture features:
+* A static website served static directly from [Amazon S3](https://aws.amazon.com/s3)
+* A backend serverless API, published securely worldwide by [AWS API Gateway](https://aws.amazon.com/api-gateway/) 
+* Application architecture following "microservices" patterns, deployed as a container to [AWS Fargate](https://aws.amazon.com/fargate/)
+* A low-latency NoSQL data store, [Amazon DynamoDB](https://aws.amazon.com/dynamodb/)
+* Authentication, authorization and secure data sync with [Amazon Cognito](https://aws.amazon.com/fargate/)
+* Click record streams are ingested at scale by by [Amazon Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/). From there records are processed by serverless AWS Lambda functions and then stored in Amazon S3.
 
 You will be creating and deploying changes to this application completely programmatically. You will use the AWS Command Line Interface to execute commands that create the required infrastructure components, which includes a fully managed CI/CD stack utilizing AWS CodeCommit, CodeBuild, and CodePipeline.  Finally, you will complete the development tasks required all within your own browser by leveraging the cloud-based IDE, AWS Cloud9.
 
