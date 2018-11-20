@@ -29,7 +29,9 @@
       "Quantity": 0
     },
     "ViewerProtocolPolicy": "allow-all",
-    "MinTTL": 3600
+    "MinTTL": 0,
+    "MaxTTL": 0,
+    "DefaultTTL": 0
   },
   "CacheBehaviors": {
     "Quantity": 0
