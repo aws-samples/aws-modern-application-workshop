@@ -46,6 +46,7 @@ This workshop is offered in different programming languages so that you can choo
 
 * [**Python**](https://github.com/aws-samples/aws-modern-application-workshop/tree/python)
 * [**.NET**](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet)
+* [**Java**](https://github.com/aws-samples/aws-modern-application-workshop/tree/java)
 * More coming soon!
 
 
