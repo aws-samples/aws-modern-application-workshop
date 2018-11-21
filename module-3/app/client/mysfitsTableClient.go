@@ -212,31 +212,6 @@ func getItems(items []map[string]*dynamodb.AttributeValue) Mysfits {
 	return mysfitList
 }
 
-// getStringFromItem creates a string from an item from a scan or query
-func getStringFromItem(item map[string]*dynamodb.AttributeValue) string {
-    m := Mysfit{}
-
-    err := dynamodbattribute.UnmarshalMap(item, &m)
-    if err != nil {
-        return ""
-    }
-
-    output := ""
-
-    switch defaultFormat {
-    case HTML:
-        output = m.toHtml()
-
-    case JSON:
-        output = m.toJson()
-
-    case STRING:
-        output = m.toString()
-    }
-
-    return output
-}
-
 // getStringFromItems creates string from the items from a scan or query
 func getStringFromItems(items []map[string]*dynamodb.AttributeValue) string {
 	ms := Mysfits{}
@@ -305,118 +280,11 @@ func GetAllMysfits() string {
 		return ""
 	}
 
-	// Info.Print(result.Items)
+	Info.Print(result.Items)
 
 	output := getStringFromItems(result.Items)
 
 	return output
-}
-
-func SetMysfitAdopt(mysfitId string) {
-    Info.Println("Setting adoption for misfit with ID: " + mysfitId)
-
-    // Create a DynamoDB client using our default credentials and region.
-    sess := session.Must(session.NewSessionWithOptions(session.Options{
-        SharedConfigState: session.SharedConfigEnable,
-    }))
-
-    // Create DynamoDB client
-    svc := dynamodb.New(sess)
-
-    // Use the DynamoDB UpdateItem API to increment the likes for the misfit from the table with
-    // the given ID
-    input := &dynamodb.UpdateItemInput{
-        TableName: aws.String("MysfitsTable"),
-        Key:       map[string]*dynamodb.AttributeValue{
-            "MysfitId": {
-                S: aws.String(mysfitId),
-            },
-        },
-        UpdateExpression: aws.String("SET Adopted = :b"),
-        ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-            ":b": {
-                BOOL: aws.Bool(true),
-            },
-        },
-    }
-
-    _, err := svc.UpdateItem(input)
-    if err != nil {
-        Info.Print("Got error getting item: " + err.Error())
-    } else {
-        Info.Print("Success")
-    }
-}
-
-func IncMysfitLikes(mysfitId string) {
-    Info.Println("Incrementing likes for misfit with ID: " + mysfitId)
-
-    // Create a DynamoDB client using our default credentials and region.
-    sess := session.Must(session.NewSessionWithOptions(session.Options{
-        SharedConfigState: session.SharedConfigEnable,
-    }))
-
-    // Create DynamoDB client
-    svc := dynamodb.New(sess)
-
-    // Use the DynamoDB UpdateItem API to increment the likes for the misfit from the table with
-    // the given ID
-    input := &dynamodb.UpdateItemInput{
-        TableName: aws.String("MysfitsTable"),
-        Key:       map[string]*dynamodb.AttributeValue{
-            "MysfitId": {
-                S: aws.String(mysfitId),
-            },
-        },
-        UpdateExpression: aws.String("SET Likes = Likes + :n"),
-        ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-            ":n": {
-                N: aws.String("1"),
-            },
-        },
-    }
-
-    _, err := svc.UpdateItem(input)
-    if err != nil {
-        Info.Print("Got error getting item: " + err.Error())
-    } else {
-        Info.Print("Success")
-    }
-}
-
-func GetMysfit(mysfitId string) string {
-    Info.Println("ID: " + mysfitId)
-
-    // Create a DynamoDB client using our default credentials and region.
-    sess := session.Must(session.NewSessionWithOptions(session.Options{
-        SharedConfigState: session.SharedConfigEnable,
-    }))
-
-    // Create DynamoDB client
-    svc := dynamodb.New(sess)
-
-    // Use the DynamoDB getItem API to retrieve the misfit from the table with
-    // the given ID
-    input := &dynamodb.GetItemInput{
-        TableName: aws.String("MysfitsTable"),
-        Key:       map[string]*dynamodb.AttributeValue{
-            "MysfitId": {
-                S: aws.String(mysfitId),
-            },
-        },
-    }
-
-    result, err := svc.GetItem(input)
-    if err != nil {
-        Info.Print("Got error getting item: " + err.Error())
-        return ""
-    }
-
-    // Info.Print(result.Item)
-
-    output := getStringFromItem(result.Item)
-
-    return output
 }
 
 // QueryMysfits gets only the specified items
@@ -456,7 +324,7 @@ func QueryMysfits(filter string, value string) string {
 		return ""
 	}
 
-	// Info.Print(result.Items)
+	Info.Print(result.Items)
 
 	output := getStringFromItems(result.Items)
 
