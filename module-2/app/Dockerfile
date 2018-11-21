@@ -1,13 +1,15 @@
-FROM ubuntu:latest
-RUN echo Updating existing packages, installing and upgrading pip and Go.
-RUN apt-get update -y
-RUN apt-get install -y golang-go
-RUN pip install --upgrade pip
-RUN echo Copying the Mythical Mysfits Go service into a service directory.
-COPY ./service /MythicalMysfitsService
-WORKDIR /MythicalMysfitsService
-RUN echo Installing Go packages listed in requirements.txt
-RUN pip install -r ./requirements.txt
+FROM golang:1.8
+
+EXPOSE 8088
+
+WORKDIR /go/src/app
+COPY ./service/ .
+
+RUN echo Fetching project dependencies
+RUN go get -d -v
+
+RUN echo Building and installing Mystical Mysfits Service
+RUN go install -v
+
 RUN echo Starting the Go service...
-ENTRYPOINT ["go"]
-CMD ["go run mythicalMysfitsService.go"]
+CMD ["app"]

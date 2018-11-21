@@ -68,7 +68,7 @@ cd ~/environment/aws-modern-application-workshop/module-2/app
 * Then build the docker image, this will use the file in the current directory called Dockerfile that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in:
 
 ```
-docker build . -t REPLACE_ME_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
+docker build -t aws-modern-application-workshop .
 ```
 
 You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  Copy the image tag for later reference.
@@ -83,7 +83,7 @@ Successfully tagged 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous camm and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
+docker run -p 8088:8088 -it --rm --name mythical-mysfits-service aws-modern-application-workshop
 ```
 
 As a result you will see docker reporting that your container is up and running locally:
