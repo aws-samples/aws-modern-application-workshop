@@ -161,4 +161,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(mainHandler))
 	http.ListenAndServe(DefaultPort, mux)
+
+	fmt.Println("Running on: ")
+	fmt.Println("http://localhost/" + port)
+	fmt.Println("Use the following to get ALL misfits:")
+	fmt.Println("http://localhost/" + port + "/misfits")
 }
