@@ -1,4 +1,4 @@
-# Build a Modern Application on AWS
+# Build a Modern Application on AWS (Golang)
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
