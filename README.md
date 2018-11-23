@@ -1,4 +1,4 @@
-# Build a Modern Application on AWS (Python)
+# Build a Modern Application on AWS
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
