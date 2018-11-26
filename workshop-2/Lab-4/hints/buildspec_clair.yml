@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - REPOSITORY_URI=REPLACEME_REPO_URI # This was started. Just replace REPLACEME_REPO_URI with your ECR Repo URI
+      
+      # Grabbing Klar, our integration tool.
+      - echo Grabbing Klar
+      - wget https://github.com/optiopay/klar/releases/download/v2.3.0/klar-2.3.0-linux-amd64
+      - chmod +x ./klar-2.3.0-linux-amd64
+      - mv ./klar-2.3.0-linux-amd64 ./klar
+      
+      # Getting our Docker registry (ECR) login info for Klar and Clair to use
+      - echo Getting Docker registry login info
+      - DOCKER_LOGIN=`aws ecr get-login --region $AWS_DEFAULT_REGION`
+      - PASSWORD=`echo $DOCKER_LOGIN | cut -d' ' -f6`
+  build:
+    commands:
+      - echo Calling Clair with Klar
+      - DOCKER_USER=AWS DOCKER_PASSWORD=${PASSWORD} CLAIR_ADDR=$CLAIR_URL ./klar $IMAGE_URI
+  post_build:
+    commands:
+      - echo Finished

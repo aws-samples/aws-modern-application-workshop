@@ -1,0 +1,18 @@
+#!/bin/bash
+
+git config --global credential.helper "cache --timeout=7200"
+git config --global user.email "REPLACEME"
+git config --global user.name "ws3-user"
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
+
+LIKE_REPO=$(jq < cfn-output.json -r '.MythicalLikeGitRepositoryCloneUrl')
+MONOLITH_REPO=$(jq < cfn-output.json -r '.MythicalMonolithGitRepositoryCloneUrl')
+
+LIKE_REPO_NAME==$(jq < cfn-output.json -r '.MythicalLikeGitRepositoryName')
+MONOLITH_REPO_NAME==$(jq < cfn-output.json -r '.MythicalMonolithGitRepositoryName')
+
+cd ~/environment/
+
+git clone $LIKE_REPO
+git clone $MONOLITH_REPO

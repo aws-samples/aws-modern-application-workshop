@@ -1,0 +1,850 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack deploys the core network infrastructure and IAM resources
+             to be used for a service hosted in Amazon ECS using AWS Fargate.
+
+Parameters:
+  SkipBucket:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+
+Conditions:
+  MakeBucket:
+    Fn::Equals: ["false", !Ref SkipBucket]
+
+Mappings:
+  # Hard values for the subnet masks. These masks define
+  # the range of internal IP addresses that can be assigned.
+  # The VPC can have all IP's from 10.0.0.0 to 10.0.255.255
+  # There are four subnets which cover the ranges:
+  #
+  # 10.0.0.0 - 10.0.0.255
+  # 10.0.1.0 - 10.0.1.255
+  # 10.0.2.0 - 10.0.2.255
+  # 10.0.3.0 - 10.0.3.255
+  #
+  # If you need more IP addresses (perhaps you have so many
+  # instances that you run out) then you can customize these
+  # ranges to add more
+  SubnetConfig:
+    VPC:
+      CIDR: '10.0.0.0/16'
+    PublicOne:
+      CIDR: '10.0.0.0/24'
+    PublicTwo:
+      CIDR: '10.0.1.0/24'
+    PrivateOne:
+      CIDR: '10.0.2.0/24'
+    PrivateTwo:
+      CIDR: '10.0.3.0/24'
+
+Resources:     
+  MythicalBucket:
+    Type: AWS::S3::Bucket
+    Condition: MakeBucket
+    Properties:
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  MythicalMonolithGitRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties: 
+      RepositoryDescription: Repository for the Mythical Mysfits monolith service
+      RepositoryName: !Sub ${AWS::StackName}-monolith-service
+  
+  MythicalLikeGitRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties: 
+      RepositoryDescription: Repository for the Mythical Mysfits like service
+      RepositoryName: !Sub ${AWS::StackName}-like-service
+
+  Mono:
+    Type: AWS::ECR::Repository
+
+  Like:
+    Type: AWS::ECR::Repository
+
+  MythicalEcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub Cluster-${AWS::StackName}
+
+  MythicalMonolithLogGroup:
+    Type: AWS::Logs::LogGroup
+
+  MythicalLikeLogGroup:
+    Type: AWS::Logs::LogGroup
+
+  MythicalMonolithTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Cpu: 256
+      ExecutionRoleArn: !GetAtt EcsServiceRole.Arn
+      Family: !Sub Mythical-Mysfits-Monolith-Service-${AWS::StackName} 
+      Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: monolith-service
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Mono}:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: http
+          Environment:
+            - Name: UPSTREAM_URL
+              Value: !GetAtt MythicalLoadBalancer.DNSName
+            - Name: DDB_TABLE_NAME
+              Value: !Ref MythicalDynamoTable
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref MythicalMonolithLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: awslogs-mythicalmysfits-service
+          Essential: true
+
+  MythicalLikeTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Cpu: 256
+      ExecutionRoleArn: !GetAtt EcsServiceRole.Arn
+      Family: !Sub Mythical-Mysfits-Like-Service-${AWS::StackName} 
+      Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: like-service
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Like}:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: http
+          Environment:
+            - Name: MONOLITH_URL
+              Value: !GetAtt MythicalLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref MythicalLikeLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: awslogs-mythicalmysfits-service
+          Essential: true
+
+  MythicalLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub SecurityGroup-${AWS::StackName}
+      GroupDescription: Access to the load balancer
+      VpcId: !Ref 'VPC'
+      SecurityGroupIngress:
+          # Allow access to ALB from anywhere on the internet
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+
+  MythicalLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub alb-${AWS::StackName}
+      Scheme: internet-facing
+      Type: application
+      SecurityGroups:
+        - !Ref MythicalLoadBalancerSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetOne
+        - !Ref PublicSubnetTwo
+
+  MythicalListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref MythicalMonolithTargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref MythicalLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  MythicalMonolithTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+
+  MythicalLikeTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+
+  MythicalLikeListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref MythicalLikeTargetGroup
+      Conditions:
+      - Field: path-pattern
+        Values:
+        - "/mysfits/*/like/"
+      ListenerArn: !Ref MythicalListener
+      Priority: 1
+
+  # VPC in which containers will be networked.
+  # It has two public subnets, and two private subnets.
+  # We distribute the subnets across the first two available subnets
+  # for the region, for high availability.
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+      Tags:
+        - Key: Name
+          Value: !Sub Mysfits-VPC-${AWS::StackName}
+
+  # Two public subnets, where a public load balancer will later be created.
+  PublicSubnetOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 0
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicOne', 'CIDR']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub MysfitsPublicOne-${AWS::StackName}
+  PublicSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 1
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PublicTwo', 'CIDR']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub MysfitsPublicTwo-${AWS::StackName}
+
+  # Two private subnets where containers will only have private
+  # IP addresses, and will only be reachable by other members of the
+  # VPC
+  PrivateSubnetOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 0
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PrivateOne', 'CIDR']
+      Tags:
+        - Key: Name
+          Value: !Sub MysfitsPrivateOne-${AWS::StackName}
+  PrivateSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 1
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'PrivateTwo', 'CIDR']
+      Tags:
+        - Key: Name
+          Value: !Sub MysfitsPrivateTwo-${AWS::StackName}
+
+  # Setup networking resources for the public subnets.
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachement:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachement
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+  PublicSubnetOneRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetOne
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetTwoRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetTwo
+      RouteTableId: !Ref PublicRouteTable
+
+  # Setup networking resources for the private subnets. Containers
+  # in these subnets have only private IP addresses, and must use a NAT
+  # gateway to talk to the internet. We launch two NAT gateways, one for
+  # each private subnet.
+  NatGatewayOneAttachment:
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachement
+    Properties:
+        Domain: vpc
+  NatGatewayTwoAttachment:
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachement
+    Properties:
+        Domain: vpc
+  NatGatewayOne:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayOneAttachment.AllocationId
+      SubnetId: !Ref PublicSubnetOne
+  NatGatewayTwo:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayTwoAttachment.AllocationId
+      SubnetId: !Ref PublicSubnetTwo
+  PrivateRouteTableOne:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PrivateRouteOne:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableOne
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayOne
+  PrivateRouteTableOneAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableOne
+      SubnetId: !Ref PrivateSubnetOne
+  PrivateRouteTableTwo:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  PrivateRouteTwo:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableTwo
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayTwo
+  PrivateRouteTableTwoAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableTwo
+      SubnetId: !Ref PrivateSubnetTwo
+
+  # VPC Endpoint for DynamoDB
+  # If a container needs to access DynamoDB (coming in module 3) this
+  # allows a container in the private subnet to talk to DynamoDB directly
+  # without needing to go via the NAT gateway.
+  DynamoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: "*"
+            Principal: "*"
+            Resource: "*"
+      RouteTableIds:
+        - !Ref 'PrivateRouteTableOne'
+        - !Ref 'PrivateRouteTableTwo'
+      ServiceName: !Join [ "", [ "com.amazonaws.", { "Ref": "AWS::Region" }, ".dynamodb" ] ]
+      VpcId: !Ref 'VPC'
+
+  # The security group for our service containers to be hosted in Fargate.
+  # Even though traffic from users will pass through a Network Load Balancer,
+  # that traffic is purely TCP passthrough, without security group inspection.
+  # Therefore, we will allow for traffic from the Internet to be accepted by our
+  # containers.  But, because the containers will only have Private IP addresses,
+  # the only traffic that will reach the containers is traffic that is routed
+  # to them by the public load balancer on the specific ports that we configure.
+  FargateContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Access to the fargate containers from the Internet
+      VpcId: !Ref 'VPC'
+      SecurityGroupIngress:
+          # Allow access to NLB from anywhere on the internet
+          - CidrIp: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+            IpProtocol: -1
+
+  # This is an IAM role which authorizes ECS to manage resources on your
+  # account on your behalf, such as updating your load balancer with the
+  # details of where your containers are, so that traffic can reach your
+  # containers.
+  EcsServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs.amazonaws.com
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              # Rules which allow ECS to attach network interfaces to instances
+              # on your behalf in order for awsvpc networking mode to work right
+              - 'ec2:AttachNetworkInterface'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:CreateNetworkInterfacePermission'
+              - 'ec2:DeleteNetworkInterface'
+              - 'ec2:DeleteNetworkInterfacePermission'
+              - 'ec2:Describe*'
+              - 'ec2:DetachNetworkInterface'
+
+              # Rules which allow ECS to update load balancers on your behalf
+              # with the information sabout how to send traffic to your containers
+              - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
+              - 'elasticloadbalancing:DeregisterTargets'
+              - 'elasticloadbalancing:Describe*'
+              - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
+              - 'elasticloadbalancing:RegisterTargets'
+
+              # Rules which allow ECS to run tasks that have IAM roles assigned to them.
+              - 'iam:PassRole'
+
+              # Rules that let ECS interact with container images.
+              - 'ecr:GetAuthorizationToken'
+              - 'ecr:BatchCheckLayerAvailability'
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+
+              # Rules that let ECS create and push logs to CloudWatch.
+              - 'logs:DescribeLogStreams'
+              - 'logs:CreateLogStream'
+              - 'logs:CreateLogGroup'
+              - 'logs:PutLogEvents'
+
+            Resource: '*'
+
+  # This is a role which is used by the ECS tasks. Tasks in Amazon ECS define
+  # the containers that should be deployed togehter and the resources they
+  # require from a compute/memory perspective. So, the policies below will define
+  # the IAM permissions that our Mythical Mysfits docker containers will have.
+  # If you attempted to write any code for the Mythical Mysfits service that
+  # interacted with different AWS service APIs, these roles would need to include
+  # those as allowed actions.
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - ecs-tasks.amazonaws.com
+              # Also add EC2 for testing in Cloud9
+              - ec2.amazonaws.com
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: AmazonECSTaskRolePolicy
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                # Allow the ECS Tasks to download images from ECR
+                - 'ecr:GetAuthorizationToken'
+                - 'ecr:BatchCheckLayerAvailability'
+                - 'ecr:GetDownloadUrlForLayer'
+                - 'ecr:BatchGetImage'
+
+                # Allow the ECS tasks to upload logs to CloudWatch
+                - 'logs:CreateLogStream'
+                - 'logs:CreateLogGroup'
+                - 'logs:PutLogEvents'
+              Resource: '*'
+
+            - Effect: Allow
+              Action:
+                # Allows the ECS tasks to interact with only the MysfitsTable
+                # in DynamoDB
+                - 'dynamodb:Scan'
+                - 'dynamodb:Query'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:GetItem'
+              Resource: !GetAtt MythicalDynamoTable.Arn
+              
+  MythicalProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref ECSTaskRole                    
+  MythicalDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub Table-${AWS::StackName}
+      AttributeDefinitions:
+        - AttributeName: MysfitId
+          AttributeType: S
+        - AttributeName: GoodEvil
+          AttributeType: S
+        - AttributeName: LawChaos
+          AttributeType: S
+      GlobalSecondaryIndexes:
+        - IndexName: LawChaosIndex
+          KeySchema:
+            - AttributeName: LawChaos
+              KeyType: HASH
+            - AttributeName: MysfitId
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: GoodEvilIndex
+          KeySchema:
+            - AttributeName: GoodEvil
+              KeyType: HASH
+            - AttributeName: MysfitId
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      KeySchema:
+        - AttributeName: MysfitId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  MythicalEnvironment:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties:
+      AutomaticStopTimeMinutes: 30
+      InstanceType: t2.small
+      Name: !Sub Project-${AWS::StackName}
+      SubnetId: !Ref PublicSubnetOne
+
+# Begin WS2 Bootstrapping
+# This role is used by CodePipeline to trigger deployments 
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: [codepipeline.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+              - Resource: "arn:aws:s3:::*"
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - codecommit:*
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  - iam:PassRole
+                  - iam:CreateRole
+                  - iam:DetachRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:PassRole
+                  - iam:PutRolePolicy
+                  - cloudwatch:*
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - ecs:*
+  
+  # CodeBuild requires access to push images to repos and this is the role that provides that access
+  
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+      RoleName: !Sub ${AWS::StackName}-CodeBuildServiceRole
+      Path: /
+      AssumeRolePolicyDocument: |
+        {
+            "Statement": [{
+                "Effect": "Allow",
+                "Principal": { "Service": [ "codebuild.amazonaws.com" ]},
+                "Action": [ "sts:AssumeRole" ]
+            }]
+        }
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ecr:GetAuthorizationToken
+                  - codecommit:GitPull
+              - Resource: !Sub arn:aws:s3:::${MythicalArtifactBucket}/*
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+              - Resource: 
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/${MythicalLikeLogGroup}/codebuild/tests/
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/${MythicalLikeLogGroup}/codebuild/tests:*
+                Effect: Allow
+                Action: 
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvent
+              - Resource:
+                  - !Sub arn:aws:s3:::codepipeline-${AWS::Region}-*
+                Effect: Allow
+                Action: 
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion  
+  
+  # CodeBuild needs a place to put artifacts in the interim. This bucket is where it goes
+  
+  MythicalArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete 
+  
+  # Actual CodeBuild project that builds the Docker images and outputs imagedefinitions.json 
+  
+  DockerBuildCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: "CODEPIPELINE"
+      Source:
+        Type: "CODEPIPELINE"
+        BuildSpec: "buildspec_prod.yml"
+      Environment:
+        PrivilegedMode: true
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/docker:17.09.0"
+        Type: "LINUX_CONTAINER"
+        EnvironmentVariables:
+        - Name: AWS_ACCOUNT_ID
+          Value: !Ref AWS::AccountId
+          Type: PLAINTEXT
+      Name: !Sub ${AWS::StackName}-like-service-build
+      ServiceRole: !Ref CodeBuildServiceRole
+  
+  # CodePipeline for deployments. Uses CodeCommit + CodeBuild + ECS, deploying
+  # to an existing ECS service. It looks for imagedefinitions.json as well as 
+  # buildspec_prod for this
+  
+  MythicalLikeServicePipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Ref MythicalArtifactBucket
+      Name: !Sub ${AWS::StackName}
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      Stages:
+        - Name: 'Source'
+          Actions:
+            - Name: 'Source'
+              ActionTypeId:
+                Category: 'Source'
+                Owner: 'AWS'
+                Version: '1'
+                Provider: 'CodeCommit'
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                PollForSourceChanges: 'false'
+                BranchName: master
+                RepositoryName: !GetAtt MythicalLikeGitRepository.Name
+              RunOrder: 1
+        - Name: 'Build_Docker_Container'
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildArtifact
+              Configuration:
+                ProjectName: !Ref DockerBuildCodeBuildProject
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: ECS
+              InputArtifacts:
+                - Name: BuildArtifact
+              Configuration:
+                ClusterName: !Ref MythicalEcsCluster
+                ServiceName: !Sub ${AWS::StackName}_Mythical-Like-Service
+                FileName: imagedefinitions.json
+              RunOrder: 1
+              
+  # CodePipeline does not automatically create this for you as part of 
+  # creation, but this role is for the CWE Hook to trigger CodePipeline once 
+  # there's an update in CodeCommit. Otherwise, we have to have CodePipeline  
+  # poll for changes, which is slower.            
+  CodeCommitCloudWatchEventRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        -
+          PolicyName: cwe-pipeline-execution
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action: codepipeline:StartPipelineExecution
+                Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${MythicalLikeServicePipeline}
+  
+  # Actual CWE Rule to push changes over to CodePipeline.
+                            
+  CodeCommitCloudWatchEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+          - aws.codecommit
+        detail-type:
+          - 'CodeCommit Repository State Change'
+        resources:
+          - !GetAtt MythicalLikeGitRepository.Arn
+        detail:
+          event:
+            - referenceCreated
+            - referenceUpdated
+          referenceType:
+            - branch
+          referenceName:
+            - master
+      Targets:
+        -
+          Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${MythicalLikeServicePipeline}
+          RoleArn: !GetAtt CodeCommitCloudWatchEventRole.Arn
+          Id: codepipeline-LikePipeline
+
+Outputs:
+  LoadBalancerDNS:
+    Description: The DNS for the load balancer
+    Value: !GetAtt MythicalLoadBalancer.DNSName
+  DynamoTable:
+    Value: !Ref MythicalDynamoTable
+  SiteBucket:
+    Value: !Ref MythicalBucket
+    Condition: MakeBucket
+  Cloud9Env:
+    Value: !Ref MythicalEnvironment
+  PrivateSubnetOne:
+    Value: !Ref PrivateSubnetOne
+  PrivateSubnetTwo:
+    Value: !Ref PrivateSubnetTwo
+  EcsClusterName:
+    Value: !Ref MythicalEcsCluster
+  StackName:
+    Value: !Sub ${AWS::StackName}
+  MonolithTaskDefinition:
+    Value: !Ref MythicalMonolithTaskDefinition
+  LikeTaskDefinition:
+    Value: !Ref MythicalLikeTaskDefinition
+  MonolithTargetGroupArn:
+    Value: !Ref MythicalMonolithTargetGroup
+  LikeTargetGroupArn:
+    Value: !Ref MythicalLikeTargetGroup
+  FargateContainerSecurityGroup:
+    Value: !Ref FargateContainerSecurityGroup 
+  ProfileName:
+    Value: !Ref MythicalProfile
+  MonoEcrRepo:
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Mono}
+  LikeEcrRepo:
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Like}
+  MythicalMonolithGitRepositoryCloneUrl:
+    Value: !GetAtt MythicalMonolithGitRepository.CloneUrlHttp
+  MythicalLikeGitRepositoryCloneUrl:
+    Value: !GetAtt MythicalLikeGitRepository.CloneUrlHttp
+  MythicalMonolithGitRepositoryName:
+    Value: !GetAtt MythicalMonolithGitRepository.Name
+  MythicalLikeGitRepositoryName:
+    Value: !GetAtt MythicalLikeGitRepository.Name
+  S3WebsiteEndpoint:
+    Value: !GetAtt MythicalBucket.WebsiteURL

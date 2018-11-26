@@ -1,0 +1,8 @@
+#! /bin/bash
+
+echo "Building Docker Containers"
+script/ws2/build-containers
+echo "Creating Fargate service JSONs"
+script/ws2/update-service-json
+echo "Creating Fargate Services for Like/Monolith"
+script/ws2/create-fargate-services
