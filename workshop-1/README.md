@@ -19,7 +19,7 @@ These labs are designed to be completed in sequence, and the full set of instruc
 * **Workshop Setup:** [Setup working environment on AWS](#lets-begin)
 * **Lab 1:** [Containerize the Mythical Mysfits monolith](#lab-1---containerize-the-mythical-mysfits-adoption-agency-platform)
 * **Lab 2:** [Deploy the container using AWS Fargate](#lab-2---deploy-your-container-using-ecrecs)
-* **Lab 3:** [Scale the monoltih with an ALB and an ECS Service](#lab-3---scale-the-logistics-platform-with-an-alb)
+* **Lab 3:** [Scale the adoption platform monolith with an ALB and an ECS Service](#lab-3---scale-the-adoption-platform-monolith-with-an-alb)
 * **Lab 4:** [Incrementally build and deploy more microservices with AWS Fargate](#lab-4-incrementally-build-and-deploy-each-microservice-using-fargate)
 * **Cleanup** [Put everything away nicely](#workshop-cleanup)
 
@@ -540,7 +540,7 @@ Nice work!  You've created a task definition and are able to deploy the monolith
 
 [*^ back to the top*](#monolith-to-microservices-with-docker-and-aws-fargate)
 
-## Lab 3 - Scale the logistics platform with an ALB
+## Lab 3 - Scale the adoption platform monolith with an ALB
 
 The Run Task method you used in the last lab is good for testing, but we need to run the adoption platform as a long running process.
 
