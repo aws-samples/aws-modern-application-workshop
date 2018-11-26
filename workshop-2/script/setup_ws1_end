@@ -1,0 +1,25 @@
+#! /bin/bash
+
+set -eu
+
+echo "Installing dependencies..."
+sudo yum install -y jq
+echo "Fetching CloudFormation outputs..."
+script/fetch-outputs
+echo "Populating DynamoDB table..."
+script/load-ddb
+#echo "Cloning Repos"
+#script/clone
+#echo "Populating and pushing Repos"
+#script/populate
+echo "Uploading static site to S3..."
+if [[ $# -eq 1 ]]; then
+  script/upload-site $1
+else
+  script/upload-site
+fi
+echo "Bootstrapping for WS2"
+script/ws2/bootstrap_ws2
+#echo "Bootstrapping for WS3"
+#script/ws3/bootstrap_ws3
+echo "Success!"

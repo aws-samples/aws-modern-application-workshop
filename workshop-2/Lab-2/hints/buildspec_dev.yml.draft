@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - REPOSITORY_URI=REPLACEME_REPO_URI # This was started. Just replace REPLACEME_REPO_URI with your ECR Repo URI
+      - #[TODO]: Command to log into ECR. Remember, it has to be executed $(maybe like this?)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - #[TODO]: Build the actual image using the current commit ID as the tag
+      - #[TODO]: Tag the newly built Docker image so that we can push the image to ECR. See the instructions in your ECR console to find out how to do this. Make sure you use the current commit ID as the tag!     
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - #[TODO]: Push the Docker image up to ECR
