@@ -188,8 +188,6 @@ $ docker run -p 8000:80 -e AWS_DEFAULT_REGION=eu-west-1 -e DDB_TABLE_NAME=Table-
 
 Press **Ctrl + C to exit**
 
-# Todo: Pull screenshots and stuff from MAW to test in c9
-
 2\. Push to the monolith-service ECR Repository
 
 In order to pull an image to use it, we have to put it somewhere. Similarly to how we use Git and centralized source control systems like GitHub, we'll use Amazon EC2 Container Registry (ECR) to store our images. Let's start by getting the ECR repository that we will be pushing to. Use the CLI to run `aws ecs describe-repositories` and note down both of the **repositoryUri** values for the ECR repositories that were created for you. The **repositoryName** should have the words mono or like in them. Don't worry that the name has a bunch of random characters in it. That's just CloudFormation making uniquely named resources for you.
