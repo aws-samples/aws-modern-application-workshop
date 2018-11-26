@@ -34,8 +34,8 @@ Click on one of the **Deploy to AWS** icons below to region to stand up the core
 
 Region | Launch Template
 ------------ | -------------  
-**Ireland** (eu-west-1) | [![Launch Mythical Mysfits Stack into Ireland with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mythical-mysfits-devsecops&templateURL=https://s3-us-west-2.amazonaws.com/aws-modern-application-workshop/templates/devsecops/starthere.yaml)  
-**Singapore** (ap-southeast-1) | [![Launch Mythical Mysfits Stack into Singapore with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/new?stackName=mythical-mysfits-devsecops&templateURL=https://s3-us-west-2.amazonaws.com/aws-modern-application-workshop/templates/devsecops/starthere.yaml) 
+**Ireland** (eu-west-1) | [![Launch Mythical Mysfits Stack into Ireland with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mythical-mysfits-devsecops&templateURL=https://s3.amazonaws.com/mythical-mysfits-website/fargate-devsecops/core.yml)  
+**Singapore** (ap-southeast-1) | [![Launch Mythical Mysfits Stack into Singapore with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/new?stackName=mythical-mysfits-devsecops&templateURL=https://s3.amazonaws.com/mythical-mysfits-website/fargate-devsecops/core.yml) 
 
 The links above will bring you to the AWS CloudFormation console with the **Specify an Amazon S3 template URL** field populated and radio button selected. Just click **Next**. If you do not have this populated, please click the link above.
 
