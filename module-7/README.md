@@ -1,4 +1,4 @@
-# Module 6: Using Machine Learning to Recommend a Mysfit
+# Module 7: Using Machine Learning to Recommend a Mysfit
 
 ![Architecture](/images/module-7/sagemaker-architecture.png)
 
@@ -139,11 +139,20 @@ Let's test the new service with the following CLI command that uses curl (a Linu
 curl -d '{"entry": [1,2,3,4,5]}' REPLACE_ME_RECOMMENDATION_API_ENDPOINT/recommendations -X POST | jq .
 ```
 
+You should get a response like the following:
+```
+{
+  "recommendedMysfit": "c0684344-1eb7-40e7-b334-06d25ac9268c"
+}
+```
+
 You're now ready to integrate this new backend functionality into the Mythical Mysfits website.
 
 ### Updating the Mythical Mysfits Site
 
 A new `index.html` file has been included in Module 7 that contain the code required to present users with the Mysfit Recommendation questionnaire and present them with their recommended Mysfit.
+
+![Recommendation Button SS](/images/module-7/recommendation-button-ss.png)
 
 Remember that you'll need to copy the existing values from previous modules and insert them as required for the existing websites functionality.
 
