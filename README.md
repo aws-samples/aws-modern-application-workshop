@@ -22,11 +22,9 @@ That's why we've hired you to be our first Full Stack Engineer. We need a more s
 
 This is a 3-part workshop series running at AWS re:Invent 2018 (CON214/CON321/CON322):
 
-[CON214: Monolith to Microservices with Docker and AWS Fargate](workshop-1/)
-
-[CON321: DevSecOps with Docker and AWS Fargate](workshop-2/)
-
-**Coming Soon** Management and Operations with AWS Fargate
+* [CON214: Monolith to Microservices with Docker and AWS Fargate](workshop-1/)
+* [CON321: DevSecOps with Docker and AWS Fargate](workshop-2/)
+* **Coming Soon** Management and Operations with AWS Fargate
 
 ### Session Times
 
