@@ -1,6 +1,5 @@
-# Mythical Mysfits: DevSecOps with Docker and AWS Fargate
+# Mythical Mysfits: A tale of love, loss, and cuddles
 
-## Overview
 ![mysfits-welcome](/images/mysfits-welcome.png)
 
 # Will you help us find their forever homes?
