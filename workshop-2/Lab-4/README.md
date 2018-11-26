@@ -19,11 +19,10 @@ In the AWS Management Console, navigate to the [AWS CodePipeline](https://consol
 ![Edit Pipeline](images/edit-pipeline.png)
 
 We're going to add a new stage, "Test", between the "Build" and "Deploy" stages. Scroll down and choose "Add Stage" between "Build" and "Deploy". Name the stage "Test" then choose "Add stage". Choose "Add action group" inside of our new stage. Name the new action "Clair" and choose CodeBuild from the dropdown. New fields will appear - choose "Create project" similar to what we did in Lab 3. 
+
 ![Clair Action](images/clair-action.png)
 
 - Project Name: Enter `prod-like-service-test`
-
-![CodeBuild Create Build Project](images/cb-test-create-1.png)
 
 **Environment:**
 
@@ -38,26 +37,27 @@ We're going to add a new stage, "Test", between the "Build" and "Deploy" stages.
 
 - Uncheck **Allow AWS CodeBuild to modify this service role so it can be used with this build project**
 
+![CodeBuild Create Project Part 1](images/cb-create-test-project-1.png)
+
 Expand the **Additional Information** and enter the following in Environment Variables:
 
 - Name: `CLAIR_URL` - *Enter this string*
 - Value: ***`REPLACE_ME_LoadBalancerDNS`*** - *This is an output from your CloudFormation stack - LoadBalancerDNS.*
 
 
-![CodeBuild Create Project Part 1](images/cb-create-test-project-1.png)
 
 **Buildspec:**
 
 - Build Specification: Select **Use a buildspec file** - *We are going to provide CodeBuild with a buildspec file*
 - Buildspec name: Enter `buildspec_clair.yml` - *we'll be using the same repo, but different buildspecs*
 
-**Artifacts:**
+Choose **Continue to CodePipeline**.
 
-- Type: Select **No artifacts** *If there are any build outputs that need to be stored, you can choose to put them in S3.*
+![CodeBuild Create Project Part 1](images/cb-create-test-project-2.png)
 
-Click **Create build project**.
+You will now be back at the CodePipeline console. In the Input Artifacts section we're going to do something different than before - we're going to use multiple artifacts. Select SourceArtifact from the dropdown, then choose add, then choose BuildArtifact. Another dropdown will appear above, Primary Artifact. Select SourceArtifact here. Finally leave your output artifacts empty. What we've done here is inject the source artifact from CodeCommit as well as the build artifact (imagedefinitions.json) from the build phase. The source artifact is our primary input artifact because it's where our buildspec is.
 
-In the Input Artifacts section we're going to do something different than before - we're going to use multiple artifacts. Select SourceArtifact from the dropdown, then choose add, then choose BuildArtifact. Another dropdown will appear above, Primary Artifact. Select SourceArtifact here. Finally leave your output artifacts empty. What we've done here is inject the source artifact from CodeCommit as well as the build artifact (imagedefinitions.json) from the build phase. The source artifact is our primary input artifact because it's where our buildspec is.
+![CodePipeline Create Action](images/cp-create-action.png)
 
 Save the action, choose "Done" to finish editing the stage, then choose "Save" to save the entire pipeline.
 
@@ -91,4 +91,4 @@ If all goes well, you should see that Clair inspected your image and didn't find
 
 From here, any run of the pipeline will include an automated security check to look for CVEs and other vulnerabilities. Congratulations! You've finished the second workshop in this track. If you're heading on to the last workshop in the series, feel free to leave everything as is.
 
-Whether you move on to the next workshop or wrap up here, make sure you ![clean everything up](../#workshop-cleanup) when you're done!
+Whether you move on to the next workshop or wrap up here, make sure you ![clean everything up](../README.md#workshop-cleanup) when you're done!
