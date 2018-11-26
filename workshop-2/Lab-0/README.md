@@ -49,6 +49,12 @@ On the Create Stack page, the stack name should automatically be populated. If y
 
 <!--- **SkipBucket** - *If you want to skip the creation of the Mythical Mysfits S3 website bucket*-->
 
+For the parameter **ClairDBPassword** you need to follow the Postgres minimum password requirements:
+
+<pre><b>
+Master Password must be at least eight characters long, as in "mypassword". Can be any printable ASCII character except "/", "", or "@".
+</b></pre>
+
 Click **Next** to continue.
 
 ![CloudFormation Parameters](images/cfn-createstack-2.png)
@@ -187,8 +193,6 @@ $ docker run -p 8000:80 -e AWS_DEFAULT_REGION=eu-west-1 -e DDB_TABLE_NAME=Table-
 </pre>
 
 Press **Ctrl + C to exit**
-
-# Todo: Pull screenshots and stuff from MAW to test in c9
 
 2\. Push to the monolith-service ECR Repository
 
