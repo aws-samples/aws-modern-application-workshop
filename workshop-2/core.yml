@@ -162,7 +162,6 @@ Resources:
           - IpProtocol: tcp
             FromPort: 6060
             ToPort: 6061
-            IpProtocol: tcp
             CidrIp: 0.0.0.0/0
 
   MythicalLoadBalancer:
