@@ -21,6 +21,7 @@ Ideally, we want to keep production and development branches as similar as possi
 Make sure you're in the like repository folder, which should be named something like **CFNStackName-like-service**. 
 
 <pre>
+$ cd ~/environment/<b>REPLACE_ME_LIKE_REPOSITORY_NAME</b>
 $ cp buildspec_dev.yml buildspec_prod.yml
 </pre>
 
@@ -42,6 +43,7 @@ Replace the container name with the name of your service, which should be `like-
 
 <details>
 <summary> HINT: There's also completed file in hints/hintspec_prod.yml. Click here to see how to copy it in.</summary>
+  Make sure you change REPLACEME_REPO_URI to your ECR repository URI!
   <pre>
   $ cp ~/environment/aws-modern-application-workshop-staging/workshop-2/Lab-3/hints/buildspec_prod.yml ~/environment/REPLACEME_REPO_NAME/buildspec_prod.yml
   </pre>
@@ -164,14 +166,14 @@ By default, when you create your pipeline, CodePipeline will automatically run t
 
 ## Deploy new version of Project Cuddle
 
-Now that you have your application deploying automatically, let's deploy a new version!
+Now that you have your application deploying automatically, let's deploy a new version! We've upgraded the health check for our like service to make sure it can connect to the monolith service for the fulfillment method.
 
 <pre>
 $ cd ~/environment/REPLACEME_LIKE_REPO
-$ cp ~/environment/aws-modern-application-workshop-STAGING/workshop-2/Lab-3/mysfits_like_v2.py service/mysfits_like.py
+$ cp ~/environment/aws-modern-application-workshop/workshop-2/Lab-3/mysfits_like_v2.py service/mysfits_like.py
 $ git add service/mysfits_like.py
 $ git commit -m "Cuddles v2"
 $ git push origin master
 </pre>
 
-Now sit back, relax, and watch the deployment.
+Now sit back, relax, and watch the deployment. When it's done, congratulations! You've unlocked the automated build and deploy achievement! Next up, head on over to [Lab 4](../Lab-4) for the "Sec" in DevSecOps.
