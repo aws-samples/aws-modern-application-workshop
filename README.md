@@ -30,31 +30,31 @@ This is a 3-part workshop series running at AWS re:Invent 2018 (CON214/CON321/CO
 
 These session times and locations are provided as a reference. Check your session guide for the latest details.
 
-CON214-R: Monolith to Microservices with Docker and AWS Fargate
-Monday, Nov 26, 10:45 AM - 1:00 PM
-MGM, Level 3, Premier Ballroom 320
+**CON214-R: Monolith to Microservices with Docker and AWS Fargate**
+- Monday, Nov 26, 10:45 AM - 1:00 PM
+- MGM, Level 3, Premier Ballroom 320
 
-CON214-R1: Monolith to Microservices with Docker and AWS Fargate
-Tuesday, Nov 27, 9:15 AM - 11:30 AM
-Venetian, Level 4, Lando 4205
+**CON214-R1: Monolith to Microservices with Docker and AWS Fargate**
+- Tuesday, Nov 27, 9:15 AM - 11:30 AM
+- Venetian, Level 4, Lando 4205
 
-CON321-R: DevSecOps with Docker and AWS Fargate
-Monday, Nov 26, 10:45 AM - 1:00 PM
-MGM, Level 3, Premier Ballroom 311
+**CON321-R: DevSecOps with Docker and AWS Fargate**
+- Monday, Nov 26, 10:45 AM - 1:00 PM
+- MGM, Level 3, Premier Ballroom 311
 
-CON321-R1: DevSecOps with Docker and AWS Fargate
-Tuesday, Nov 27, 12:15 PM - 2:30 PM
-MGM, Level 3, Premier Ballroom 320
+**CON321-R1: DevSecOps with Docker and AWS Fargate**
+- Tuesday, Nov 27, 12:15 PM - 2:30 PM
+- MGM, Level 3, Premier Ballroom 320
 
-CON321-R2: DevSecOps with Docker and AWS Fargate
-Friday, Nov 30, 8:30 AM - 10:45 AM
-Venetian, Level 2, Veronese 2404
+**CON321-R2: DevSecOps with Docker and AWS Fargate**
+- Friday, Nov 30, 8:30 AM - 10:45 AM
+- Venetian, Level 2, Veronese 2404
 
-CON322-R: Management and Operations with AWS Fargate
-Wednesday, Nov 28, 11:30 AM - 1:45 PM
-Mirage, Mirage Event Center C1
+**CON322-R: Management and Operations with AWS Fargate**
+- Wednesday, Nov 28, 11:30 AM - 1:45 PM
+- Mirage, Mirage Event Center C1
 
-CON322-R1: Management and Operations with AWS Fargate
-Friday, Nov 30, 8:30 AM - 10:45 AM
-Mirage, Bermuda A
+**CON322-R1: Management and Operations with AWS Fargate**
+- Friday, Nov 30, 8:30 AM - 10:45 AM
+- Mirage, Bermuda A
 
