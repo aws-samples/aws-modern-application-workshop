@@ -77,9 +77,8 @@ You will be deploying infrastructure on AWS which will have an associated cost. 
 
     In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
-    <!-- TODO: Replace with actual clone url -->
     ```
-    $ git clone https://github.com/aws-samples/aws-modern-application-workshop.git
+    $ git clone -b fargate https://github.com/aws-samples/aws-modern-application-workshop.git
     ```
 
     After cloning the repository, you'll see that your project explorer now includes the files cloned.
@@ -617,7 +616,7 @@ Here's what you will be implementing:
 
 *Note: The green tasks denote the monolith and the orange tasks denote the "like" microservice
 
-    
+
 As with the monolith, you'll be using [Fargate](https://aws.amazon.com/fargate/) to deploy these microservices, but this time we'll walk through all the deployment steps for a fresh service.
 
 ### Instructions:
