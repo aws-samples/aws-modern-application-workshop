@@ -2,7 +2,7 @@
 
 ## Lab 0 - Deploy Existing Mythical Stack
 
-In this lab, we are going to create the core infrastructure for the rest of the workshop and get familiar with the general environment. If you've 
+In this lab, we are going to create the core infrastructure for the rest of the workshop and get familiar with the general environment.
 
 ## Table of Contents
 
@@ -16,14 +16,9 @@ Here's what you'll be doing:
 
 # STOP! Pay attention here because it matters! 
 
-<details>
-<summary>
-Click here if you attended CON214: Monolith to Microservice with Docker and AWS Fargate
-</summary>
 If you attended CON214 AND finished the workshop AND still have it up and running, skip this lab and [proceed to Lab 1](../Lab-1).
-</details>
 
-**If the statement above does not describe your situation, continue on**
+**If the statement above does not describe your situation, continue on.**
 
 ### Deploy Mythical CloudFormation Stack
 
@@ -48,9 +43,11 @@ The links above will bring you to the AWS CloudFormation console with the **Spec
 
 3\. Specify stack details
 
-On the Create Stack page, the stack name should automatically be populated. If you're running multiple workshop environments in the same account, use a different stack name. There is a parameter **SkipBucket** but you don't need to change anything.
+On the Create Stack page, the stack name should automatically be populated. If you're running multiple workshop environments in the same account, use a different stack name.
 
-- **SkipBucket** - *If you want to skip the creation of the Mythical Mysfits S3 website bucket*
+<!--There is a parameter **SkipBucket** but you don't need to change anything.-->
+
+<!--- **SkipBucket** - *If you want to skip the creation of the Mythical Mysfits S3 website bucket*-->
 
 Click **Next** to continue.
 
@@ -102,7 +99,7 @@ Here's a reference architecture for what you'll be building:
 
 In the AWS Management Console, go to the [Cloud9 Dashboard](https://console.aws.amazon.com/cloud9/home) and find your environment which should be prefixed with the name of the CloudFormation stack you created earlier, in our case mythical-mysfits-devsecops. You can also find the name of your environment in the CloudFormation outputs as Cloud9Env. Click **Open IDE**.
 
-![Cloud9 Env](images/0-c9.png)
+![Cloud9 Env](images/cloud9.png)
 
 2\. Familiarize yourself with the Cloud9 Environment
 
@@ -131,7 +128,7 @@ $ git config --global credential.UseHttpPath true
 There are a number of files and startup scripts we have pre-created for you. They're all in the main repo that you're using, so we'll clone that locally. Run this:
 
 <pre>
-$ git clone --single-branch -b reinvent https://github.com/aws-samples/aws-modern-application-workshop.git
+$ git clone --single-branch -b fargate https://github.com/aws-samples/aws-modern-application-workshop.git
 </pre>
 
 # STOP! Pay attention here because it matters! Choose Your Path.
@@ -142,7 +139,7 @@ Click here if you are already attended CON214 or are familiar with Docker, Farga
 </summary>
 <pre>
 $ cd ~/environment/aws-modern-application-workshop/workshop-2/
-$ script/setup_ws1_end
+$ script/setup
 </pre>
 
 You should now have 2 Fargate services running in ECS - one for the Monolith service and one for the Like service. These are both sitting behind an ALB.
@@ -158,7 +155,7 @@ Click here if you want a <b>refresher</b> or a quick crash course on Docker, Far
 </summary>
 <pre>
 $ cd ~/environment/aws-modern-application-workshop/workshop-2/
-$ script/setup
+$ script/setup_ws1_end
 </pre>
 
 Continue on with the rest of the instructions here.
@@ -171,7 +168,7 @@ Continue on with the rest of the instructions here.
 In order for us to use a Docker image, we have to create it first. We'll do it manually here but don't worry, the whole point is to automate all this away. 
 
 <pre>
-$ cd ~/environment/aws-modern-application-workshop-STAGING/workshop-2/app/monolith-service
+$ cd ~/environment/aws-modern-application-workshop/workshop-2/app/monolith-service
 $ docker build -t monolith-service .
 </pre>
 
@@ -248,7 +245,7 @@ When you issue the push command, Docker pushes the layers up to ECR, and if you 
 We already have the repository URIs so let's build the like-service:
 
 <pre>
-$ cd ~/environment/aws-modern-application-workshop-STAGING/workshop-2/app/like-service
+$ cd ~/environment/aws-modern-application-workshop/workshop-2/app/like-service
 $ docker build -t like-service .
 </pre>
 

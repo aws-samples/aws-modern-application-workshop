@@ -75,8 +75,8 @@ Earlier in the workshop, we set up the CodeCommit credential helper, so for toda
 $ cd ~/environment/
 $ git clone <b><i>REPLACEME_LIKE_REPOSITORY_CLONEURL</b></i>
 $ git clone <b><i>REPLACEME_MONOLITH_REPOSITORY_CLONEURL</b></i>
-$ cp -R ~/environment/aws-modern-application-workshop-STAGING/workshop-2/app/like-service/* <b><i>REPLACEME_LIKE_REPOSITORY_NAME</b></i>
-$ cp -R ~/environment/aws-modern-application-workshop-STAGING/workshop-2/app/monolith-service/* <b><i>REPLACEME_MONOLITH_REPOSITORY_NAME</b></i>
+$ cp -R ~/environment/aws-modern-application-workshop/workshop-2/app/like-service/* <b><i>REPLACEME_LIKE_REPOSITORY_NAME</b></i>
+$ cp -R ~/environment/aws-modern-application-workshop/workshop-2/app/monolith-service/* <b><i>REPLACEME_MONOLITH_REPOSITORY_NAME</b></i>
 </pre>
 
 ### Build security right into git commits

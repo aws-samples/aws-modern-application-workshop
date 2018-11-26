@@ -835,3 +835,4 @@ Outputs:
     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Like}
   S3WebsiteEndpoint:
     Value: !GetAtt MythicalBucket.WebsiteURL
+    Condition: MakeBucket
