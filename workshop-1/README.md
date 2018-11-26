@@ -54,15 +54,22 @@ You will be deploying infrastructure on AWS which will have an associated cost. 
 ### Workshop Setup:
 
 1. Open the CloudFormation launch template link below in a new tab. The link will load the CloudFormation Dashboard and start the stack creation process in the chosen region:
-    TODO: Insert final CFN link. Use workshop-1/core.yml from the repo for now.
+   
+    Click on one of the **Deploy to AWS** icons below to region to stand up the core workshop infrastructure.
 
-    The template will automatically bring you to the CloudFormation Dashboard and start the stack creation process in the specified region. Give the stack a name that is unique within your account, and proceed through the wizard to launch the stack. Leave all options at their default values, but make sure to check the box to allow CloudFormation to create IAM roles on your behalf:
+| Region | Launch Template |
+| ------------ | ------------- | 
+| **Ireland** (eu-west-1) | [![Launch Mythical Mysfits Stack into Ireland with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mythical-mysfits-fargate&templateURL=https://s3.amazonaws.com/mythical-mysfits-website/fargate/core.yml) | 
+|**Singapore** (ap-southeast-1) | [![Launch Mythical Mysfits Stack into Singapore with CloudFormation](/images/deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/new?stackName=mythical-mysfits-fargate&templateURL=https://s3.amazonaws.com/mythical-mysfits-website/fargate/core.yml) |
+
+
+2. The template will automatically bring you to the CloudFormation Dashboard and start the stack creation process in the specified region. Give the stack a name that is unique within your account, and proceed through the wizard to launch the stack. Leave all options at their default values, but make sure to check the box to allow CloudFormation to create IAM roles on your behalf:
 
     ![IAM resources acknowledgement](images/00-cf-create.png)
 
     See the *Events* tab for progress on the stack launch. You can also see details of any problems here if the launch fails. Proceed to the next step once the stack status advances to "CREATE_COMPLETE".
 
-2. Access the AWS Cloud9 Environment created by CloudFormation:
+3. Access the AWS Cloud9 Environment created by CloudFormation:
 
     On the AWS Console home page, type **Cloud9** into the service search bar and select it. Find the environment named like "Project-***STACK_NAME***":
 
@@ -73,7 +80,7 @@ You will be deploying infrastructure on AWS which will have an associated cost. 
 
     On the left pane (Blue), any files downloaded to your environment will appear here in the file tree. In the middle (Red) pane, any documents you open will show up here. Test this out by double clicking on README.md in the left pane and edit the file by adding some arbitrary text. Then save it by clicking File and Save. Keyboard shortcuts will work as well. On the bottom, you will see a bash shell (Yellow). For the remainder of the lab, use this shell to enter all commands. You can also customize your Cloud9 environment by changing themes, moving panes around, etc. (if you like the dark theme, you can select it by clicking the gear icon in the upper right, then "Themes", and choosing the dark theme).
 
-3. Clone the Mythical Mysfits Workshop Repository:
+4. Clone the Mythical Mysfits Workshop Repository:
 
     In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
@@ -89,7 +96,7 @@ You will be deploying infrastructure on AWS which will have an associated cost. 
     $ cd aws-modern-application-workshop/workshop-1
     ```
 
-4. Run some additional automated setup steps with the `setup` script:
+5. Run some additional automated setup steps with the `setup` script:
 
     ```
     $ script/setup
@@ -616,7 +623,7 @@ Here's what you will be implementing:
 
 *Note: The green tasks denote the monolith and the orange tasks denote the "like" microservice
 
-
+    
 As with the monolith, you'll be using [Fargate](https://aws.amazon.com/fargate/) to deploy these microservices, but this time we'll walk through all the deployment steps for a fresh service.
 
 ### Instructions:
