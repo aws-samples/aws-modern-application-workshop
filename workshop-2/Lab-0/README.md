@@ -77,8 +77,6 @@ The CloudFormation template will launch the following:
 * Cloud9 Development Environment
 * A DynamoDB table to store your mysfits and their data
 
-*Note: SNS Orders topic, S3 assets, API Gateway and DynamoDB tables are admin components that run in the workshop administrator's account.  If you're at a live AWS event, this will be provided by the workshop facilitators.  We're working on packaging up the admin components in an admin CloudFormation template, so you will be able to run this workshop at your office or home.*
-
 ## Checkpoint:
 
 The CloudFormation stack will take a few minutes to launch.  Periodically check on the stack creation process in the CloudFormation Dashboard.  Your stack should show status **CREATE\_COMPLETE** in roughly 5-10 minutes. If you select box next to your stack and click on the **Events** tab, you can see what steps it's on.  
@@ -88,12 +86,6 @@ The CloudFormation stack will take a few minutes to launch.  Periodically check 
 If there was an [error](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors) during the stack creation process, CloudFormation will rollback and terminate. You can investigate and troubleshoot by looking in the Events tab.  Any errors encountered during stack creation will appear in the event stream as a failure.
 
 ### Familiarize yourself with the workshop environment
-
-Here's a reference architecture for what you'll be building:
-
-![Lab 0 - Overview](images/0-overview.png)
-
-*Reminder: You'll see SNS topics, S3 bucket, API Gateway and DynamoDB in the diagram.  These are provided by Mythical MysfitsHQ for communicating orders and fulfilling orders.  They're in the diagram to show you the big picture as to how orders come in to the logistics platform and how orders get fulfilled*
 
 1\. Access your AWS Cloud9 Development Environment
 
@@ -155,7 +147,12 @@ You should now have 2 Fargate services running in ECS - one for the Monolith ser
 
 One last thing before you move on. Go to the CloudFormation Outputs section of your stack and get the **S3WebsiteEndpoint**. It is an HTTP link. Copy and paste it into your browser window and bookmark it or put it in a note. It should already be working. If you see a bunch of Mysfits, it's working. Otherwise, it's not.
 
-[Skip to Lab 0 Checkpoint](#checkpoint-1)
+# Checkpoint
+
+You made it to the end of Lab 0. You should now have two running services hooked into an ALB. If you visit the S3 static website bucket that was created as part of the bootstrap, it should be working already and you should see a bunch of Mythical Mysfits. Now you're ready to move on to Lab 1 to start your journey to DevSecOps!
+
+[Proceed to Lab 1](../Lab-1)
+
 </details>
 
 <details>
@@ -304,10 +301,17 @@ If successful, a large blob of JSON describing your new service will appear.
 5\. Visit the Mythical Mysfits Homepage
 
 Finally, let's look at what you've set up. The Mythical Mysfits adoption homepage is where you will be able to view all sorts of information about the Mythical Mysfits. To find out how to get there, go to the CloudFormation outputs section for your CloudFormation stack. Look for an output named **S3WebsiteEndpoint**. It is an HTTP link. Copy and paste it into your browser window and bookmark it or put it in a note. It should already be working. If you see a bunch of Mysfits, it's working. Otherwise, it's not.
-</details>
 
 # Checkpoint
 
-You made it to the end of Lab 0. You should now have two running services hooked into an ALB. If you visit the S3 static website bucket that was created as part of the bootstrap, it should be working already and you should see a bunch of Mythical Mysfits. Now you're ready to move on to Lab 1 to start your journey to DevSecOps!
+You made it to the end of Lab 0. In one way or another, you should now have two running services hooked into an ALB. If you visit the S3 static website bucket that was created as part of the bootstrap, it should be working already and you should see a bunch of Mythical Mysfits. Now you're ready to move on to Lab 1 to start your journey to DevSecOps!
 
 [Proceed to Lab 1](../Lab-1)
+
+</details>
+
+# End
+
+This is the end of Lab 0, but if you're reading this, you may have gone too far. Make sure you click on the hidden dialogues right above this section.
+
+
