@@ -91,4 +91,4 @@ If all goes well, you should see that Clair inspected your image and didn't find
 
 From here, any run of the pipeline will include an automated security check to look for CVEs and other vulnerabilities. Congratulations! You've finished the second workshop in this track. If you're heading on to the last workshop in the series, feel free to leave everything as is.
 
-Whether you move on to the next workshop or wrap up here, make sure you ![clean everything up](../README.md#workshop-cleanup) when you're done!
+Whether you move on to the next workshop or wrap up here, make sure you [clean everything up](../README.md#workshop-cleanup) when you're done!
