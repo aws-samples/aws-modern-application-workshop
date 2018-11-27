@@ -38,8 +38,10 @@ aws cloudformation deploy --stack-name MythicalMysfits-SageMaker-NotebookRole --
 
 Then, run the following command to create a hosted notebook instance with SageMaker (replacing your Account_Id in the Role Arn):
 ```
-aws sagemaker create-notebook-instance --notebook-instance-name MythicalMysfits-SageMaker-Notebook --instance-type ml.t2.medium --subnet subnet-015e9a3fff4d6cf59 --role arn:aws:iam::REPLACE_ME_ACCOUNT_ID:role/MysfitsNotbookRole
+aws sagemaker create-notebook-instance --notebook-instance-name MythicalMysfits-SageMaker-Notebook --instance-type ml.t2.medium --role arn:aws:iam::REPLACE_ME_ACCOUNT_ID:role/MysfitsNotbookRole
 ```
+
+**Note:** It will take about 10 minutes for your notebook instance to move from `Pending` state to `InService`. You may proceed on to the next steps while the notebook is being provisioned.
 
 Finally, there is a file in your cloned repository that will be used in the next steps that you should download.  In the File Explorer in Cloud9, find `MythicalMysfitsIDE/aws-modern-application-workshop/module-7/sagemaker/mysfit_recommendations_knn.ipynb`, right-click it, and select Download.  Save this file to your local workstation and remember where it has been saved.
 
@@ -136,14 +138,12 @@ aws cloudformation describe-stacks --stack-name MythicalMysfitsRecommendationsSt
 Let's test the new service with the following CLI command that uses curl (a Linux tool for making web requests). This will show you the recommendations in action for a new data point matching the CSV lines we used for training data. You'll use the OutputValue from the `recommendation-endpoint.json` value above to invoke your own REST API, be sure to append /recommendations after the endpoint, as shown below:
 
 ```
-curl -d '{"entry": [1,2,3,4,5]}' REPLACE_ME_RECOMMENDATION_API_ENDPOINT/recommendations -X POST | jq .
+curl -d '{"entry": [1,2,3,4,5]}' REPLACE_ME_RECOMMENDATION_API_ENDPOINT/recommendations -X POST
 ```
 
 You should get a response like the following:
 ```
-{
-  "recommendedMysfit": "c0684344-1eb7-40e7-b334-06d25ac9268c"
-}
+{"recommendedMysfit": "c0684344-1eb7-40e7-b334-06d25ac9268c"}
 ```
 
 You're now ready to integrate this new backend functionality into the Mythical Mysfits website.
