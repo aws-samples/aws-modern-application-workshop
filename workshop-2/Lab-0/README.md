@@ -136,7 +136,7 @@ $ script/setup
 
 <details>
 <summary>
-**Click here** if you are already attended CON214 or are familiar with Docker, Fargate, and AWS in general, we'll give you instructions on how to run the bootstrap script that will get you to the start of Lab 1.
+<b>Click here</b> if you are already attended CON214 or are familiar with Docker, Fargate, and AWS in general, we'll give you instructions on how to run the bootstrap script that will get you to the start of Lab 1.
 </summary>
 <pre>
 $ cd ~/environment/aws-modern-application-workshop/workshop-2/
@@ -157,7 +157,7 @@ You made it to the end of Lab 0. You should now have two running services hooked
 
 <details>
 <summary>
-**Click here** if you want a <b>refresher</b> or a quick crash course on Docker, Fargate, and AWS in general. You'll do a few of the steps from CON214 to get you to the start of Lab 1.
+<b>Click here</b> if you want a <b>refresher</b> or a quick crash course on Docker, Fargate, and AWS in general. You'll do a few of the steps from CON214 to get you to the start of Lab 1.
 </summary>
 
 ### Crash Course/Refresher on Workshop 1 (CON214: Monolith to Microservice with Docker and AWS Fargate)
@@ -310,7 +310,7 @@ You made it to the end of Lab 0. In one way or another, you should now have two 
 
 </details>
 
-# End
+# The End?
 
 This is the end of Lab 0, but if you're reading this, you may have gone too far. Make sure you click on the hidden dialogues right above this section.
 
