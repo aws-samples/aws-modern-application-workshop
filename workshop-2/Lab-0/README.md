@@ -158,7 +158,7 @@ You made it to the end of Lab 0. You should now have two running services hooked
 <details>
 <summary>
 **Click here** if you want a <b>refresher</b> or a quick crash course on Docker, Fargate, and AWS in general. You'll do a few of the steps from CON214 to get you to the start of Lab 1.
-</pre>
+</summary>
 
 ### Crash Course/Refresher on Workshop 1 (CON214: Monolith to Microservice with Docker and AWS Fargate)
 
