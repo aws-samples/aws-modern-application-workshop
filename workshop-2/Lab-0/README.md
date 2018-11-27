@@ -14,12 +14,6 @@ Here's what you'll be doing:
 * [Choose Your Mythical Path](#stop-pay-attention-here-because-it-matters)
 * [Crash Course/Refresher of CON214](#crash-courserefresher-on-workshop-1-con214-monolith-to-microservice-with-docker-and-aws-fargate)
 
-# STOP! Pay attention here because it matters! 
-
-If you attended CON214 AND finished the workshop AND still have it up and running, skip this lab and [proceed to Lab 1](../Lab-1).
-
-**If the statement above does not describe your situation, continue on.**
-
 ### Deploy Mythical CloudFormation Stack
 
 1\. Select an AWS Region
@@ -137,6 +131,15 @@ There are a number of files and startup scripts we have pre-created for you. The
 $ git clone --single-branch -b fargate https://github.com/aws-samples/aws-modern-application-workshop.git
 </pre>
 
+3\. Bootstrap
+
+There are a number of files that need to be created in order for your services to run later, so let's create them now.
+
+<pre>
+$ cd ~/environment/aws-modern-application-workshop/workshop-2/
+$ script/setup
+</pre>
+
 # STOP! Pay attention here because it matters! Choose Your Path.
 
 <details>
@@ -165,7 +168,7 @@ $ script/setup_ws1_end
 </pre>
 
 Continue on with the rest of the instructions here.
-</details>
+
 
 ### Crash Course/Refresher on Workshop 1 (CON214: Monolith to Microservice with Docker and AWS Fargate)
 
@@ -308,7 +311,7 @@ If successful, a large blob of JSON describing your new service will appear.
 5\. Visit the Mythical Mysfits Homepage
 
 Finally, let's look at what you've set up. The Mythical Mysfits adoption homepage is where you will be able to view all sorts of information about the Mythical Mysfits. To find out how to get there, go to the CloudFormation outputs section for your CloudFormation stack. Look for an output named **S3WebsiteEndpoint**. It is an HTTP link. Copy and paste it into your browser window and bookmark it or put it in a note. It should already be working. If you see a bunch of Mysfits, it's working. Otherwise, it's not.
-
+</details>
 
 # Checkpoint
 
