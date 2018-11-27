@@ -144,11 +144,11 @@ $ script/setup
 
 <details>
 <summary>
-Click here if you are already attended CON214 or are familiar with Docker, Fargate, and AWS in general, we'll give you instructions on how to run the bootstrap script that will get you to the start of Lab 1.
+**Click here** if you are already attended CON214 or are familiar with Docker, Fargate, and AWS in general, we'll give you instructions on how to run the bootstrap script that will get you to the start of Lab 1.
 </summary>
 <pre>
 $ cd ~/environment/aws-modern-application-workshop/workshop-2/
-$ script/setup
+$ script/setup_ws1_end
 </pre>
 
 You should now have 2 Fargate services running in ECS - one for the Monolith service and one for the Like service. These are both sitting behind an ALB.
@@ -160,15 +160,8 @@ One last thing before you move on. Go to the CloudFormation Outputs section of y
 
 <details>
 <summary>
-Click here if you want a <b>refresher</b> or a quick crash course on Docker, Fargate, and AWS in general. You'll do a few of the steps from CON214 to get you to the start of Lab 1.
-</summary>
-<pre>
-$ cd ~/environment/aws-modern-application-workshop/workshop-2/
-$ script/setup_ws1_end
+**Click here** if you want a <b>refresher</b> or a quick crash course on Docker, Fargate, and AWS in general. You'll do a few of the steps from CON214 to get you to the start of Lab 1.
 </pre>
-
-Continue on with the rest of the instructions here.
-
 
 ### Crash Course/Refresher on Workshop 1 (CON214: Monolith to Microservice with Docker and AWS Fargate)
 
