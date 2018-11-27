@@ -28,7 +28,7 @@ You will be creating and deploying changes to this application completely progra
 
 ## Begin the Modern Application Workshop
 
-[Proceed to Module 1](/module-1)
+### [Proceed to Module 1](/module-1)
 
 
 ### Workshop Clean-Up (Once Complete)
