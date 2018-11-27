@@ -128,7 +128,7 @@ With our bucket created, we are ready to use the SAM CLI to package and upload o
 sam package --template-file ./real-time-streaming.yml --output-template-file ./transformed-streaming.yml --s3-bucket REPLACE_ME_YOUR_BUCKET_NAME
 ```
 
-If successful, you will see the newly created `transformed-streaming.yml` file exist within the `./cfn/` directory, if you look in its contents, you'll see that the CodeUri parameter of the serverless Lambda function has been updated with the object location where the SAM CLI has uploaded your packaged code.
+If successful, you will see the newly created `transformed-streaming.yml` file exist within the `./MythicalMysfitsStreamingService-Repository/` directory, if you look in its contents, you'll see that the CodeUri parameter of the serverless Lambda function has been updated with the object location where the SAM CLI has uploaded your packaged code.
 
 #### Deploy the Stack using AWS CloudFormation
 
