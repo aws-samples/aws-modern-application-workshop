@@ -213,7 +213,7 @@ $ aws ecr describe-repositories
 }
 </pre>
 
-Now that we have the repository URIs, we can tag and push the images up to ECR for later use.
+Now that we have the repository URIs, we can tag and push the images up to ECR for later use. Here we are pushing the monolith-service to the repository with the word `mono` in it we got from above. 
 
 <pre>
 $ $(aws ecr get-login --no-include-email --region <b><i>REPLACEME_REGION</b></i>)
@@ -234,8 +234,6 @@ latest: digest: sha256:5d985802219c5a92ea097d414858d962c125c1ff46cfc70edcdf7f05a
 </pre>
 
 When you issue the push command, Docker pushes the layers up to ECR, and if you refresh the monolith-service ECR repository page, you'll see an image indicating the latest version.  
-
-*Note: You did not need to authenticate docker with ECR because of the [Amazon ECR Credential Helper](https://github.com/awslabs/amazon-ecr-credential-helper). You can read more about the credentials helper in this blog article - https://aws.amazon.com/blogs/compute/authenticating-amazon-ecr-repositories-for-docker-cli-with-credential-helper/*
 
 2\. Build the like docker image and push to ECR.
 
