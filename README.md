@@ -1,6 +1,4 @@
-**NOTE:** Please use the README files within this GitHub repository to follow the most up-to-date version of this workshop.  The version of this workshop located at https://aws.amazon.com/getting-started/projects/build-modern-app-fargate-lambda-dynamodb-python/ is out-of-date.  
-
-After reading the description below, choose the programming language of your choice and follow that link to full instructions to complete this tutorial.  You will clone a specific branch of this repository for complete instructions, **not** this master branch where only a description of the workshop exists.
+**NOTE:** After reading the description below, choose the programming language of your choice and follow that link to full instructions to complete this tutorial.  You will clone a specific branch of this repository for complete instructions, **not** this master branch where only a description of the workshop exists.
 
 # Build a Modern Application on AWS
 
@@ -16,7 +14,7 @@ That's why we've hired you to be our first Full Stack Engineer. We need a more s
 
 **AWS Experience: Beginner**
 
-**Time to Complete: 3-4 hours**
+**Time to Complete: 6-7 hours**
 
 **Cost to Complete: Many of the services used are included in the AWS Free Tier. For those that are not, the sample application will cost, in total, less than $1/day.**
 
