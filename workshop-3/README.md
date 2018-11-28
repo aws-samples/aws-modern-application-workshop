@@ -281,15 +281,15 @@ More information on Task Metadata endpoint can be found here: https://docs.aws.a
 
         2. The second endpoint returns metadata JSON for the specified Docker container ID.
 
-            ```curl x.x.x.x:8001/v2/metadata/<container-id> | jq```
+            ```curl x.x.x.x:8001/v2/metadata/<DockerId> | jq```
 
         3. The third endpoint returns Docker stats JSON for all of the containers associated with the task. 
 
-        ```curl x.x.x.x:8001/v2/stats | jq```
+            ```curl x.x.x.x:8001/v2/stats | jq```
 
         4. The fourth and final endpoint returns Docker stats JSON for the specified Docker container ID.
 
-            ```curl x.x.x.x:8001/v2/stats/<container-id> | jq```
+            ```curl x.x.x.x:8001/v2/stats/<DockerId> | jq```
 
     </details>
 
@@ -310,7 +310,7 @@ More information on Task Metadata endpoint can be found here: https://docs.aws.a
 
     5. On the **All metrics** tab, click **ECS**, then **Cluster Name, Service Name**.
 
-    6. Find the services where the name containers **Mythical-Monolith-Service** and select the **CPUUtilization** metric.
+    6. Find the services where the name contains **Mythical-Monolith-Service** and select the **CPUUtilization** metric.
 
     7. On the **Graphed metrics** tab, for the **CPUUtilization** metric change the **Statistic** to **Sample Count**, and the period to **1 Minute**.
 
