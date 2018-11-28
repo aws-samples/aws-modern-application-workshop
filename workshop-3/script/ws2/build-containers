@@ -1,0 +1,19 @@
+#!/bin/bash
+
+LIKE_ECR_REPO=$(jq < cfn-output.json -r '.LikeEcrRepo')
+MONO_ECR_REPO=$(jq < cfn-output.json -r '.MonoEcrRepo')
+XRAY_ECR_REPO=$(jq < cfn-output.json -r '.XrayEcrRepo')
+
+$(aws ecr get-login --no-include-email)
+
+docker build -t like-service app/like-service
+docker tag like-service:latest $LIKE_ECR_REPO:latest
+docker push $LIKE_ECR_REPO:latest
+
+docker build -t monolith-service app/monolith-service
+docker tag monolith-service:latest $MONO_ECR_REPO:latest
+docker push $MONO_ECR_REPO:latest
+
+docker build -t x-ray-daemon app/xray
+docker tag x-ray-daemon:latest $XRAY_ECR_REPO:latest
+docker push $XRAY_ECR_REPO:latest

@@ -1,0 +1,40 @@
+#! /bin/bash
+
+set -eu
+
+# declare an associative array, the -A defines the array of this type
+declare -A cfnOutputs
+
+# The output of jq is separated by '|' so that we have a valid delimiter
+# to read our keys and values. The read command processes one line at a 
+# time and puts the values in the variables 'key' and 'value'
+while IFS='|' read -r key value; do
+    # Strip out the text until the last occurrence of '/' 
+    strippedKey="${key##*/}"
+    # Putting the key/value pair in the array
+    cfnOutputs["$strippedKey"]="$value"
+done< <(jq -r 'keys[] as $k | "\($k)|\(.[$k])"' cfn-output.json)
+
+# Print the array using the '-p' or do one by one
+#declare -p cfnOutputs
+
+cp script/ws2/service-template.json script/ws2/monolith-service.json
+cp script/ws2/service-template.json script/ws2/like-service.json
+
+sed -i -e 's/CLUSTER_NAME/'"${cfnOutputs[EcsClusterName]}"'/' \
+       -e 's/STACK_NAME/'"${cfnOutputs[StackName]}"'/' \
+       -e 's/SERVICE_NAME/Monolith/' \
+       -e 's~TARGET_GROUP_ARN~'"${cfnOutputs[MonolithTargetGroupArn]}"'~' \
+       -e 's/CONTAINER_NAME/monolith-service/' \
+       -e 's/PRIVATE_SUBNET_ONE/'"${cfnOutputs[PrivateSubnetOne]}"'/' \
+       -e 's/PRIVATE_SUBNET_TWO/'"${cfnOutputs[PrivateSubnetTwo]}"'/' \
+       -e 's/FARGATE_CONTAINER_SECURITY_GROUP/'"${cfnOutputs[FargateContainerSecurityGroup]}"'/' script/ws2/monolith-service.json
+
+sed -i -e 's/CLUSTER_NAME/'"${cfnOutputs[EcsClusterName]}"'/' \
+       -e 's/STACK_NAME/'"${cfnOutputs[StackName]}"'/' \
+       -e 's/SERVICE_NAME/Like/' \
+       -e 's~TARGET_GROUP_ARN~'"${cfnOutputs[LikeTargetGroupArn]}"'~' \
+       -e 's/CONTAINER_NAME/like-service/' \
+       -e 's/PRIVATE_SUBNET_ONE/'"${cfnOutputs[PrivateSubnetOne]}"'/' \
+       -e 's/PRIVATE_SUBNET_TWO/'"${cfnOutputs[PrivateSubnetTwo]}"'/' \
+       -e 's/FARGATE_CONTAINER_SECURITY_GROUP/'"${cfnOutputs[FargateContainerSecurityGroup]}"'/' script/ws2/like-service.json

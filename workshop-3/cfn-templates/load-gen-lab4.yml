@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Mythical Misfits workshop lab4. Deploys a load generator.
+Parameters:
+  ALBDNSName:
+    Type: String
+    Description: "DNS Name of the Mysfits ALB"
+  MysfitID:
+    Type: String
+    Description: "ID of one of the Mysfits"
+    Default: "0e37d916-f960-4772-a25a-01b762b5c1b"
+Mappings:
+  AWSRegionToAMZNLinuxAMI:
+    us-east-1:
+      AMIID: ami-a4c7edb2
+    us-east-2:
+      AMIID: ami-8a7859ef
+    us-west-1:
+      AMIID: ami-327f5352
+    us-west-2:
+      AMIID: ami-6df1e514
+    eu-central-1:
+      AMIID: ami-82be18ed
+    eu-west-1:
+      AMIID: ami-d7b9a2b1
+    eu-west-2:
+      AMIID: ami-ed100689
+    ap-northeast-1:
+      AMIID: ami-3bd3c45c
+    ap-southeast-2:
+      AMIID: ami-10918173
+    ap-southeast-1:
+      AMIID: ami-77af2014
+    ca-central-1:
+      AMIID: ami-a7aa15c3
+Resources:
+  LoadGeneratorInstance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          files:
+            /home/ec2-user/targets:
+              content: !Join ['', ['POST http://', !Ref 'ALBDNSName' , '/mysfits/', !Ref 'MysfitID','/like']]
+              mode: '000777'
+              owner: root
+              group: root
+            /home/ec2-user/load.sh:
+              content: !Join ['', [ '#! /bin/bash', '
+              
+              ', 'cd /home/ec2-user
+              
+              ', '/home/ec2-user/vegeta attack -targets targets -timeout 15m -output results.txt
+              
+              ']]
+              mode: '000777'
+              owner: root
+              group: root
+    Properties:
+      ImageId: !FindInMap [AWSRegionToAMZNLinuxAMI, !Ref 'AWS::Region', AMIID]
+      InstanceType: m4.large
+      Tags:
+        -
+          Key: Name
+          Value: LoadGenerator
+      UserData: !Base64
+        Fn::Join:
+        - ''
+        - ['#!/bin/bash
+
+        ', '/opt/aws/bin/cfn-init -s ', !Ref 'AWS::StackName', ' -r LoadGeneratorInstance --region ', !Ref 'AWS::Region', '
+
+        ', 'wget http://catsndogs-assets.s3.amazonaws.com/vegeta -P /home/ec2-user/
+
+        ', 'chmod +x /home/ec2-user/vegeta
+
+        ', 'sleep 10', '
+
+        ', '/home/ec2-user/load.sh','
+        
+        ']

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+LIKE_TASK_DEF=$(jq < cfn-output.json -r '.LikeTaskDefinition')
+MONOLITH_TASK_DEF=$(jq < cfn-output.json -r '.MonolithTaskDefinition')
+
+aws ecs create-service --cli-input-json file://script/ws2/like-service.json --task-definition $LIKE_TASK_DEF
+aws ecs create-service --cli-input-json file://script/ws2/monolith-service.json --task-definition $MONOLITH_TASK_DEF

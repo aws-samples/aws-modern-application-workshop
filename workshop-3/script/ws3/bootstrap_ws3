@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Cloning Git Repos"
+script/ws3/clone
+echo "Populating and pushing Git Repos"
+script/ws3/populate
