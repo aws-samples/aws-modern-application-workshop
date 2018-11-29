@@ -200,7 +200,7 @@ More information on Task Metadata endpoint can be found here: https://docs.aws.a
 
         1. In Minimum healthy percent enter **50**.
 
-        2. In Maximum healthy percent enter **100**.
+        2. In Maximum healthy percent enter **200**.
 
     The update to the **Like** service will replace the containers that make up the service. ECS offers you control over how the replacement process works. Because the **Like** containers could be serving production traffic, you should not stop all the containers before starting new ones. By specifying a Minimum health percent of 50 and a Maximum healthy percent of 100, ECS will terminate up to 50 percent of the active **Like** containers, then start new containers. Once the new containers are healthy, ECS will terminate the remaining 50 percent of and replace those.
 
