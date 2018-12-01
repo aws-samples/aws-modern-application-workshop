@@ -593,9 +593,9 @@ In this lab, you'll implement X-Ray for the Like microservice and compare its fi
 
 The AWS X-Ray daemon is an open software application that listens for traffic on UDP port 2000, gathers raw segment data, and relays it to the AWS X-Ray API.  When deployed with Fargate, the Task IAM role authorizes it to communicate with the X-Ray API.  The workshop CFN template you ran earlier create a role that has the necessary permissions.
 
-Further reading: [X-Ray daemon permissions documentation]("https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html#xray-daemon-permissions)
+Further reading: [X-Ray daemon permissions documentation](https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html#xray-daemon-permissions)
     
-The setup script earlier built and pushed a Docker image that runs the X-Ray daemon to ECR.  If you're curious about the open source project and would like to review the Dockefile behind the image, expand below.  
+The setup script earlier built and pushed a Docker image that runs the X-Ray daemon to ECR.  If you're curious about the open source project and would like to review the Dockerfile behind the image, expand below.  
 
 <details>
 <summary>Learn more: X-Ray daemon github repo and Dockerfile</summary>
