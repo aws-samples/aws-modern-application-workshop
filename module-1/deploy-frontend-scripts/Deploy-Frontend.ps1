@@ -6,11 +6,9 @@ $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 $scriptDir = Split-Path -LiteralPath $PSCommandPath
 $startingLoc = Get-Location
 Set-Location $scriptDir
-$startingDir = [System.Environment]::CurrentDirectory
-[System.Environment]::CurrentDirectory = $scriptDir
 
 $frontEndPath = Join-Path -Path $(Split-Path -Path $scriptDir -Parent) -ChildPath "frontend"
-$buildFile = Get-Content -Path $(Join-Path -Path $frontEndPath -ChildPath "angular.json") | ConvertFrom-Json
+$buildFile = Get-Content -Path $(Join-Path -Path $frontEndPath -ChildPath "angular.json") -Raw | ConvertFrom-Json
 $projectName = "MythicalMysfits"
 $projectNameForS3 = "mythical-mysfits"
 $projectSettings = $buildFile.projects.$projectName
@@ -18,18 +16,13 @@ $projectBuildFolder = $projectSettings.architect.build.options.outputPath
 $frontEndBuildPath = Join-Path -Path $frontEndPath  -ChildPath $projectBuildFolder
 Write-Output $frontEndBuildPath
 try {
-    try {
-        $IsMacOS
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $awsModuleName = 'AWSPowerShell.NetCore'
+    } else {
+        $awsModuleName = 'AWSPowerShell'
     }
-    catch {
-        $IsMacOS = $false
-    }
-    If ($IsMacOS) {
-        Import-Module AWSPowerShell.NetCore
-    }
-    Else {
-        Import-Module AWSPowerShell
-    }
+
+    Import-Module $awsModuleName
 
     Get-AWSPowerShellVersion
     $awsRegion = if ($null -eq $(Get-DefaultAWSRegion)) { "us-west-2" } else { $(Get-DefaultAWSRegion) }
@@ -52,19 +45,18 @@ try {
         throw $error
     }
     else {
-        Write-S3BucketWebsite -BucketName $bucketName -WebsiteConfiguration_IndexDocumentSuffix index.html -WebsiteConfiguration_ErrorDocument index.html         
+        Write-S3BucketWebsite -BucketName $bucketName -WebsiteConfiguration_IndexDocumentSuffix index.html -WebsiteConfiguration_ErrorDocument index.html
         Write-Output "Removing previous files from this S3 Bucket..."
         Get-S3Object -BucketName $bucketName | Remove-S3Object -Force
-    
+
         foreach ($f in (Get-ChildItem $frontEndBuildPath)) {
             Write-Output "Uploading $f to S3 Bucket..."
-            Write-S3Object -BucketName $bucketName  -File $(Join-Path $frontEndBuildPath -ChildPath $f) -PublicReadOnly
+            Write-S3Object -BucketName $bucketName  -File $f.FullName -PublicReadOnly
             Write-Output "$f successfully uploaded."
         }
         $locationObj = Get-S3BucketLocation -BucketName $bucketName
         $location = $locationObj.Value
-        Write-Output $location
-        if (!$locationObj.Value) {
+        if (!$location) {
             $location = "us-east-1"
         }
         Write-Output "View your site: http://$($bucketName).s3-website.$location.amazonaws.com"
@@ -73,6 +65,5 @@ try {
 }
 finally {
     Set-Location $startingLoc
-    [System.Environment]::CurrentDirectory = $startingDir
     Write-Output "Done. Elapsed time: $($stopwatch.Elapsed)"
 }

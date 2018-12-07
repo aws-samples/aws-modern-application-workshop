@@ -2,12 +2,12 @@
   "name": "ng-mythical-mysfits",
   "version": "0.0.0",
   "scripts": {
-    "ng": "./node_modules/@angular/cli/bin/ng",
-    "start": "./node_modules/@angular/cli/bin/ng serve",
-    "build": "./node_modules/@angular/cli/bin/ng build",
-    "test": "./node_modules/@angular/cli/bin/ng test",
-    "lint": "./node_modules/@angular/cli/bin/ng lint",
-    "e2e": "./node_modules/@angular/cli/bin/ng e2e"
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {

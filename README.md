@@ -6,7 +6,7 @@
 
 Our business has been thriving with only a single mysfit adoption center, located inside Devils Tower National Monument. Speak, friend, and enter should you ever come to visit.
 
-We've just had a surge of new mysfits arrive at our door with nowhere else to go!  They're all pretty distraught after not only being driven from their homes... but an immensely grumpy ogre has also denied them all entry at a swamp they've used for refuge in the past.  
+We've just had a surge of new mysfits arrive at our door with nowhere else to go!  They're all pretty distraught after not only being driven from their homes... but an immensely grumpy ogre has also denied them all entry at a swamp they've used for refuge in the past.
 
 That's why we've hired you to be our first Full Stack Engineer. We need a more scalable way to show off our inventory of mysfits and let families adopt them. We'd like you to build the first Mythical Mysfits adoption website to help introduce these lovable, magical, often mischievous creatures to the world!
 
@@ -38,12 +38,18 @@ You will be creating and deploying changes to this application completely progra
 
 
 ### Workshop Clean-Up (Once Complete)
-Be sure to delete all of the resources created during the workshop in order to ensure that billing for the resources does not continue for longer than you intend.  We recommend that you utilize the AWS Console to explore the resources you've created and delete them when you're ready.  
+Be sure to delete all of the resources created during the workshop in order to ensure that billing for the resources does not continue for longer than you intend.  We recommend that you utilize the AWS Console to explore the resources you've created and delete them when you're ready.
 
-For the two cases where you provisioned resources using AWS CloudFormation, you can remove those resources by simply running the following CLI command for each stack:
+For the two cases where you provisioned resources using AWS CloudFormation, you can remove those resources by simply running the following commands for each stack:
 
+__AWS CLI__
 ```
 aws cloudformation delete-stack --stack-name STACK-NAME-HERE
+```
+
+__AWS Tools for PowerShell__
+```
+Remove-CFNStack -StackName STACK-NAME-HERE
 ```
 
 To remove all of the created resources, you can visit the following AWS Consoles, which contain resources you've created during the Mythical Mysfits workshop:

@@ -52,7 +52,7 @@ In the `frontend` folder, the repo includes a fully built [Angular](https://angu
 This version of the frontend has all of the Mysfits data hardcoded into the `MythicalMysfitProfileService` (located at `frontend/src/app/services/mythical-mysfit-profile.service.ts`). This is an injectable [Angular service](https://angular.io/tutorial/toh-pt4) created to work with Mysfit profile data. In the following modules, we'll update this service to pull the Mysfits data from an API we create.
 
 #### Create an S3 Bucket and Configure it for Website Hosting
-Before you can build and publish your Angular app, you will need to create a production Angular environment file located in the `./module-1/frontend/environments/` folder. Make sure the file is named `environment.prod.ts`.
+Before you can build and publish your Angular app, you will need to create a production Angular environment file located in the `./module-1/frontend/src/environments/` folder. Make sure the file is named `environment.prod.ts`.
 
 Open the `environment.prod.ts` file in VS Code and copy the properties from the `environment.ts` file located in the same folder. The property at this point should only be the following:
 ```js
@@ -80,7 +80,7 @@ Both scripts do the following:
 
 To verify your S3 bucket was created, you can use these commands:
 ```
-aws s3api list-buckets --query 'Buckets[?starts_with(Name, `mythical-mysfits-frontend`) == `true`]' 
+aws s3api list-buckets --query 'Buckets[?starts_with(Name, `mythical-mysfits-frontend`) == `true`]'
 ```
 ```
 Get-S3Bucket | Where-Object { $_.BucketName -Like "mythical-mysfits-frontend*" }
