@@ -5,25 +5,30 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	L "../client"
 )
+
+func setupResponse(w *http.ResponseWriter) {
+    (*w).Header().Set("Content-Type", "text/html; charset=utf-8")
+    (*w).Header().Set("Access-Control-Allow-Origin", "*")
+    (*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+    (*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
 
 func getContentType() string {
 	contentType := "application/json"
 
 	switch DefaultFormat {
 	case "JSON":
-		L.Init(os.Stderr, L.JSON)
+		Init(os.Stderr, JSON)
 		contentType = "application/json"
 	case "HTML":
-		L.Init(os.Stderr, L.HTML)
+        Init(os.Stderr, HTML)
 		contentType = "application/html"
 	case "TEXT":
-		L.Init(os.Stderr, L.STRING)
+        Init(os.Stderr, STRING)
 		contentType = "text/html; charset=utf-8"
 	default:
-		L.Init(os.Stderr, L.JSON)
+        Init(os.Stderr, JSON)
 		contentType = "application/json"
 	}
 
@@ -32,47 +37,52 @@ func getContentType() string {
 
 // Handle GET requests
 func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
+    fmt.Println("In getHandler")
+
+    setupResponse(&w)
 	// We handle (in local testing):
-	// /misfits                              returns all misfits
-	// /misfits?filter=FILTER&value=VALUE    returns a misfit where FILTER is has VALUE
-	// /misfits/{mysfitsId}                  returns a misfit by their MysfitId
+	// /mysfits                              returns all mysfits
+	// /mysfits?filter=FILTER&value=VALUE    returns a mysfit where FILTER is has VALUE
+	// /mysfits/{mysfitsId}                  returns a mysfit by their mysfitId
 
 	var path = r.URL.Path
+	fmt.Println("Got path: " + path)
 
 	// If just /, return simple message
 	if path == "/" {
 		// We must set the format to text, otherwise we get a JSON format error
-		return "Nothing here, used for health check. Try /misfits instead.", "TEXT"
+		return "Nothing here, used for health check. Try /mysfits instead.", "TEXT"
 	}
 
-	// If just /misfits, get them all
-	if path == "/misfits" {
-		return L.GetAllMysfits(), t
+   	// If just /mysfits, get them all
+	if path == "/mysfits" {
+        // Did we get a filter request?
+        filter := r.URL.Query().Get("filter")
+        if filter != "" {
+            fmt.Println("Got filter: " + filter)
+            value := r.URL.Query().Get("value")
+            if value != "" {
+                fmt.Println("Got value: " + value)
+                return QueryMysfits(filter, value), t
+            }
+        } else {
+            fmt.Println("Returning all mysfits")
+            return GetAllMysfits(), t
+        }
 	}
 
-	// Did we get a filter request?
-	filter := r.URL.Query().Get("filter")
-	if filter != "" {
-		fmt.Println("Got filter: " + filter)
-		value := r.URL.Query().Get("value")
-		if value != "" {
-			fmt.Println("Got value: " + value)
-			return L.QueryMysfits(filter, value), t
-		}
-	}
-
-	// We have a path like: /misfits/abc123
-	// First make sure it's not /misfits/abc123/xyz
+    // We have a path like: /mysfits/abc123
+	// First make sure it's not /mysfits/abc123/xyz
 	s := strings.Split(path, "/")
 
-	// Splitting /misfits/abc123 gives us:
+	// Splitting /mysfits/abc123 gives us:
 	// s[0]: ""
-	// s[1]: "misfits"
+	// s[1]: "mysfits"
 	// s[2]: "abc123"
 
 	if len(s) == 3 {
 		id := s[2]
-		return L.GetMysfit(id), t
+		return GetMysfit(id), t
 	}
 
 	// We must set the format to text, otherwise we get a JSON format error
@@ -81,17 +91,18 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 
 // Handle POST requests
 func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
+    setupResponse(&w)
 	// We support:
-	// /misfits/<mysfitId>/like     increments the likes for misfit with mysfitId
-	// /misfits/<mysfitId>/adopt    enables adopt for misfit with mysfitId
+	// /mysfits/<mysfitId>/like     increments the likes for mysfit with mysfitId
+	// /mysfits/<mysfitId>/adopt    enables adopt for mysfit with mysfitId
 
 	path := r.URL.Path
 
 	s := strings.Split(path, "/")
 
-	// Splitting /misfits/abc123/adopt gives us:
+	// Splitting /mysfits/abc123/adopt gives us:
 	// s[0] == ""
-	// s[1] == "misfits"
+	// s[1] == "mysfits"
 	// s[2] == "abc123"
 	// s[3] == "adopt"
 
@@ -101,10 +112,10 @@ func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, stri
 
 		switch action {
 		case "like":
-			L.IncMysfitLikes(id)
+            IncMysfitLikes(id)
 			return "Incremented likes for " + id, "TEXT"
 		case "adopt":
-			L.SetMysfitAdopt(id)
+            SetMysfitAdopt(id)
 			return "Enabled adoption for " + id, "TEXT"
 		default:
 			return "Unknown action: " + action, "TEXT"
@@ -116,6 +127,8 @@ func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, stri
 
 // Handle everything here
 func mainHandler(w http.ResponseWriter, r *http.Request) {
+    setupResponse(&w)
+
 	// Show path and method
 	fmt.Println("")
 	fmt.Println("In mainHandler")
@@ -153,10 +166,14 @@ func main() {
 		DefaultPort = port
 	}
 
-	format := os.Getenv("FORMAT")
+		format := os.Getenv("FORMAT")
 	if format != "" {
 		DefaultFormat = format
 	}
+
+	fmt.Println("Returning format: " + DefaultFormat)
+
+	fmt.Println("Running locally on http://localhost" + DefaultPort)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(mainHandler))
