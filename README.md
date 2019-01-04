@@ -50,6 +50,5 @@ This workshop is offered in different programming languages so that you can choo
 
 
 ### AWS Developer Center
-For more details on tools and services for developers provided by AWS, please visit our [Developer Center](https://developer.aws).
-
+For more details on tools and services for developers provided by AWS, please visit our [Developer Center](https://developer.aws).<br/>
 For information on best practices for modern application development, please [visit here](https://aws.amazon.com/modern-apps/).
