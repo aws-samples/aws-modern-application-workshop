@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	L "../client"
 )
 
 func getContentType() string {
@@ -14,16 +12,16 @@ func getContentType() string {
 
 	switch DefaultFormat {
 	case "JSON":
-		L.Init(os.Stderr, L.JSON)
+		Init(os.Stderr, JSON)
 		contentType = "application/json"
 	case "HTML":
-		L.Init(os.Stderr, L.HTML)
+		Init(os.Stderr, HTML)
 		contentType = "application/html"
 	case "TEXT":
-		L.Init(os.Stderr, L.STRING)
+		Init(os.Stderr, STRING)
 		contentType = "text/html; charset=utf-8"
 	default:
-		L.Init(os.Stderr, L.JSON)
+		Init(os.Stderr, JSON)
 		contentType = "application/json"
 	}
 
@@ -47,7 +45,7 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 
 	// If just /misfits, get them all
 	if path == "/misfits" {
-		return L.GetAllMysfits(), t
+		return GetAllMysfits(), t
 	}
 
 	// Did we get a filter request?
@@ -57,7 +55,7 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 		value := r.URL.Query().Get("value")
 		if value != "" {
 			fmt.Println("Got value: " + value)
-			return L.QueryMysfits(filter, value), t
+			return QueryMysfits(filter, value), t
 		}
 	}
 
@@ -72,7 +70,7 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 
 	if len(s) == 3 {
 		id := s[2]
-		return L.GetMysfit(id), t
+		return GetMysfit(id), t
 	}
 
 	// We must set the format to text, otherwise we get a JSON format error
@@ -101,10 +99,10 @@ func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, stri
 
 		switch action {
 		case "like":
-			L.IncMysfitLikes(id)
+			IncMysfitLikes(id)
 			return "Incremented likes for " + id, "TEXT"
 		case "adopt":
-			L.SetMysfitAdopt(id)
+			SetMysfitAdopt(id)
 			return "Enabled adoption for " + id, "TEXT"
 		default:
 			return "Unknown action: " + action, "TEXT"
