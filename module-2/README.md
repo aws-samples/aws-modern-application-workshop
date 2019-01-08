@@ -76,15 +76,16 @@ cd ~/environment/aws-modern-application-workshop/module-2/app
 
 * Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
 
+<!-- ORIGINAL (see Python branch): -->
 ```
-docker build -t aws-modern-application-workshop .
+docker build . -t REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image (ACCOUNT-ID represents an account ID, and REGION the region in which you signed into the console):
+You should see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image:
 
 ```
-Successfully built 8bxxxxxxxxab
-Successfully tagged ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service:latest
+Successfully built xxxxxxxxxxxx
+Successfully tagged REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
 Save the image tag, **ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service** in the previous example, as you will need it later in the tutorial.
@@ -94,7 +95,7 @@ Save the image tag, **ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/se
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous command and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service
+docker run -p 8080:8080 aws-modern-application-workshop:latest
 ```
 
 As a result you will see docker reporting that your container is up and running locally:
