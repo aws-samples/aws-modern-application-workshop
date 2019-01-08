@@ -66,36 +66,42 @@ All of the code required to run our service backend is stored within the `/modul
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
+* Retrieve the login command to use to authenticate your Docker client to your registry.
+Use the AWS CLI:
+
+```
+$(aws ecr get-login --no-include-email --region REPLACE_ME_REGION)
+```
+
 * Navigate to `~/environment/module-2/app`
 
 ```
 cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
 
-* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks** command.
-
-* Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
-
-<!-- ORIGINAL (see Python branch): -->
+<!-- From https://console.aws.amazon.com/ecr/repositories/mythicalmysfits/service/?region=us-east-1: -->
 ```
-docker build . -t REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
+docker build -t mythicalmysfits/service .
 ```
 
-You should see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image:
+After the build completes, tag your image so that you can push it to the repository:
 
 ```
-Successfully built xxxxxxxxxxxx
-Successfully tagged REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
+docker tag mythicalmysfits/service:latest REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-Save the image tag, **ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service** in the previous example, as you will need it later in the tutorial.
+Run the following command to push the image to the repository you just created:
+
+```
+docker push REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
+```
 
 #### Testing the Service Locally
 
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous command and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 aws-modern-application-workshop:latest
+docker run -p 8080:8080 mythicalmysfits/service:latest
 ```
 
 As a result you will see docker reporting that your container is up and running locally:

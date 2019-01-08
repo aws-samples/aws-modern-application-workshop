@@ -23,6 +23,8 @@ This web application can be deployed in any AWS region that supports all the ser
 * eu-west-1 (Ireland)
 
 Select a region from the dropdown in the upper right corner of the AWS Management Console.
+Once you've selected the region for the IDE,
+that becomes the default region for all of the resources you create using the IDE.
 
 ### Creating your Mythical Mysifts IDE
 
