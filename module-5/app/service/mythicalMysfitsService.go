@@ -31,20 +31,20 @@ func getContentType() string {
 // Handle GET requests
 func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
 	// We handle (in local testing):
-	// /misfits                              returns all misfits
-	// /misfits?filter=FILTER&value=VALUE    returns a misfit where FILTER is has VALUE
-	// /misfits/{mysfitsId}                  returns a misfit by their MysfitId
+	// /mysfits                              returns all mysfits
+	// /mysfits?filter=FILTER&value=VALUE    returns a mysfit where FILTER is has VALUE
+	// /mysfits/{mysfitsId}                  returns a mysfit by their MysfitId
 
 	var path = r.URL.Path
 
 	// If just /, return simple message
 	if path == "/" {
 		// We must set the format to text, otherwise we get a JSON format error
-		return "Nothing here, used for health check. Try /misfits instead.", "TEXT"
+		return "Nothing here, used for health check. Try /mysfits instead.", "TEXT"
 	}
 
-	// If just /misfits, get them all
-	if path == "/misfits" {
+	// If just /mysfits, get them all
+	if path == "/mysfits" {
 		return GetAllMysfits(), t
 	}
 
@@ -59,13 +59,13 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 		}
 	}
 
-	// We have a path like: /misfits/abc123
-	// First make sure it's not /misfits/abc123/xyz
+	// We have a path like: /mysfits/abc123
+	// First make sure it's not /mysfits/abc123/xyz
 	s := strings.Split(path, "/")
 
-	// Splitting /misfits/abc123 gives us:
+	// Splitting /mysfits/abc123 gives us:
 	// s[0]: ""
-	// s[1]: "misfits"
+	// s[1]: "mysfits"
 	// s[2]: "abc123"
 
 	if len(s) == 3 {
@@ -80,16 +80,16 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
 // Handle POST requests
 func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
 	// We support:
-	// /misfits/<mysfitId>/like     increments the likes for misfit with mysfitId
-	// /misfits/<mysfitId>/adopt    enables adopt for misfit with mysfitId
+	// /mysfits/<mysfitId>/like     increments the likes for mysfit with mysfitId
+	// /mysfits/<mysfitId>/adopt    enables adopt for mysfit with mysfitId
 
 	path := r.URL.Path
 
 	s := strings.Split(path, "/")
 
-	// Splitting /misfits/abc123/adopt gives us:
+	// Splitting /mysfits/abc123/adopt gives us:
 	// s[0] == ""
-	// s[1] == "misfits"
+	// s[1] == "mysfits"
 	// s[2] == "abc123"
 	// s[3] == "adopt"
 
@@ -162,6 +162,6 @@ func main() {
 
 	fmt.Println("Running on: ")
 	fmt.Println("http://localhost/" + port)
-	fmt.Println("Use the following to get ALL misfits:")
-	fmt.Println("http://localhost/" + port + "/misfits")
+	fmt.Println("Use the following to get ALL mysfits:")
+	fmt.Println("http://localhost/" + port + "/mysfits")
 }

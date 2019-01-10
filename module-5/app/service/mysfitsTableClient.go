@@ -313,7 +313,7 @@ func GetAllMysfits() string {
 }
 
 func SetMysfitAdopt(mysfitId string) {
-	Info.Println("Setting adoption for misfit with ID: " + mysfitId)
+	Info.Println("Setting adoption for mysfit with ID: " + mysfitId)
 
 	// Create a DynamoDB client using our default credentials and region.
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -323,7 +323,7 @@ func SetMysfitAdopt(mysfitId string) {
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
-	// Use the DynamoDB UpdateItem API to increment the likes for the misfit from the table with
+	// Use the DynamoDB UpdateItem API to increment the likes for the mysfit from the table with
 	// the given ID
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("MysfitsTable"),
@@ -349,7 +349,7 @@ func SetMysfitAdopt(mysfitId string) {
 }
 
 func IncMysfitLikes(mysfitId string) {
-	Info.Println("Incrementing likes for misfit with ID: " + mysfitId)
+	Info.Println("Incrementing likes for mysfit with ID: " + mysfitId)
 
 	// Create a DynamoDB client using our default credentials and region.
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -359,7 +359,7 @@ func IncMysfitLikes(mysfitId string) {
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
-	// Use the DynamoDB UpdateItem API to increment the likes for the misfit from the table with
+	// Use the DynamoDB UpdateItem API to increment the likes for the mysfit from the table with
 	// the given ID
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String("MysfitsTable"),
@@ -395,7 +395,7 @@ func GetMysfit(mysfitId string) string {
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
-	// Use the DynamoDB getItem API to retrieve the misfit from the table with
+	// Use the DynamoDB getItem API to retrieve the mysfit from the table with
 	// the given ID
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String("MysfitsTable"),

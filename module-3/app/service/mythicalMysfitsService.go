@@ -8,15 +8,15 @@ import (
 
 // For http://localhost:8088
 func healthCheckResponse(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("Nothing here, used for health check. Try /misfits instead."))
+	w.Write([]byte("Nothing here, used for health check. Try /mysfits instead."))
 }
 
-// Show mysfits-response.json for http://localhost:8088/misfits
-func showMisfits(w http.ResponseWriter, r *http.Request) {
+// Show mysfits-response.json for http://localhost:8088/mysfits
+func showMysfits(w http.ResponseWriter, r *http.Request) {
 	// Does request contain a 'filter' arg?, ala:
-	// http://localhost:PORT/misfits?filter=value1&value=value2
+	// http://localhost:PORT/mysfits?filter=value1&value=value2
 	// To get by ID:
-	// http://localhost:PORT/misfits?filter=MysfitId&value=VALUE
+	// http://localhost:PORT/mysfits?filter=MysfitId&value=VALUE
 	fmt.Println("GET params were:", r.URL.Query())
 
 	var items string
@@ -79,6 +79,6 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(healthCheckResponse))
-	mux.Handle("/misfits", http.HandlerFunc(showMisfits))
+	mux.Handle("/mysfits", http.HandlerFunc(showMysfits))
 	http.ListenAndServe(DefaultPort, mux)
 }

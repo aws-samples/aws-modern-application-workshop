@@ -104,23 +104,28 @@ Let's test our image locally within Cloud9 to make sure everything is operating 
 docker run -p 8080:8080 mythicalmysfits/service:latest
 ```
 
-As a result you will see docker reporting that your container is up and running locally:
+You can confirm that the service is running by using *curl* in another terminal window:
 
 ```
- * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+curl -X get http://localhost:8080/mysfits
 ```
 
-To test our service with a local request, we're going to open up the built-in web browser within the Cloud9 IDE that can be used to preview applications that are running on the IDE instance.  To open the preview web browser, select **Preview > Preview Running Application** in the Cloud9 menu bar:
+This should display the JSON list of mysfits.
+
+You can also test the service with a local request.
+Select **Preview > Preview Running Application** in the Cloud9 menu bar to 
+pen up the built-in web browser within the Cloud9 IDE:
 
 ![preview-menu](/images/module-2/preview-menu.png)
 
-This will open another panel in the IDE where the web browser will be available.  Append /mysfits to the end of the URI in the address bar of the preview browser in the new panel and hit enter:
+This opens another panel in the IDE where the web browser is available.
+Append /mysfits to the end of the URI in the address bar of the preview browser in the new panel and hit enter:
 
 ![preview-menu](/images/module-2/address-bar.png)
 
-If successful you will see a response from the service that returns the JSON document */aws-modern-application-workshop/module-2/app/service/mysfits-response.json*.
+If successful you will see a response from the service that returns the JSON document */aws-modern-application-workshop/module-2/app/service/mysfits-response.json* (it should match the *curl* output).
 
-When done testing the service you can stop it by pressing CTRL-c on PC or Mac.
+When done testing the service you can stop it by pressing CTRL-c in the terminal window running the *docker run* command.
 
 #### Pushing the Docker Image to Amazon ECR
 
