@@ -77,7 +77,7 @@ First, create an S3 bucket, replace REPLACE_ME_BUCKET_NAME with your own unique 
 aws s3 mb s3://REPLACE_ME_BUCKET_NAME
 ```
 
-Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases). Don't forget to replacy REPLACE_ME_BUCKET_NAME with the bucket name you used on the previous step:
+Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases). Don't forget to replace REPLACE_ME_BUCKET_NAME with the bucket name you used on the previous step:
 
 ```
 aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
