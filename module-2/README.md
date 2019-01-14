@@ -66,54 +66,66 @@ All of the code required to run our service backend is stored within the `/modul
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
+* Retrieve the login command to use to authenticate your Docker client to your registry.
+Use the AWS CLI:
+
+```
+$(aws ecr get-login --no-include-email --region REPLACE_ME_REGION)
+```
+
 * Navigate to `~/environment/module-2/app`
 
 ```
 cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
 
-* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks** command.
-
-* Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
-
+<!-- From https://console.aws.amazon.com/ecr/repositories/mythicalmysfits/service/?region=us-east-1: -->
 ```
-docker build -t aws-modern-application-workshop .
+docker build -t mythicalmysfits/service .
 ```
 
-You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image (ACCOUNT-ID represents an account ID, and REGION the region in which you signed into the console):
+After the build completes, tag your image so that you can push it to the repository:
 
 ```
-Successfully built 8bxxxxxxxxab
-Successfully tagged ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service:latest
+docker tag mythicalmysfits/service:latest REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-Save the image tag, **ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service** in the previous example, as you will need it later in the tutorial.
+Run the following command to push the image to the repository you just created:
+
+```
+docker push REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
+```
 
 #### Testing the Service Locally
 
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous command and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
 
 ```
-docker run -p 8080:8080 ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/mythicalmysfits/service
+docker run -p 8080:8080 mythicalmysfits/service:latest
 ```
 
-As a result you will see docker reporting that your container is up and running locally:
+You can confirm that the service is running by using *curl* in another terminal window:
 
 ```
- * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+curl -X get http://localhost:8080/mysfits
 ```
 
-To test our service with a local request, we're going to open up the built-in web browser within the Cloud9 IDE that can be used to preview applications that are running on the IDE instance.  To open the preview web browser, select **Preview > Preview Running Application** in the Cloud9 menu bar:
+This should display the JSON list of mysfits.
+
+You can also test the service with a local request.
+Select **Preview > Preview Running Application** in the Cloud9 menu bar to 
+pen up the built-in web browser within the Cloud9 IDE:
 
 ![preview-menu](/images/module-2/preview-menu.png)
 
-This will open another panel in the IDE where the web browser will be available.  Append /mysfits to the end of the URI in the address bar of the preview browser in the new panel and hit enter:
+This opens another panel in the IDE where the web browser is available.
+Append /mysfits to the end of the URI in the address bar of the preview browser in the new panel and hit enter:
 
 ![preview-menu](/images/module-2/address-bar.png)
 
-If successful you will see a response from the service that returns the JSON document */aws-modern-application-workshop/module-2/app/service/mysfits-response.json*.
+If successful you will see a response from the service that returns the JSON document */aws-modern-application-workshop/module-2/app/service/mysfits-response.json* (it should match the *curl* output).
 
-When done testing the service you can stop it by pressing CTRL-c on PC or Mac.
+When done testing the service you can stop it by pressing CTRL-c in the terminal window running the *docker run* command.
 
 #### Pushing the Docker Image to Amazon ECR
 

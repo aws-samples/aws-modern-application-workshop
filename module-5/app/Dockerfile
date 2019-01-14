@@ -1,6 +1,6 @@
 FROM golang:1.8
 
-EXPOSE 8088
+EXPOSE 8080
 
 WORKDIR /go/src/app
 COPY ./service/ .

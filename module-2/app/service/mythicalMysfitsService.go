@@ -7,12 +7,12 @@ import (
 
 // For http://localhost:8080
 func healthCheckResponse(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("Nothing here, used for health check. Try /misfits instead."))
+    w.Write([]byte("Nothing here, used for health check. Try /mysfits instead."))
 }
 
-// Show mysfits-response.json for http://localhost:8080/misfits
-func showMisfits(w http.ResponseWriter, r *http.Request) {
-    // Read Misfits data from file and show it
+// Show mysfits-response.json for http://localhost:8080/mysfits
+func showMysfits(w http.ResponseWriter, r *http.Request) {
+    // Read Mysfits data from file and show it
     body, _ := ioutil.ReadFile("mysfits-response.json")
 
     // Let the web server know it's JSON
@@ -23,6 +23,6 @@ func showMisfits(w http.ResponseWriter, r *http.Request) {
 func main() {
     mux := http.NewServeMux()
     mux.Handle("/", http.HandlerFunc(healthCheckResponse))
-    mux.Handle("/misfits", http.HandlerFunc(showMisfits))
+    mux.Handle("/mysfits", http.HandlerFunc(showMysfits))
     http.ListenAndServe(":8080", mux)
 }

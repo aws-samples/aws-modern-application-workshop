@@ -23,6 +23,8 @@ This web application can be deployed in any AWS region that supports all the ser
 * eu-west-1 (Ireland)
 
 Select a region from the dropdown in the upper right corner of the AWS Management Console.
+Once you've selected the region for the IDE,
+that becomes the default region for all of the resources you create using the IDE.
 
 ### Creating your Mythical Mysifts IDE
 
@@ -75,15 +77,15 @@ First, create an S3 bucket, replace REPLACE_ME_BUCKET_NAME with your own unique 
 aws s3 mb s3://REPLACE_ME_BUCKET_NAME
 ```
 
-Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
+Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for static website hosting.  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases). Don't forget to replace REPLACE_ME_BUCKET_NAME with the bucket name you used on the previous step:
 
 ```
-aws s3 website s3://mythical-mysfits-bucket-name --index-document index.html
+aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
 ```
 
 #### Update the S3 Bucket Policy
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 **Bucket Policy** that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone). The JSON document for the necessary bucket policy is located at: `/~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file includes several places that you need to change to use the new bucket name you've created (indicated with `REPLACE_ME_BUCKET_NAME`).
+All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 **Bucket Policy** that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone). The JSON document for the necessary bucket policy is located at: `/~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file includes one place that you need to change to use the new bucket name you've created (indicated with `REPLACE_ME_BUCKET_NAME`).
 
 Execute the following CLI command to add a public bucket policy to your website:
 
@@ -99,11 +101,19 @@ Now that our new website bucket is configured appropriately, let's add the first
 aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html s3://REPLACE_ME_BUCKET_NAME/index.html
 ```
 
-Now, open up your favorite web browser and enter the below address into the address bar,
+Browse to one of the following addresses,
 replacing REPLACE_ME_BUCKET_NAME with the name of your bucket and REPLACE_ME_REGION
-with the region where you signed into the console:
+with the region where you signed into the console.
+Note that one of the addresses contains a '.' before the region name,
+and the other a '-'. The one you use depends on the region you're using.
 
-http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_REGION.amazonaws.com
+For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
+
+http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+
+For us-east-2 (Ohio) use:
+
+http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
