@@ -90,12 +90,6 @@ After the build completes, tag your image so that you can push it to the reposit
 docker tag mythicalmysfits/service:latest REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-Run the following command to push the image to the repository you just created:
-
-```
-docker push REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
-```
-
 #### Testing the Service Locally
 
 Let's test our image locally within Cloud9 to make sure everything is operating as expected. Copy the image tag that resulted from the previous command and run the following command to deploy the container “locally” (which is actually within your Cloud9 IDE inside AWS!):
