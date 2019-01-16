@@ -158,7 +158,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 // Defaults
 var DefaultFormat = "JSON"
-var DefaultPort = ":8088"
+var DefaultPort = ":8080"
 
 func main() {
     // Check environment
