@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-	"strings"
+    "fmt"
+    "net/http"
+    "os"
+    "strings"
 )
 
+// CORS:
 func setupResponse(w *http.ResponseWriter) {
     (*w).Header().Set("Content-Type", "text/html; charset=utf-8")
     (*w).Header().Set("Access-Control-Allow-Origin", "*")
@@ -15,24 +16,24 @@ func setupResponse(w *http.ResponseWriter) {
 }
 
 func getContentType() string {
-	contentType := "application/json"
+    contentType := "application/json"
 
-	switch DefaultFormat {
-	case "JSON":
-		Init(os.Stderr, JSON)
-		contentType = "application/json"
-	case "HTML":
-        Init(os.Stderr, HTML)
-		contentType = "application/html"
-	case "TEXT":
-        Init(os.Stderr, STRING)
-		contentType = "text/html; charset=utf-8"
-	default:
+    switch DefaultFormat {
+    case "JSON":
         Init(os.Stderr, JSON)
-		contentType = "application/json"
-	}
+        contentType = "application/json"
+    case "HTML":
+        Init(os.Stderr, HTML)
+        contentType = "application/html"
+    case "TEXT":
+        Init(os.Stderr, STRING)
+        contentType = "text/html; charset=utf-8"
+    default:
+        Init(os.Stderr, JSON)
+        contentType = "application/json"
+    }
 
-	return contentType
+    return contentType
 }
 
 // Handle GET requests
@@ -40,22 +41,22 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
     fmt.Println("In getHandler")
 
     setupResponse(&w)
-	// We handle (in local testing):
-	// /mysfits                              returns all mysfits
-	// /mysfits?filter=FILTER&value=VALUE    returns a mysfit where FILTER is has VALUE
-	// /mysfits/{mysfitsId}                  returns a mysfit by their mysfitId
+    // We handle (in local testing):
+    // /mysfits                              returns all mysfits
+    // /mysfits?filter=FILTER&value=VALUE    returns a mysfit where FILTER is has VALUE
+    // /mysfits/{mysfitsId}                  returns a mysfit by their mysfitId
 
-	var path = r.URL.Path
-	fmt.Println("Got path: " + path)
+    var path = r.URL.Path
+    fmt.Println("Got path: " + path)
 
-	// If just /, return simple message
-	if path == "/" {
-		// We must set the format to text, otherwise we get a JSON format error
-		return "Nothing here, used for health check. Try /mysfits instead.", "TEXT"
-	}
+    // If just /, return simple message
+    if path == "/" {
+        // We must set the format to text, otherwise we get a JSON format error
+        return "Nothing here, used for health check. Try /mysfits instead.", "TEXT"
+    }
 
-   	// If just /mysfits, get them all
-	if path == "/mysfits" {
+    // If just /mysfits, get them all
+    if path == "/mysfits" {
         // Did we get a filter request?
         filter := r.URL.Query().Get("filter")
         if filter != "" {
@@ -69,90 +70,90 @@ func getHandler(w http.ResponseWriter, r *http.Request, t string) (string, strin
             fmt.Println("Returning all mysfits")
             return GetAllMysfits(), t
         }
-	}
+    }
 
     // We have a path like: /mysfits/abc123
-	// First make sure it's not /mysfits/abc123/xyz
-	s := strings.Split(path, "/")
+    // First make sure it's not /mysfits/abc123/xyz
+    s := strings.Split(path, "/")
 
-	// Splitting /mysfits/abc123 gives us:
-	// s[0]: ""
-	// s[1]: "mysfits"
-	// s[2]: "abc123"
+    // Splitting /mysfits/abc123 gives us:
+    // s[0]: ""
+    // s[1]: "mysfits"
+    // s[2]: "abc123"
 
-	if len(s) == 3 {
-		id := s[2]
-		return GetMysfit(id), t
-	}
+    if len(s) == 3 {
+        id := s[2]
+        return GetMysfit(id), t
+    }
 
-	// We must set the format to text, otherwise we get a JSON format error
-	return "Got bad GET request", "TEXT"
+    // We must set the format to text, otherwise we get a JSON format error
+    return "Got bad GET request", "TEXT"
 }
 
 // Handle POST requests
 func postHandler(w http.ResponseWriter, r *http.Request, t string) (string, string) {
     setupResponse(&w)
-	// We support:
-	// /mysfits/<mysfitId>/like     increments the likes for mysfit with mysfitId
-	// /mysfits/<mysfitId>/adopt    enables adopt for mysfit with mysfitId
+    // We support:
+    // /mysfits/<mysfitId>/like     increments the likes for mysfit with mysfitId
+    // /mysfits/<mysfitId>/adopt    enables adopt for mysfit with mysfitId
 
-	path := r.URL.Path
+    path := r.URL.Path
 
-	s := strings.Split(path, "/")
+    s := strings.Split(path, "/")
 
-	// Splitting /mysfits/abc123/adopt gives us:
-	// s[0] == ""
-	// s[1] == "mysfits"
-	// s[2] == "abc123"
-	// s[3] == "adopt"
+    // Splitting /mysfits/abc123/adopt gives us:
+    // s[0] == ""
+    // s[1] == "mysfits"
+    // s[2] == "abc123"
+    // s[3] == "adopt"
 
-	if len(s) == 4 {
-		id := s[2]
-		action := s[3]
+    if len(s) == 4 {
+        id := s[2]
+        action := s[3]
 
-		switch action {
-		case "like":
+        switch action {
+        case "like":
             IncMysfitLikes(id)
-			return "Incremented likes for " + id, "TEXT"
-		case "adopt":
+            return "Incremented likes for " + id, "TEXT"
+        case "adopt":
             SetMysfitAdopt(id)
-			return "Enabled adoption for " + id, "TEXT"
-		default:
-			return "Unknown action: " + action, "TEXT"
-		}
-	}
+            return "Enabled adoption for " + id, "TEXT"
+        default:
+            return "Unknown action: " + action, "TEXT"
+        }
+    }
 
-	return "Unknown request", "TEXT"
+    return "Unknown request", "TEXT"
 }
 
 // Handle everything here
 func mainHandler(w http.ResponseWriter, r *http.Request) {
     setupResponse(&w)
 
-	// Show path and method
-	fmt.Println("")
-	fmt.Println("In mainHandler")
-	fmt.Println("Method: " + r.Method)
-	fmt.Println("Path:   " + r.URL.Path)
+    // Show path and method
+    fmt.Println("")
+    fmt.Println("In mainHandler")
+    fmt.Println("Method: " + r.Method)
+    fmt.Println("Path:   " + r.URL.Path)
 
-	content := ""
-	contentType := getContentType()
+    content := ""
+    contentType := getContentType()
 
-	// If GET, send it to getHandler
-	switch r.Method {
-	case "GET":
-		content, contentType = getHandler(w, r, contentType)
-	case "POST":
-		content, contentType = postHandler(w, r, contentType)
-	default:
-		content = "Bad HTTP request method: " + r.Method
-		contentType = "TEXT"
-	}
+    // If GET, send it to getHandler
+    switch r.Method {
+    case "GET":
+        content, contentType = getHandler(w, r, contentType)
+    case "POST":
+        content, contentType = postHandler(w, r, contentType)
+    default:
+        content = "Bad HTTP request method: " + r.Method
+        contentType = "TEXT"
+    }
 
-	// Add content to web page
-	body := []byte(content)
-	w.Header().Set("Content-Type", contentType)
-	w.Write(body)
+    // Add content to web page
+    body := []byte(content)
+    w.Header().Set("Content-Type", contentType)
+    w.Write(body)
 }
 
 // Defaults
@@ -160,22 +161,22 @@ var DefaultFormat = "JSON"
 var DefaultPort = ":8088"
 
 func main() {
-	// Check environment
-	port := os.Getenv("PORT")
-	if port != "" {
-		DefaultPort = port
-	}
+    // Check environment
+    port := os.Getenv("PORT")
+    if port != "" {
+        DefaultPort = port
+    }
 
-		format := os.Getenv("FORMAT")
-	if format != "" {
-		DefaultFormat = format
-	}
+        format := os.Getenv("FORMAT")
+    if format != "" {
+        DefaultFormat = format
+    }
 
-	fmt.Println("Returning format: " + DefaultFormat)
+    fmt.Println("Returning format: " + DefaultFormat)
 
-	fmt.Println("Running locally on http://localhost" + DefaultPort)
+    fmt.Println("Running locally on http://localhost" + DefaultPort)
 
-	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(mainHandler))
-	http.ListenAndServe(DefaultPort, mux)
+    mux := http.NewServeMux()
+    mux.Handle("/", http.HandlerFunc(mainHandler))
+    http.ListenAndServe(DefaultPort, mux)
 }
