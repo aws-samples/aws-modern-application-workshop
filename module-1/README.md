@@ -6,9 +6,10 @@
 
 **Services used:**
 * [AWS Cloud9](https://aws.amazon.com/cloud9/)
+* [Amazon CloudFront](https://aws.amazon.com/cloudfront/)
 * [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
 
-In this module, follow the instructions to create your cloud-based IDE on [AWS Cloud9](https://aws.amazon.com/cloud9/) and deploy the first version of the static Mythical Mysfits website.  [Amazon S3](https://aws.amazon.com/s3/) is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
+In this module, follow the instructions to create your cloud-based IDE on [AWS Cloud9](https://aws.amazon.com/cloud9/) and deploy the first version of the static Mythical Mysfits website. The content will be served from Amazon CloudFront content delivery service, with the source stored in [Amazon S3](https://aws.amazon.com/s3/). This combination allows highly scalable and secure serving in CloudFront, while S3 storage provides a highly durable, highly available, and inexpensive object storage service. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.
 
 ### Getting Started
 
@@ -69,41 +70,62 @@ In the terminal, change directory to the newly cloned repository directory:
 cd aws-modern-application-workshop
 ```
 
-### Creating a Static Website in Amazon S3
+### Creating a Website with Amazon CloudFront and Amazon S3
 
-#### Create an S3 Bucket and Configure it for Website Hosting
-Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).
+#### Create an S3 Bucket for Storing Content
+Next, we will create the infrastructure components needed for storing static website in Amazon S3 via the ![AWS CLI](https://aws.amazon.com/cli/). If you do not already have the AWS CLI configured see ![getting started](http://docs.aws.amazon.com/cli/latest/userguide/)
 
-**Note: This workshop uses placeholders for names that you must supply. These placeholders use the prefix `REPLACE_ME_` to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.**
-
-First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace *REPLACE_ME_BUCKET_NAME* with your own unique bucket name, as described in [requirements for bucket names](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+First, create an S3 bucket, replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name.  Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
 ```
-aws s3 mb s3://REPLACE_ME_BUCKET_NAME
-```
-
-Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
-
-```
-aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
+aws s3 mb s3://mythical-mysfits-bucket-name
 ```
 
 #### Update the S3 Bucket Policy
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
+All buckets created in Amazon S3 are fully private by default.  In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by a CloudFront origin access identity that we also create. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or explicitly denied) to be performed by different *Principals* (in our case the CloudFront service).
 
-The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains a string that needs to be replaced with the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+First we need to create a CloudFront Access Identity using the following CLI command.
 
-To **open a file** in Cloud9, use the File Explorer on the left panel and double click `website-bucket-policy.json`:
+```
+aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config CallerReference=Mysfits,Comment=Mysfits
+```
 
-![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
+Record the **Id** from the output as we will need to update the bucket policy with this.
 
-This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
+```
+{
+    "CloudFrontOriginAccessIdentity": {
+        "CloudFrontOriginAccessIdentityConfig": {
+            "Comment": "Mysfits", 
+            "CallerReference": "Mysfits"
+        }, 
+        "S3CanonicalUserId": "ABCABCCCAfICCQD6m7oRw0uXOjANBgkqhkiG9w0BAQUFADCBiDELMAkGA1EXAMPLE", 
+        "Id": "ABCAJ2UCCR6DPCEXAMPLE"
+    }, 
+    "ETag": "ANPAJ2UCCR6DPCEXAMPLE", 
+    "Location": "https://cloudfront.amazonaws.com/2017-10-30/origin-access-identity/cloudfront/ANPAJ2UCCR6DPCEXAMPLE"
+}
+
+```
+
+The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+
+**Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
+
+To **open a file** in Cloud9, use the File Explorer on the left panel and double click `bucket-policy.json`:
+
+![bucket-policy-image.png](/images/module-1/bucket-policy.png)
+
+This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown on both lines 9 and 12 with your Id and chosen bucket name used in the previous commands:
 
 ![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
 
+In Cloud9, open the `website-cloudfront-distribution.json` file and edit the bucket name on line 12 and the Id on line 14:
 
-Execute the following CLI command to add a public bucket policy to your website:
+![bucket-policy-image.png](/images/module-1/cloudfront-distribution.png)
+
+Execute the following CLI command to add a public bucket policy to allow CloudFront:
 
 ```
 aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json
@@ -111,25 +133,38 @@ aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/en
 
 #### Publish the Website Content to S3
 
-Now that our new website bucket is configured appropriately, let's add the first iteration of the Mythical Mysfits homepage to the bucket.  Use the following S3 CLI command that mimics the linux command for copying files (**cp**) to copy the provided index.html page locally from your IDE up to the new S3 bucket (replacing the bucket name appropriately).
+Now that our S3 bucket is created, let's add the first iteration of the Mythical Mysfits homepage to the bucket.  Use the following S3 CLI command that mimics the linux command for copying files (**cp**) to copy the provided index.html page locally from your IDE up to the new S3 bucket (replacing the bucket name appropriately).
 
 ```
 aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html s3://REPLACE_ME_BUCKET_NAME/index.html
 ```
 
-Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using.
+#### Create CloudFront Distribution
 
-The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you created the S3 bucket within (eg: us-east-1):
+Using the AWS CLI, we will create a CloudFront distribution, and configure the S3 bucket as the origin. The JSON document for the necessary CloudFront configuration is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-cloudfront-distribution.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
 
-For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+aws cloudfront create-distribution --distribution-config file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-cloudfront-distribution.json
 ```
 
-For us-east-2 (Ohio) use:
+  * If this was a web site used for more than just testing you should enable logging, and consider the AWS Web Application Firewall (WAF) service to help protect. For more information on the other configuration options, see [Values That You Specify When You Create or Update a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html) in the CloudFront documentation.
+
+
+5. You can check on the status of the CloudFront distribution by using the CLI command:
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
+aws cloudfront list-distributions
 ```
+Note the `DomainName` as that will be your web site. After CloudFront creates your distribution, the value of `Status` will change from In Progress to Deployed.
+For more information, see [Testing a Web Distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-testing.html) in the CloudFront documentation.
+
+
+6. You have now configured Amazon CloudFront with basic settings and S3 as origin.
+
+For more information on configuring CloudFront, see [Viewing and Updating CloudFront Distributions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowToUpdateDistribution.html) in the CloudFront documentation.
+
+#### Test Website
+
+Now, it can take some time e.g. 15 to 30 minutes for your newly created S3 bucket to be accessible by CloudFront, as it is a global network of 100+ edge locations. Open up your favorite web browser and enter the **Domain Name** from the CloudFront console, it will be a series of characters and end in cloudfront.net. If you get an error and/or redirect to the S3 bucket wait some more time.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
