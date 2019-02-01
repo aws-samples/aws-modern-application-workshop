@@ -75,24 +75,24 @@ cd aws-modern-application-workshop
 #### Create an S3 Bucket for Storing Content
 Next, we will create the infrastructure components needed for storing static website in Amazon S3 via the ![AWS CLI](https://aws.amazon.com/cli/). If you do not already have the AWS CLI configured see ![getting started](http://docs.aws.amazon.com/cli/latest/userguide/)
 
-First, create an S3 bucket, replace the name below (mythical-mysfits-bucket-name) with your own unique bucket name.  Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+First, create an S3 bucket, replace the name below (REPLACE_ME_BUCKET_NAME) with your own unique bucket name.  Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
 
 ```
-aws s3 mb s3://mythical-mysfits-bucket-name
+aws s3 mb s3://REPLACE_ME_BUCKET_NAME
 ```
 
 #### Update the S3 Bucket Policy
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by a CloudFront origin access identity that we also create. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or explicitly denied) to be performed by different *Principals* (in our case the CloudFront service).
+All buckets created in Amazon S3 are fully private by default. In order to be used as a website accessible only through CloudFront, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be accessed by only your CloudFront origin access identity that you create. 
+
+The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_CLOUDFRONT_ORIGIN_ACCESS_IDENTITY_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`). 
 
 First we need to create a CloudFront Access Identity using the following CLI command.
 
 ```
 aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config CallerReference=Mysfits,Comment=Mysfits
 ```
-
-Record the **Id** from the output as we will need to update the bucket policy with this.
-
+Example Output: 
 ```
 {
     "CloudFrontOriginAccessIdentity": {
@@ -101,15 +101,15 @@ Record the **Id** from the output as we will need to update the bucket policy wi
             "CallerReference": "Mysfits"
         }, 
         "S3CanonicalUserId": "ABCABCCCAfICCQD6m7oRw0uXOjANBgkqhkiG9w0BAQUFADCBiDELMAkGA1EXAMPLE", 
-        "Id": "ABCAJ2UCCR6DPCEXAMPLE"
+        "Id": "REPLACE_ME_CLOUDFRONT_ORIGIN_ACCESS_IDENTITY_ID"
     }, 
     "ETag": "ANPAJ2UCCR6DPCEXAMPLE", 
     "Location": "https://cloudfront.amazonaws.com/2017-10-30/origin-access-identity/cloudfront/ANPAJ2UCCR6DPCEXAMPLE"
 }
 
 ```
-
-The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains two strings that need to be replaced, the Id (indicated with `REPLACE_ME_ID`), and the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+Record the **Id** from the output as we will need to use it in subsequent steps, where we will refer to it as `REPLACE_ME_CLOUDFRONT_ORIGIN_ACCESS_IDENTITY_ID`.
+  
 
 **Note: Throughout this workshop you will be similarly opening files that have contents which need to be replaced (all will be prefixed with `REPLACE_ME_`, to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.)**
 
