@@ -196,8 +196,7 @@ func getItems(items []map[string]*dynamodb.AttributeValue) Mysfits {
 
     err := dynamodbattribute.UnmarshalListOfMaps(items, &mysfitList)
     if err != nil {
-        println("Got error unmarshalling items:")
-        println(err.Error())
+        Info.Print("Got error unmarshalling items:", err)
         return nil
     }
 
@@ -210,6 +209,7 @@ func getStringFromItem(item map[string]*dynamodb.AttributeValue) string {
 
     err := dynamodbattribute.UnmarshalMap(item, &m)
     if err != nil {
+        Info.Print("Got error unmarshalling item:", err)
         return ""
     }
 
@@ -235,6 +235,7 @@ func getStringFromItems(items []map[string]*dynamodb.AttributeValue) string {
 
     err := dynamodbattribute.UnmarshalListOfMaps(items, &ms)
     if err != nil {
+        Info.Print("Got error unmarshalling items:", err)
         return ""
     }
 
@@ -260,6 +261,7 @@ func getJSONStringFromItems(items []map[string]*dynamodb.AttributeValue) string 
 
     err := dynamodbattribute.UnmarshalListOfMaps(items, &ms)
     if err != nil {
+        Info.Print("Got error unmarshalling items:", err)
         return ""
     }
 
@@ -293,7 +295,7 @@ func GetAllMysfits() string {
 
     result, err := svc.Scan(input)
     if err != nil {
-        Info.Print("Got error scanning table:")
+        Info.Print("Got error scanning table:", err)
         return ""
     }
 
@@ -476,7 +478,7 @@ func QueryMysfits(originalFilter string, originalValue string) string {
 
     result, err := svc.Scan(input)
     if err != nil {
-        Info.Print("Got error getting item:")
+        Info.Print("Got error getting item:", err)
         return ""
     }
 
