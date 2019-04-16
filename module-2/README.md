@@ -68,7 +68,7 @@ All of the code required to run our service backend is stored within the `/modul
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
-* Navigate to `~/environment/module-2/app`
+* Navigate to `~/environment/aws-modern-application-workshop/module-2/app`
 
 ```
 cd ~/environment/aws-modern-application-workshop/module-2/app
@@ -82,7 +82,8 @@ cd ~/environment/aws-modern-application-workshop/module-2/app
 docker build . -t REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  **Copy the image tag for later reference. Below the example tag shown is: 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest**
+You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  **Copy the image tag for later reference. Below the example tag shown is: 111111111111.dkr.ecr.
+.amazonaws.com/mythicalmysfits/service:latest**
 
 ```
 Successfully built 8bxxxxxxxxab
@@ -176,7 +177,7 @@ Open `~/environment/aws-modern-application-workshop/module-2/aws-cli/task-defini
 
 Replace the indicated values with the appropriate ones from your created resources.  
 
-These values will be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `REPLACE_ME_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest`
+These values will be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `REPLACE_ME_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest`
 
 Once you have replaced the values in `task-defintion.json` and saved it. Execute the following command to register a new task definition in ECS:
 
@@ -245,10 +246,10 @@ After your service is created, ECS will provision a new task that's running the 
 
 #### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by simply any web browser, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
+Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by usingy any web browser or CLI tool, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
 
 ```
-http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
+curl http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
 ```
 
 A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate.
@@ -275,7 +276,7 @@ To upload this file to your S3 hosted website, use the bucket name again that wa
 aws s3 cp ~/environment/aws-modern-application-workshop/module-2/web/index.html s3://INSERT-YOUR-BUCKET-NAME/index.html
 ```
 
- Open your website using the same URL used at the end of Module 1 in order to see your new Mythical Mysfits website, which is retrieving JSON data from your Flask API running within a docker container deployed to AWS Fargate!
+ Open your website using the same CloudFront URL used at the end of Module 1 in order to see your new Mythical Mysfits website, which is retrieving JSON data from your Flask API running within a docker container deployed to AWS Fargate!
 
 
 ## Module 2b: Automating Deployments using AWS Code Services
