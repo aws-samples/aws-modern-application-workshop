@@ -246,7 +246,7 @@ After your service is created, ECS will provision a new task that's running the 
 
 #### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by usingy any web browser or CLI tool, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
+Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by using any web browser or CLI tool, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
 
 ```
 curl http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
