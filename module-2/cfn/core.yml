@@ -320,7 +320,6 @@ Resources:
   MythicalMysfitsServiceCodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: MythicalMysfitsServiceCodePipelineServiceRole
       AssumeRolePolicyDocument:
         Statement:
         - Effect: Allow
@@ -370,7 +369,6 @@ Resources:
   MythicalMysfitsServiceCodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: MythicalMysfitsServiceCodeBuildServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
