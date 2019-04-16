@@ -11,7 +11,7 @@
 * [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
 * [AWS Lambda](https://aws.amazon.com/lambda/)
 * [AWS CodeCommit](https://aws.amazon.com/codecommit/)
-* [AWS Serverless Appliation Model (AWS SAM)](https://github.com/awslabs/serverless-application-model)
+* [AWS Serverless Application Model (AWS SAM)](https://github.com/awslabs/serverless-application-model)
 * [AWS SAM Command Line Interface (SAM CLI)](https://github.com/awslabs/aws-sam-cli)
 
 ## Overview
