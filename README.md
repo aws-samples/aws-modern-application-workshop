@@ -18,6 +18,9 @@ Please be sure to terminate all of the resources created during this workshop to
 
 **Note:**  Estimated workshop costs assume little to no traffic will be served by your demo website created as part of this workshop.
 
+**Video Tutorial Series**
+* [Watch the series here](https://www.youtube.com/playlist?list=PLvmxnsCyoh65RDAWSCzniRDwZqoCTmdii)
+
 ### Application Architecture
 
 ![Application Architecture](/images/arch-diagram.png)
