@@ -1,0 +1,24 @@
+{
+  "name": "cdk",
+  "version": "0.1.0",
+  "bin": {
+    "cdk": "bin/cdk.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/aws-apigateway": "^0.33.0",
+    "@aws-cdk/aws-elasticloadbalancingv2": "^0.33.0",
+    "@babel/preset-env": "^7.4.5",
+    "@types/node": "12.0.4",
+    "aws-cdk": "^0.33.0",
+    "typescript": "^3.5.1"
+  },
+  "dependencies": {
+    "@aws-cdk/cdk": "^0.33.0",
+    "source-map-support": "^0.5.12"
+  }
+}
