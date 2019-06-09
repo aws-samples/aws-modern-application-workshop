@@ -4,6 +4,11 @@
 
 **Time to complete:** 60 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-4/source/cdk/`
+
+---
+
 **Services used:**
 
 * [Amazon Cognito](https://aws.amazon.com/cognito/)
@@ -93,7 +98,7 @@ You should now have a Cognito User Pool in your default AWS region. AWS Amplify 
 
 #### Create an API Gateway VPC Link
 
-Next, let's turn our attention to creating a new RESTful API in front of our existing .NET API, so that we can perform request authorization before our NLB receives any requests.  We will do this with **Amazon API Gateway**, as described in the module overview.  In order for API Gateway to privately integrate with our NLB, we will configure an **API Gateway VPC Link** that enables API Gateway APIs to directly integrate with backend web services that are privately hosted inside a VPC. 
+Next, let's turn our attention to creating a new RESTful API in front of our existing .NET API, so that we can perform request authorization before our NLB receives any requests.  We will do this with **Amazon API Gateway**, as described in the module overview.  In order for API Gateway to privately integrate with our NLB, we will configure an **API Gateway VPC Link** that enables API Gateway APIs to directly integrate with backend web services that are privately hosted inside a VPC.
 
 **Note:** For the purposes of this workshop, we created the NLB to be *internet-facing* so that it could be called directly in earlier modules. Because of this, even though we will be requiring Authorization tokens in our API after this module, our NLB will still actually be open to the public behind the API Gateway API.  In a real-world scenario, you should create your NLB to be *internal* from the beginning (or create a new internal load balancer to replace the existing one), knowing that API Gateway would be your strategy for Internet-facing API authorization. But for the sake of time, we'll use the NLB that we've already created that will stay publicly accessible.
 
@@ -156,16 +161,26 @@ import { NetworkStack } from "../lib/networkstack";
 import { APIGatewayStack } from "../lib/apigatewaystack";
 
 const app = new cdk.App();
-new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
+const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-  NetworkStack: networkStack,
-  EcrStack: ecrStack
+  vpc: networkStack.vpc,
+  ecrRepository: ecrStack.ecrRepository
 });
-new DynamoDBStack(app, 'MythicalMysfits-DynamoDB');
-new APIGatewayStack(app, 'MythicalMysfits-APIGateway');
+new CiCdStack(app, "MythicalMysfits-CICD", {
+  EcrRepository: ecrStack.ecrRepository,
+  EcsService: ecsStack.ecsService.service,
+  APIRepository: developerToolStack.apiRepository
+});
+new DynamoDBStack(app, "MythicalMysfits-DynamoDB", {
+  Vpc: networkStack.vpc,
+  FargateService: ecsStack.ecsService.service
+});
+new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+  LBFargateService: ecsStack.ecsService
+});
 ```
 
 Install the AWS CDK npm package for API Gateway by executing the following command from within the `~/Workshop/cdk/` directory.
@@ -183,10 +198,10 @@ Back in `APIGatewayStack.ts`, define the class imports for the code we will be w
 ```typescript
 import apigateway = require('@aws-cdk/aws-apigateway');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
+import ecspatterns = require('@aws-cdk/aws-ecs-patterns');
 import cdk = require('@aws-cdk/cdk');
 import fs = require('fs');
 import path = require('path');
-import { EcsStack } from './ECSStack';
 ```
 
 Next, define the Stack Properties class which details the dependencies our API Gateway implementation has upon other stacks.
@@ -195,7 +210,7 @@ Next, define the Stack Properties class which details the dependencies our API G
 
 ```typescript
 interface APIGatewayStackProps extends cdk.StackProps {
-  EcsStack: EcsStack;
+  LBFargateService: ecspatterns.LoadBalancedFargateService;
 }
 ```
 
@@ -205,7 +220,7 @@ Now, within the constructor of our `APIGatewayStack` class, first we import the 
 
 ```typescript
 const nlb = elbv2.NetworkLoadBalancer.fromNetworkLoadBalancerAttributes(this, 'NLB', {
-  loadBalancerArn: props.EcsStack.ecsService.loadBalancer.loadBalancerArn,
+  loadBalancerArn: props.LBFargateService.loadBalancer.loadBalancerArn,
 });
 ```
 
@@ -266,7 +281,7 @@ And finally, back within the constructor, we define our API Gateway utilising th
 **Action:** Write/Copy the following code:
 
 ```typescript
-const schema = this.generateSwaggerSpec(props.EcsStack.ecsService.loadBalancer.loadBalancerDnsName, vpcLink);
+const schema = this.generateSwaggerSpec(props.LBFargateService.loadBalancer.loadBalancerDnsName, vpcLink);
 const jsonSchema = JSON.parse(schema);
 const api = new apigateway.CfnRestApi(this, 'Schema', {
   name: 'MysfitsApi',

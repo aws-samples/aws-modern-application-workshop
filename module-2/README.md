@@ -4,6 +4,11 @@
 
 **Time to complete:** 60 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-2/source/cdk/`
+
+---
+
 **Services used:**
 
 * [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
@@ -24,27 +29,107 @@ In Module 2, you will create a new microservice hosted with [AWS Fargate](https:
 
 ## Module 2a: Creating a .NET Web API Container
 
-### Building A Docker Image
-
 Next, you will create a Docker container image that contains all of the code and configuration required to run the Mythical Mysfits backend as a microservice API created with .NET Core. We will build the docker container image within our local terminal and then push it to the Amazon Elastic Container Registry, where it will be available to pull when we create our service using Fargate.
 
 All of the code required to run our service backend is stored within the `~/Workshop/source/module-2/webapi/` directory of the repository you've cloned into your local dev environment.  If you would like to review the .NET Core code that is used to create the service API, view the `~/Workshop/source/module-2/webapi/Controllers/MysfitsController.cs` file.
 
 If you do not have Docker installed on your machine, you will need to install it. If you have it aleady installed, we can build the image by running the following commands.
 
-**Action:** * Change to the directory `~/Workshop/api/`
+**Action:** Change to the directory `~/Workshop/api/`
 
 ```sh
 cd ~/Workshop/api/
 ```
 
-**Action:** * Copy the API code to your local directory.
-
 ```sh
-cp -r ~/Workshop/source/webapi/* ~/Workshop/api/
+git init
 ```
 
-* Then build the Docker image. This will use the file in the current directory called `Dockerfile` that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in.
+**Action:** Copy the API code to your local directory.
+
+```sh
+cp -r ~/Workshop/source/module-2/webapi/* ~/Workshop/api/
+```
+
+```sh
+git add .
+```
+
+```sh
+git commit -m 'Initial commit of WebAPI'
+```
+
+### Create a GIT repository for the Web API
+
+We will modify the developertoolstack created in module-1 and create another GIT repository to store the Web API code.
+
+Open the `developertoolstack.ts` in the editor.
+
+```sh
+code ~/Workshop/cdk/lib/developertoolstack.ts
+```
+
+**Action:** Write/Copy the following code:
+
+Create a public property, for other stacks to reference the API repository.
+
+```typescript
+public readonly apiRepository: codecommit.Repository;
+```
+
+Within the constructor, add a definition of a repository for the API code.
+
+```typescript
+const apiRepository = new codecommit.Repository(this, "APIRepository", {
+    repositoryName: "MythicalMysfitsService-Repository-API"
+});
+```
+
+Export the Clone URLs (SSH/HTTPS) so we can use their values once deployed.
+
+```typescript
+new cdk.CfnOutput(this, 'APIRepositoryCloneUrlHttp', {
+  description: 'API Repository CloneUrl HTTP',
+  value: this.apiRepository.repositoryCloneUrlHttp
+});
+
+new cdk.CfnOutput(this, 'APIRepositoryCloneUrlSsh', {
+  description: 'API Repository CloneUrl SSH',
+  value: this.apiRepository.repositoryCloneUrlSsh
+});
+```
+
+#### Using Git with AWS CodeCommit
+
+We need to configure git and integrate it with your CodeCommit repository.
+
+[See this documentation for instructions on generating Git credentials for CodeCommit](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html).
+
+With the generated Git credentials downloaded, we are ready to clone our repository using the following terminal command:
+
+#### Deploy the updated developer tools stack
+
+**Action:** Execute the following command:
+
+```sh
+cdk deploy MythicalMysfits-DeveloperTools
+```
+
+#### Add the CodeCommit repository as a remote
+
+`git remote add origin <Repository URL for selected connection method (https/git-ssh)`
+
+for example:
+
+`git remote add origin https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-API`
+
+or
+
+`git remote add origin ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-API`
+
+## Building A Docker Image
+
+Now, build the Docker image. This will use the file in the current directory called `Dockerfile` that tells Docker all of the instructions that should take place when the build command is executed. Replace the contents in and the {braces} below with the appropriate information from the account/region you're working in.
 
 To retrieve the needed information about your account and region, you can run the following CLI command that uses the AWS Security Token Service to return back information about the principal issuing either the CLI command or the PoewrShell command:
 
@@ -78,14 +163,14 @@ docker build . -t ("{0}.dkr.ecr.{1}.amazonaws.com/mythicalmysfits/service:latest
 
 You will see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  
 
-**Copy the image tag for later reference. Below the example tag shown is: 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest**
+**Action:** Copy the image tag for later reference. Below the example tag shown is: 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest**
 
 ```sh
 Successfully built 8bxxxxxxxxab
 Successfully tagged 111111111111.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest
 ```
 
-#### Testing the Service Locally
+### Testing the Service Locally
 
 Let's test our image locally to make sure everything is operating as expected. Copy the image tag that resulted from the previous command and run the following command to deploy the container locally:
 
@@ -101,11 +186,9 @@ As a result you will see docker reporting that your container is up and running 
 
 To test our service with a local request, open up the above ip address in your browser of choice. Append /api/mysfits to the end of the URI in the address bar of the preview browser and hit enter:
 
-![preview-menu](/images/module-2/address-bar.png)
+If successful you will see a response from the service that returns the JSON document stored at `~/Workshop/webapi/mysfits-response.json`
 
-If successful you will see a response from the service that returns the JSON document stored at `./module-2/webapi/mysfits-response.json`
-
-When done testing the service you can stop it by pressing CTRL-c on PC or Mac.
+When done testing the service you can stop it by pressing CTRL-C on PC or Mac.
 
 ## Module 2b: Deploying a Service with AWS Fargate
 
@@ -227,7 +310,6 @@ But lets now customise the VPC we are creating by adding some property overrides
 
 ```typescript
 this.vpc = new ec2.Vpc(this, "VPC", {
-  cidr: "10.0.0.0/16",
   natGateways: 1,
   maxAZs: 2
 });
@@ -398,8 +480,8 @@ And define the following properties object.
 
 ```typescript
 interface EcsStackProps extends cdk.StackProps{
-  NetworkStack: NetworkStack;
-  EcrStack: EcrStack;
+  vpc: networkStack.vpc,
+  ecrRepository: ecrStack.ecrRepository
 }
 ```
 
@@ -544,8 +626,8 @@ new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    NetworkStack: networkStack,
-    EcrStack: ecrStack
+  vpc: networkStack.vpc,
+  ecrRepository: ecrStack.ecrRepository
 });
 ```
 
@@ -640,6 +722,12 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 ```typescript
 import cdk = require('@aws-cdk/cdk');
 
+interface CiCdStackProps extends cdk.StackProps {
+  EcrRepository: ecr.Repository;
+  EcsService: ecs.FargateService;
+  APIRepository: codecommit.Repository;
+}
+
 export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id);
@@ -647,36 +735,6 @@ export class CiCdStack extends cdk.Stack {
     // The code that defines your stack goes here
   }
 }
-```
-
-Then, add the CiCdStack to our CDK application definition in `bin/cdk.ts`, when done, your `bin/cdk.ts` should look like this;
-
-**Action:** Write/Copy the following code:
-
-```typescript
-#!/usr/bin/env node
-
-import cdk = require("@aws-cdk/cdk");
-import "source-map-support/register";
-import { DeveloperToolsStack } from "../lib/developertoolsstack";
-import { WebApplicationStack } from "../lib/webapplicationstack";
-import { EcrStack } from "../lib/ecrstack";
-import { EcsStack } from "../lib/ecsstack";
-import { NetworkStack } from "../lib/networkstack";
-
-const app = new cdk.App();
-new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
-new WebApplicationStack(app, "MythicalMysfits-WebApplication");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
-const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
-const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    NetworkStack: networkStack,
-    EcrStack: ecrStack
-});
-new CiCdStack(app, "MythicalMysfits-CICD", {
-    EcrStack: ecrStack,
-    EcsStack: ecsStack
-});
 ```
 
 Now, we can define our CiCd pipeline using AWS CDK.  Once again, AWS CDK makes the implementation of AWS Components and Services a breeze by providing you with high level abstractions.  Let's demonstrate this now.
@@ -702,10 +760,6 @@ Within the `CiCdStack` file, define your complete CI/CD CodePipeline:
 **Action:** Write/Copy the following code:
 
 ```typescript
-const apiRepository = new codecommit.Repository(this, "APIRepository", {
-    repositoryName: "MythicalMysfitsService-Repository-API"
-});
-
 const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
   projectName: "MythicalMysfitsServiceCodeBuildProject",
   environment: {
@@ -724,8 +778,14 @@ const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
     }
   }
 });
+```
+
+Provide the codebuild project with permissions to query the codecommit repository.
+**Action:** Write/Copy the following code:
+
+```typescript
 codebuildProject.addToRolePolicy(new iam.PolicyStatement()
-  .addResource(apiRepository.repositoryArn)
+  .addResource(props.DeveloperToolsStack.apiRepository.repositoryArn)
   .addActions(
     "codecommit:ListBranches",
     "codecommit:ListRepositories",
@@ -733,16 +793,33 @@ codebuildProject.addToRolePolicy(new iam.PolicyStatement()
     "codecommit:GitPull"
   )
 );
-props.EcrStack.ecrRepository.grantPullPush(codebuildProject.grantPrincipal);
+```
 
+Provide the codebuild project with permissions to pull and push images to the ECR repository
+**Action:** Write/Copy the following code:
+
+```typescript
+props.EcrStack.ecrRepository.grantPullPush(codebuildProject.grantPrincipal);
+```
+
+Define the Pipeline Source action which tells CodePipeline where to obtain its source from.
+**Action:** Write/Copy the following code:
+
+```typescript
 const sourceOutput = new codepipeline.Artifact();
 const sourceAction = new actions.CodeCommitSourceAction({
   actionName: "CodeCommit-Source",
   branch: "master",
   pollForSourceChanges: false,
-  repository: apiRepository,
+  repository: props.DeveloperToolsStack.apiRepository,
   output: sourceOutput
 });
+```
+
+Define the Pipeline Build action to inform CodePipeline and CodeBuild how to build the WebAPI code and docker image.
+**Action:** Write/Copy the following code:
+
+```typescript
 const buildOutput = new codepipeline.Artifact();
 const buildAction = new actions.CodeBuildAction({
   actionName: "Build",
@@ -750,12 +827,23 @@ const buildAction = new actions.CodeBuildAction({
   output: buildOutput,
   project: codebuildProject
 });
+```
+
+Define the ECS deployment action to instruct the CodePipeline how to deploy the output of the BuildAction to the CodePipeline instance.
+**Action:** Write/Copy the following code:
+
+```typescript
 const deployAction = new actions.EcsDeployAction({
   actionName: "DeployAction",
   service: props.EcsStack.ecsService.service,
   input: buildOutput
 });
+```
 
+Finally define the CodePipeline and stich all the stages/actions together.
+**Action:** Write/Copy the following code:
+
+```typescript
 const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
   pipelineName: "MythicalMysfitsPipeline"
 });
@@ -771,46 +859,40 @@ pipeline.addStage({
   name: "Deploy",
   actions: [deployAction]
 });
+```
 
-new cdk.CfnOutput(this, 'APIRepositoryCloneUrlHttp',{
-    description: 'API Repository CloneUrl HTTP',
-    value: apiRepository.repositoryCloneUrlHttp
+Then, add the CiCdStack to our CDK application definition in `bin/cdk.ts`, when done, your `bin/cdk.ts` should look like this;
+
+**Action:** Write/Copy the following code:
+
+```typescript
+#!/usr/bin/env node
+
+import cdk = require("@aws-cdk/cdk");
+import "source-map-support/register";
+import { DeveloperToolsStack } from "../lib/developertoolsstack";
+import { WebApplicationStack } from "../lib/webapplicationstack";
+import { EcrStack } from "../lib/ecrstack";
+import { EcsStack } from "../lib/ecsstack";
+import { NetworkStack } from "../lib/networkstack";
+
+const app = new cdk.App();
+const developerToolsStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
+new WebApplicationStack(app, "MythicalMysfits-WebApplication");
+const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
+const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
+const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
+    NetworkStack: networkStack,
+    EcrStack: ecrStack
 });
-
-new cdk.CfnOutput(this, 'APIRepositoryCloneUrlSsh',{
-    description: 'API Repository CloneUrl SSH',
-    value: apiRepository.repositoryCloneUrlSsh
+new CiCdStack(app, "MythicalMysfits-CICD", {
+    EcrRepository: ecrStack.ecrRepository,
+    EcsService: ecsStack.ecsService.service,
+    APIRepository: developerToolStack.apiRepository
 });
-
 ```
 
 ### Test the CI/CD Pipeline
-
-#### Using Git with AWS CodeCommit
-
-To test out the new pipeline, we need to configure git and integrate it with your CodeCommit repository.
-
-[See this documentation for instructions on generating Git credentials for CodeCommit](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html).
-
-With the generated Git credentials downloaded, we are ready to clone our repository using the following terminal command:
-
-**Action:** Execute the following command:
-
-```sh
-cd ~/WorkShop/
-```
-
-```sh
-git clone https://git-codecommit.REPLACE_REGION.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-API ~/WorkShop/api
-```
-
-This will tell us that our repository is empty!  Let's fix that by copying the application files into our repository directory using the following command:
-
-**Action:** Execute the following command:
-
-```sh
-cp -r ~/Workshop/source/module-2/webapi/* ~/WorkShop/api
-```
 
 #### Pushing a Code Change
 
@@ -847,6 +929,5 @@ You can view the progress of your code change through the [AWS CodePipeline](htt
 This concludes Module 2.
 
 [Proceed to Module 3](/module-3)
-
 
 ## [AWS Developer Center](https://developer.aws)

@@ -4,6 +4,11 @@
 
 **Time to complete:** 30 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-5/source/cdk/`
+
+---
+
 **Services used:**
 
 * [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
@@ -54,17 +59,35 @@ cd ~/WorkShop/cdk
 code .
 ```
 
-Create a new file in the `lib` folder called `KinesisFirehoseStack.ts`.
+Open the `developertoolsstack.ts` and define another CodeCommit repository, this time for the Kinesis Firehose and Lambda code we will write.
+
+```typescript
+const repo = new codecommit.Repository(this, "Repository", {
+  repositoryName: "MythicalMysfitsService-Repository-Lambda"
+});
+new cdk.CfnOutput(this, "repositoryCloneUrlHttp", {
+  value: repo.repositoryCloneUrlHttp,
+  description: "Repository Clone Url HTTP"
+});
+new cdk.CfnOutput(this, "repositoryCloneUrlSsh", {
+  value: repo.repositoryCloneUrlSsh,
+  description: "Repository Clone Url SSH"
+});
+```
+
+Now, create a new file in the `lib` folder called `kinesisfirehosestack.ts`.
 
 __Note__ As before, you may find it helpful to run the command `npm run watch` from within the CDK folder to provide compile time error reporting whilst you develop your AWS CDK constructs.  We recommend running this from the terminal window within VS Code.
 
-Within the file you just created, define the skeleton CDK Stack structure as we have done before, this time naming the class  `KinesisFirehoseStack`:
+Within the file you just created, define the skeleton CDK Stack structure as we have done before, this time naming the class `KinesisFirehoseStack`:
 
 **Action:** Write/Copy the following code:
 
 ```typescript
 import cdk = require('@aws-cdk/cdk');
-
+interface KinesisFirehoseStackProps extends cdk.StackProps {
+  Table: dynamodb.Table;
+}
 export class KinesisFirehoseStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
     super(scope, id);
@@ -91,16 +114,23 @@ import { NetworkStack } from "../lib/networkstack";
 const app = new cdk.App();
 new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
+const networkStack = new NetworkStack(app, "MythicalMysfits-Module2-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-  NetworkStack: networkStack,
-  EcrStack: ecrStack
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
 });
-const dynamoDBStack = new DynamoDBStack(app, 'MythicalMysfits-DynamoDB');
-new KinesisFirehoseStack(app, 'MythicalMysfits-Lambda', {
-  DynamoDBStack: dynamoDBStack
+const dynamoDBStack = new DynamoDBStack(app, "MythicalMysfits-DynamoDB", {
+    Vpc: networkStack.vpc,
+    FargateService: ecsStack.ecsService
 });
+new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+    LBFargateService: ecsStack.ecsService
+});
+new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
+    Table: dynamoDBStack.Table
+});
+app.run();
 ```
 
 Back in the `KinesisFirehoseStack` file,  define the class imports for the code we will be writing:
@@ -108,26 +138,14 @@ Back in the `KinesisFirehoseStack` file,  define the class imports for the code 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import codecommit = require('@aws-cdk/aws-codecommit');
-import cdk = require('@aws-cdk/cdk');
-```
-
-Now, within the constructor, we should define the GIT repository that we will store our Lambda code within.
-
-**Action:** Write/Copy the following code:
-
-```typescript
-const repo = new codecommit.Repository(this, "Repository", {
-  repositoryName: "MythicalMysfitsService-Repository-Lambda"
-});
-new cdk.CfnOutput(this, "repositoryCloneUrlHttp", {
-  value: repo.repositoryCloneUrlHttp,
-  description: "Repository Clone Url HTTP"
-});
-new cdk.CfnOutput(this, "repositoryCloneUrlSsh", {
-  value: repo.repositoryCloneUrlSsh,
-  description: "Repository Clone Url SSH"
-});
+import cdk = require("@aws-cdk/cdk");
+import apigw = require("@aws-cdk/aws-apigateway");
+import iam = require("@aws-cdk/aws-iam");
+import dynamodb = require("@aws-cdk/aws-dynamodb");
+import { ServicePrincipal } from "@aws-cdk/aws-iam";
+import { CfnDeliveryStream } from "@aws-cdk/aws-kinesisfirehose";
+import lambda = require("@aws-cdk/aws-lambda");
+import s3 = require("@aws-cdk/aws-s3");
 ```
 
 We are not yet finished writing the KinesisFirehoseStack implementation but let's deploy what we have written so far.
@@ -243,7 +261,7 @@ Now let's define the kinesis firehose implementation.
     initialPolicy: [
       new iam.PolicyStatement()
         .addAction("dynamodb:GetItem")
-        .addResource(props.DynamoDBStack.Table.tableArn)
+        .addResource(props.Table.tableArn)
     ],
     environment: {
       mysfits_api_url: "MysfitsApiUrl"
@@ -384,7 +402,7 @@ cdk deploy MythicalMysfits-Lambda
 
 #### Update the Website Content and Push the New Site to S3
 
-With the streaming stack up and running, we now need to publish a new version of our Mythical Mysfits frontend. You will need to update the production `environment` file that you created in module 3 with the value of StreamingApiEndpoint you copied from the last step. Remember this environment file is located inside this folder `./module-5/frontend/src/environments/` and the file is named `environment.prod.ts`. Do not include the /mysfits path. 
+With the streaming stack up and running, we now need to publish a new version of our Mythical Mysfits frontend. You will need to update the production `environment` file that you created in module 3 with the value of StreamingApiEndpoint you copied from the last step. Remember this environment file is located inside this folder `~/Workshop/frontend/module-5/frontend/src/environments/` and the file is named `environment.prod.ts`. Do not include the /mysfits path.
 ![update-angular-environment](/images/module-5/update-angular-environment.png)
 
 After replacing the endpoint to point with your new streaming endpoint, deploy your updated Angular app by running the following command:

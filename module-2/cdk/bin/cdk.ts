@@ -5,18 +5,21 @@ import { CiCdStack } from "../lib/cicdstack";
 import { NetworkStack } from "../lib/networkstack";
 import { EcrStack } from "../lib/ecrstack";
 import { EcsStack } from "../lib/ecsstack";
-import { WebApplicationStack } from "../../../module-1/cdk/lib/webapplicationstack";
+import { WebApplicationStack } from "../lib/webapplicationstack";
+import { DeveloperToolsStack } from "../lib/developertoolsstack";
 
 const app = new cdk.App();
+const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
+new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    NetworkStack: networkStack,
-    EcrStack: ecrStack
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
-    EcrStack: ecrStack,
-    EcsStack: ecsStack
+    EcrRepository: ecrStack.ecrRepository,
+    EcsService: ecsStack.ecsService.service,
+    APIRepository: developerToolStack.apiRepository
 });
-new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 app.run();

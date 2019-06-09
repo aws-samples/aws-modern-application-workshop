@@ -1,28 +1,33 @@
 #!/usr/bin/env node
+
 import cdk = require('@aws-cdk/cdk');
 import 'source-map-support/register';
-import { GitRepoStack } from '../lib/GitRepoStack';
-import { KinesisFirehoseStack } from '../lib/KinesisFirehoseStack';
-import { DynamoDBStack } from '../../../module-3/cdk/lib/DynamoDBStack';
-import { WebApplicationStack } from '../../../module-1/cdk/lib/WebApplicationStack';
-import { NetworkStack } from '../../../module-2/cdk/lib/NetworkStack';
-import { EcrStack } from '../../../module-2/cdk/lib/EcrStack';
-import { EcsStack } from '../../../module-2/cdk/lib/EcsStack';
+import { DynamoDBStack } from '../lib/dynamodbstack';
+import { NetworkStack } from '../lib/networkstack';
+import { WebApplicationStack } from '../lib/webapplicationstack';
+import { DeveloperToolsStack } from "../lib/developertoolsstack";
+import { APIGatewayStack } from "../lib/apigatewaystack";
+import { EcrStack } from "../lib/ecrstack";
+import { EcsStack } from "../lib/ecsstack";
+import { KinesisFirehoseStack } from "../lib/kinesisfirehosestack";
 
 const app = new cdk.App();
-new GitRepoStack(app);
+new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
+new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Module2-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    NetworkStack: networkStack,
-    EcrStack: ecrStack
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
 });
 const dynamoDBStack = new DynamoDBStack(app, "MythicalMysfits-DynamoDB", {
-    NetworkStack: networkStack,
-    EcsStack: ecsStack
+    Vpc: networkStack.vpc,
+    FargateService: ecsStack.ecsService
 });
-new KinesisFirehoseStack(app, "MythicalMysfits-KinesisStack", {
-    DynamoDBStack: dynamoDBStack
+new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+    LBFargateService: ecsStack.ecsService
 });
-new WebApplicationStack(app, "MythicalMysfits-WebApplication");
+new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
+    Table: dynamoDBStack.Table
+});
 app.run();

@@ -4,6 +4,11 @@
 
 **Time to complete:** 20 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-3/source/cdk/`
+
+---
+
 **Services used:**
 
 * [Amazon DynamoDB](https://aws.amazon.com/dynamodb/)
@@ -110,11 +115,9 @@ import ec2 = require("@aws-cdk/aws-dynamodb");
 
 const dynamoDbEndpoint = props.NetworkStack.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
     service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
-    subnets: [
-    {
+    subnets: [{
         subnetType: ec2.SubnetType.Private
-    }
-    ]
+    }]
 });
 dynamoDbEndpoint.addToPolicy(
     new iam.PolicyStatement() // Restrict to listing and describing tables?
@@ -340,6 +343,5 @@ Re-visit your Mythical Mysfits website to see the new population of Mysfits load
 That concludes module 3.
 
 [Proceed to Module 4](/module-4)
-
 
 ## [AWS Developer Center](https://developer.aws)
