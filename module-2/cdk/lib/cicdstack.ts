@@ -10,12 +10,13 @@ import actions = require("@aws-cdk/aws-codepipeline-actions");
 interface CiCdStackProps extends cdk.StackProps {
   EcrRepository: ecr.Repository;
   EcsService: ecs.FargateService;
-  APIRepository: codecommit.Repository;
+  APIRepositoryARN: string;
 }
 export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
     super(scope, id);
 
+    const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository', props.APIRepositoryARN);
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
@@ -35,7 +36,7 @@ export class CiCdStack extends cdk.Stack {
       }
     });
     codebuildProject.addToRolePolicy(new iam.PolicyStatement()
-      .addResource(props.APIRepository.repositoryArn)
+      .addResource(apiRepository.repositoryArn)
       .addActions(
         "codecommit:ListBranches",
         "codecommit:ListRepositories",
@@ -50,7 +51,7 @@ export class CiCdStack extends cdk.Stack {
       actionName: "CodeCommit-Source",
       branch: "master",
       pollForSourceChanges: false,
-      repository: props.APIRepository,
+      repository: apiRepository,
       output: sourceOutput
     });
     const buildOutput = new codepipeline.Artifact();

@@ -20,6 +20,6 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 new CiCdStack(app, "MythicalMysfits-CICD", {
     EcrRepository: ecrStack.ecrRepository,
     EcsService: ecsStack.ecsService.service,
-    APIRepository: developerToolStack.apiRepository
+    APIRepositoryARN: developerToolStack.apiRepository.repositoryArn
 });
 app.run();

@@ -648,7 +648,7 @@ Copy the DNS name you saved when creating the NLB and send a request to it using
 `Bash`
 
 ```sh
-curl http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/api/mysfits
+curl http://<replace-with-your-nlb-address>/api/mysfits
 ```
 
 A response showing the same JSON response we received earlier when testing the docker container locally in our browser means your .NET Web API is up and running on AWS Fargate.
@@ -660,8 +660,6 @@ A response showing the same JSON response we received earlier when testing the d
 Next, we need to integrate our Angular app with your new API backend instead of using the hardcoded Mysfit profile data. We need to edit our `enviroment` file in our Angular app to include a `mysfitsApiUrl` property and re-publish it to our S3 bucket so the endpoint will now point to our NLB.  
 
 ### Replace the API Endpoint and Upload to S3
-
-Since we use `npm run build -- --prod` to build the Angular app, we'll need to create a `prod` version of the `environment` file.
 
 Navigate to the `environments` folder in the Angular app.
 
@@ -680,6 +678,16 @@ Open the `environment.prod.ts` file in Visual Studio Code and replace the `mysfi
 ![angular-update](/images/module-2/replace-mysfits-api-url.png)
 
 After replacing the endpoint to point at your NLB and adding `/api`, deploy your updated angular app:
+
+Since we use `npm run build -- --prod` to build the Angular app, we'll need to create a `prod` version of the `environment` file.
+
+```sh
+cd ~/Workshop/frontend
+```
+
+```sh
+npm run build -- --prod
+```
 
 ```sh
 cd ~/Workshop/cdk
@@ -725,7 +733,7 @@ import cdk = require('@aws-cdk/cdk');
 interface CiCdStackProps extends cdk.StackProps {
   EcrRepository: ecr.Repository;
   EcsService: ecs.FargateService;
-  APIRepository: codecommit.Repository;
+  APIRepositoryARN: string;
 }
 
 export class CiCdStack extends cdk.Stack {
@@ -760,6 +768,7 @@ Within the `CiCdStack` file, define your complete CI/CD CodePipeline:
 **Action:** Write/Copy the following code:
 
 ```typescript
+const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository', props.APIRepositoryARN);
 const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
   projectName: "MythicalMysfitsServiceCodeBuildProject",
   environment: {
@@ -785,7 +794,7 @@ Provide the codebuild project with permissions to query the codecommit repositor
 
 ```typescript
 codebuildProject.addToRolePolicy(new iam.PolicyStatement()
-  .addResource(props.DeveloperToolsStack.apiRepository.repositoryArn)
+  .addResource(apiRepository.repositoryArn)
   .addActions(
     "codecommit:ListBranches",
     "codecommit:ListRepositories",
@@ -811,7 +820,7 @@ const sourceAction = new actions.CodeCommitSourceAction({
   actionName: "CodeCommit-Source",
   branch: "master",
   pollForSourceChanges: false,
-  repository: props.DeveloperToolsStack.apiRepository,
+  repository: apiRepository,
   output: sourceOutput
 });
 ```
@@ -888,7 +897,7 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 new CiCdStack(app, "MythicalMysfits-CICD", {
     EcrRepository: ecrStack.ecrRepository,
     EcsService: ecsStack.ecsService.service,
-    APIRepository: developerToolStack.apiRepository
+    APIRepositoryARN: developerToolStack.apiRepository.repositoryArn
 });
 ```
 
