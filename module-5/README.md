@@ -409,8 +409,18 @@ After replacing the endpoint to point with your new streaming endpoint, deploy y
 
 **Action:** Execute the following commands:
 
+We use `npm run build -- --prod` to build the Angular app.
+
 ```sh
-cd ~/Workshop/cdk/
+cd ~/Workshop/frontend
+```
+
+```sh
+npm run build -- --prod
+```
+
+```sh
+cd ~/Workshop/cdk
 ```
 
 ```sh

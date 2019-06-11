@@ -299,6 +299,16 @@ new cdk.CfnOutput(this, 'APIID', {
 })
 ```
 
+Once you have finished, deploy your stacks.
+
+```sh
+cd ~/Workshop/cdk
+```
+
+```sh
+cdk deploy
+```
+
 With that, our REST API that's capable of user authorization is deployed and available on the Internet... but where?!  Your API is available at the following location:
 
 `Bash`
@@ -324,11 +334,11 @@ Let's take care of that next.
 To accommodate the new functionality to view Mysfit Profiles, like, and adopt them, we have included an updated Mysfits Controller with the additional .NET methods.  Let's overwrite your existing codebase with these files and push them into the repository:
 
 ```sh
-cd ~/WorkShop/api/
+cd ~/WorkShop/webapi/
 ```
 
 ```sh
-cp -r ~/Workshop/source/module-4/webapi/* .
+cp -r ~/Workshop/source/module-4/webapi/* ~/WorkShop/webapi/
 ```
 
 ```sh
@@ -347,9 +357,9 @@ While those service updates are being automatically pushed through your CI/CD pi
 
 #### Update the Mythical Mysfits Website in S3
 
-**Note:** Be sure that the `environment.prod.ts` file exists in `~/Workshop/source/module-4/frontend/src/environments/environment.prod.ts` and has the same values as the previous module.
+**Note:** Be sure that the `environment.prod.ts` file exists in `~/Workshop/frontend/src/environments/environment.prod.ts` and has the same values as the previous module.
 
-You'll need to add our new API as an environment value in the `environment.prod.ts` file. Navigate to `~/Workshop/source/module-4/frontend/src/environments/environment.prod.ts` and create a key/value pair like the following:
+You'll need to add our new API as an environment value in the `environment.prod.ts` file. Navigate to `~/Workshop/frontend/src/environments/environment.prod.ts` and create a key/value pair like the following:
 
 ```js
 export const environment = {
@@ -387,8 +397,19 @@ Once you've updated the `environment.prod.ts` file, Deploy your updated angular 
 
 **Action:** Execute the following commands:
 
+
+Since we use `npm run build -- --prod` to build the Angular app, we'll need to create a `prod` version of the `environment` file.
+
 ```sh
-cd ~/Workshop/cdk/
+cd ~/Workshop/frontend
+```
+
+```sh
+npm run build -- --prod
+```
+
+```sh
+cd ~/Workshop/cdk
 ```
 
 ```sh

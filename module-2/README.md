@@ -35,10 +35,10 @@ All of the code required to run our service backend is stored within the `~/Work
 
 If you do not have Docker installed on your machine, you will need to install it. If you have it aleady installed, we can build the image by running the following commands.
 
-**Action:** Change to the directory `~/Workshop/api/`
+**Action:** Change to the directory `~/Workshop/webapi/`
 
 ```sh
-cd ~/Workshop/api/
+mkdir ~/Workshop/webapi/
 ```
 
 ```sh
@@ -48,7 +48,7 @@ git init
 **Action:** Copy the API code to your local directory.
 
 ```sh
-cp -r ~/Workshop/source/module-2/webapi/* ~/Workshop/api/
+cp -r ~/Workshop/source/module-2/webapi/* ~/Workshop/webapi/
 ```
 
 ```sh
@@ -912,7 +912,7 @@ After saving the file, change directories to the new repository directory:
 **Action:** Execute the following command:
 
 ```sh
-cd ~/WorkShop/api
+cd ~/WorkShop/webapi
 ```
 
 Then, run the following git commands to push in your code changes.  

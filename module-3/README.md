@@ -328,12 +328,24 @@ Deploy your updated angular app by running the following command:
 
 **Action:** Execute the following commands:
 
+
+Since we use `npm run build -- --prod` to build the Angular app, we'll need to create a `prod` version of the `environment` file.
+
 ```sh
-cd ~/Workshop/cdk/
+cd ~/Workshop/frontend
 ```
 
 ```sh
-cdk deploy MythicalMysfits-WebApplicationStack
+npm install
+npm run build -- --prod
+```
+
+```sh
+cd ~/Workshop/cdk
+```
+
+```sh
+cdk deploy MythicalMysfits-WebApplication
 ```
 
 ### (Optional)
