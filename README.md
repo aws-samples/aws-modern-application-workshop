@@ -28,7 +28,7 @@ Please be sure to terminate all of the resources created during this workshop to
 
 The Mythical Mysfits website serves its static content directly from Amazon S3, provides a microservice API backend deployed as a container through AWS Fargate on Amazon ECS, stores data in a managed NoSQL database provided by Amazon DynamoDB, with authentication and authorization for the application enabled through AWS API Gateway and its integration with Amazon Cognito.  The clicks that users perform on the website will be sent as records to an Amazon Kinesis Firehose Delivery stream where those records will be processed by serverless AWS Lambda functions and then stored in Amazon S3.
 
-You will be creating and deploying changes to this application completely programmatically. You will use the [AWS CLI](https://aws.amazon.com/cli/) or the [AWS Tools for PowerShell](https://aws.amazon.com/powershell/) to execute commands that create the required infrastructure components, which includes a fully managed CI/CD stack utilizing AWS CodeCommit, CodeBuild, and CodePipeline.  Finally, you will complete the development tasks required all within [Visual Studio Code](https://code.visualstudio.com/).
+You will be creating and deploying changes to this application completely programmatically. You will use the AWS CDK to create the required infrastructure components, which includes a fully managed CI/CD stack utilizing AWS CodeCommit, CodeBuild, and CodePipeline.  Finally, you will complete the development tasks required all within [Visual Studio Code](https://code.visualstudio.com/).
 
 ## Begin the Modern Application Workshop
 
