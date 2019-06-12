@@ -389,11 +389,13 @@ You may be prompted with a messages such as `Do you wish to deploy these changes
 
 ### Bind to your new GIT Repository remotes
 
-Now that you have created your CodeCommit repositories, you should connect to them from your local repositories.  This involves selecting a method by which you wish to communicate (HTTPS or GIT/SSH) and then lastly adding the CodeCommit repository as a remote and pushing your changes.
+Now that you have created your CodeCommit repositories, we want to now connect them to your local repositories.  This involves selecting a method by which you wish to communicate (HTTPS or GIT/SSH) and then lastly adding the CodeCommit repository as a remote and pushing your changes.
 
 #### Choose connection method
 
-Choose between connecting to your AWS CodeCommit repositories via HTTPS or SSH.  The easiest way to set up CodeCommit is to configure HTTPS Git credentials for AWS CodeCommit. This HTTPS authentication method:
+Choose between connecting to your AWS CodeCommit repositories via HTTPS or SSH.  The easiest way to set up CodeCommit is to configure HTTPS Git credentials for AWS CodeCommit.
+
+The HTTPS authentication method:
 
 * Uses a static user name and password.
 * Works with all operating systems supported by CodeCommit.
@@ -403,36 +405,48 @@ Refer to [https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up.htm
 
 Refer to [https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up.html#setting-up-standard](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up.html#setting-up-standard) for details on how to configure connections via GIT Credentials (SSH)
 
-**Action:** For both your `~/Workshop/cdk` and `~/Workshop/frontend` folders repeat the following steps:
-
-#### Add the CodeCommit repository as a remote
-
-`git remote add origin <Repository URL for selected connection method (https/git-ssh)`
-
-for example:
-
-`git remote add origin https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Web`
-
-or
-
-`git remote add origin ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Web`
-
-### Push your changes
-
-For both the `~/Workshop/frontend` and `~/Workshop/cdk` folders, let's push our code up to CodeCommit.
-
-**Action:** Execute the following command:
+### Add your CodeCommit Repo to ~/Workshop/frontend
 
 ```sh
 cd ~/Workshop/frontend
+```
+
+Execute ONE of the following two commands, based on your chosen method of connection.
+
+_Note:_ If using HTTPS connection method, execute this command
+
+```sh
+git remote add origin https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Web
+```
+
+_Note:_ If using SSH connection method, execute this command
+
+```sh
+git remote add origin ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Web
 ```
 
 ```sh
 git push origin master
 ```
 
+### Add your CodeCommit Repo to ~/Workshop/cdk
+
 ```sh
 cd ~/Workshop/cdk
+```
+
+Execute ONE of the following two commands, based on your chosen method of connection.
+
+_Note:_ If using HTTPS connection method, execute this command
+
+```sh
+git remote add origin https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-CDK
+```
+
+_Note:_ If using SSH connection method, execute this command
+
+```sh
+git remote add origin ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-CDK
 ```
 
 ```sh
@@ -492,11 +506,20 @@ npm install --save-dev @aws-cdk/aws-s3
 npm install --save-dev @aws-cdk/aws-s3-deployment
 ```
 
+
 ### Define the Web Application root directory
 
 Ensure the webAppRoot variable points to the `~/Workshop/frontend/dist/` directory
 
 **Action:** Write/Copy the following code:
+
+In the `webapplicationstack.ts` file, We want to import the `path` module, which we will use to resolve the path to our Web Application build folder.
+
+```typescript
+import path = require('path');
+```
+
+Now, within the `webapplicationstack.ts` constructor, write the folllowing code.
 
 ```typescript
 const webAppRoot = path.resolve(__dirname, '..', '..', 'frontend', 'dist');
@@ -530,6 +553,22 @@ const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOri
 bucket.grantRead(new iam.CanonicalUserPrincipal(
   origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
 ));
+```
+
+### S3 Deploy - Bucket deployment
+
+Now we want to use a handy CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
+
+**Action:** Write/Copy the following code:
+
+```typescript
+// A CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
+new s3deploy.BucketDeployment(this, "DeployWebsite", {
+  source: s3deploy.Source.asset(webAppRoot),
+  destinationKeyPrefix: "web/",
+  destinationBucket: bucket,
+  retainOnDelete: false
+});
 ```
 
 ### CloudFront Distribution
