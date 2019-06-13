@@ -18,7 +18,7 @@ In this module, follow the instructions to set up your environment with Visual S
     * Pick a tool based on the environment you're more comfortable with:
         * Bash -- AWS CLI
         * PowerShell -- AWS Tools for PowerShell
-* [Node.js and NPM](https://nodejs.org/en/)
+* [Node.js and NPM](https://nodejs.org/en/) - v12 or greater
 * [.NET Core 2.1](https://www.microsoft.com/net/download)
 * [Angular CLI](https://cli.angular.io/)
     * npm install -g @angular/cli
