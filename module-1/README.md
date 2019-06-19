@@ -257,7 +257,7 @@ Next, within the lib folder you should find a file with the default name of `cdk
 **Action:** Execute the following command:
 
 ```sh
-mv bin/cdk-stack.ts bin/developertoolsstack.ts
+mv lib/cdk-stack.ts lib/developer-tools-stack.ts
 ```
 
 Open this file in VS Code and rename the class that already exists to `DeveloperToolsStack`, as illustrated below.
