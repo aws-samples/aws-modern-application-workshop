@@ -1,4 +1,4 @@
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
 import cloudfront = require("@aws-cdk/aws-cloudfront");
 import iam = require("@aws-cdk/aws-iam");
 import s3 = require("@aws-cdk/aws-s3");
@@ -27,7 +27,7 @@ export class WebApplicationStack extends cdk.Stack {
 
     // Restrict the S3 bucket via a bucket policy that only allows our CloudFront distribution
     bucket.grantRead(new iam.CanonicalUserPrincipal(
-      origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
+      origin.attrS3CanonicalUserId
     ));
 
     // A CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
@@ -40,14 +40,14 @@ export class WebApplicationStack extends cdk.Stack {
 
     // Definition for a new CloudFront web distribution, which enforces traffic over HTTPS
     const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
-      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.AllowAll,
-      priceClass: cloudfront.PriceClass.PriceClassAll,
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
       originConfigs: [
         {
           behaviors: [
             {
               isDefaultBehavior: true,
-              maxTtlSeconds: undefined,
+              maxTtl: undefined,
               allowedMethods:
                 cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS
             }
@@ -55,7 +55,7 @@ export class WebApplicationStack extends cdk.Stack {
           originPath: `/web`,
           s3OriginSource: {
             s3BucketSource: bucket,
-            originAccessIdentityId: origin.cloudFrontOriginAccessIdentityId
+            originAccessIdentityId: origin.attrS3CanonicalUserId
           }
         }
       ]

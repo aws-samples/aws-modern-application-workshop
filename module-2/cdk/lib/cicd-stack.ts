@@ -1,4 +1,4 @@
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
 import iam = require("@aws-cdk/aws-iam");
 import codebuild = require("@aws-cdk/aws-codebuild");
 import ecr = require("@aws-cdk/aws-ecr");
@@ -20,29 +20,31 @@ export class CiCdStack extends cdk.Stack {
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
-        computeType: codebuild.ComputeType.Small,
+        computeType: codebuild.ComputeType.SMALL,
         buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_PYTHON_3_5_2,
         privileged: true,
         environmentVariables: {
           AWS_ACCOUNT_ID: {
-            type: codebuild.BuildEnvironmentVariableType.PlainText,
-            value: cdk.Aws.accountId
+            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+            value: cdk.Aws.ACCOUNT_ID
           },
           AWS_DEFAULT_REGION: {
-            type: codebuild.BuildEnvironmentVariableType.PlainText,
-            value: cdk.Aws.region
+            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+            value: cdk.Aws.REGION
           }
         }
       }
     });
-    codebuildProject.addToRolePolicy(new iam.PolicyStatement()
-      .addResource(apiRepository.repositoryArn)
-      .addActions(
+    const codeBuildPolicy = new iam.PolicyStatement();
+    codeBuildPolicy.addResources(apiRepository.repositoryArn)
+    codeBuildPolicy.addActions(
         "codecommit:ListBranches",
         "codecommit:ListRepositories",
         "codecommit:BatchGetRepositories",
         "codecommit:GitPull"
       )
+    codebuildProject.addToRolePolicy(
+      codeBuildPolicy
     );
     props.ecrRepository.grantPullPush(codebuildProject.grantPrincipal);
 
@@ -50,7 +52,7 @@ export class CiCdStack extends cdk.Stack {
     const sourceAction = new actions.CodeCommitSourceAction({
       actionName: "CodeCommit-Source",
       branch: "master",
-      pollForSourceChanges: false,
+      trigger: actions.CodeCommitTrigger.POLL,
       repository: apiRepository,
       output: sourceOutput
     });
@@ -58,7 +60,9 @@ export class CiCdStack extends cdk.Stack {
     const buildAction = new actions.CodeBuildAction({
       actionName: "Build",
       input: sourceOutput,
-      output: buildOutput,
+      outputs: [
+        buildOutput
+      ],
       project: codebuildProject
     });
     const deployAction = new actions.EcsDeployAction({
@@ -71,15 +75,15 @@ export class CiCdStack extends cdk.Stack {
       pipelineName: "MythicalMysfitsPipeline"
     });
     pipeline.addStage({
-      name: "Source",
+      stageName: "Source",
       actions: [sourceAction]
     });
     pipeline.addStage({
-      name: "Build",
+      stageName: "Build",
       actions: [buildAction]
     });
     pipeline.addStage({
-      name: "Deploy",
+      stageName: "Deploy",
       actions: [deployAction]
     });
   }

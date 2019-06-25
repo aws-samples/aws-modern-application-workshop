@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 import 'source-map-support/register';
 import { DynamoDbStack } from '../lib/dynamodb-stack';
 import { NetworkStack } from '../lib/network-stack';
@@ -32,4 +32,4 @@ new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
     fargateService: ecsStack.ecsService
 });
-app.run();
+app.synth();

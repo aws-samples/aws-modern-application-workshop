@@ -1,4 +1,4 @@
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
 import ecr = require("@aws-cdk/aws-ecr");
 
 export class EcrStack extends cdk.Stack {

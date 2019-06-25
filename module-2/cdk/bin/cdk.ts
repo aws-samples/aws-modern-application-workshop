@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
+import 'source-map-support/register';
 import { CiCdStack } from "../lib/cicd-stack";
 import { NetworkStack } from "../lib/network-stack";
 import { EcrStack } from "../lib/ecr-stack";
@@ -22,4 +23,4 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service,
     apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
 });
-app.run();
+app.synth();

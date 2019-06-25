@@ -265,7 +265,7 @@ Open this file in VS Code and rename the class that already exists to `Developer
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class DeveloperToolsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
@@ -282,7 +282,7 @@ Following the change of filename and classname, you should now update the refere
 ```typescript
 #!/usr/bin/env node
 import 'source-map-support/register';
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 import { DeveloperToolsStack } from '../lib/developer-tools-stack';
 
 const app = new cdk.App();
@@ -361,7 +361,7 @@ Declare `CfnOutput` for the HTTP and SSH clone URLs for each of your repositorie
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 import codecommit = require("@aws-cdk/aws-codecommit");
 
 export class DeveloperToolsStack extends cdk.Stack {
@@ -510,7 +510,7 @@ Create a new file called `web-application-stack.ts` the `lib` folder define the 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class WebApplicationStack extends cdk.Stack {
   constructor(app: cdk.App, id: string) {

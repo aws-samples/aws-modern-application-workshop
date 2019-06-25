@@ -1,4 +1,4 @@
-import cdk = require('@aws-cdk/cdk');
+import cdk = require("@aws-cdk/core");
 import codecommit = require("@aws-cdk/aws-codecommit");
 
 export class DeveloperToolsStack extends cdk.Stack {

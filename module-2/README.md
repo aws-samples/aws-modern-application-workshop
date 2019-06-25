@@ -266,7 +266,7 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class NetworkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
@@ -284,7 +284,7 @@ Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, wh
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";
@@ -377,7 +377,7 @@ And again, as before, define the skeleton structure of a CDK Stack.
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class ECRStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
@@ -395,7 +395,7 @@ Then, add the ECRStack to our CDK application definition in `bin/cdk.ts`, as we 
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";
@@ -539,7 +539,7 @@ Define the skeleton structure of a CDK Stack.
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class EcsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
@@ -629,10 +629,7 @@ this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
   containerPort: 8080,
   image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
 });
-this.ecsService.service.connections.allowFrom(
-  new ec2.CidrIPv4(props.vpc.vpcCidrBlock),
-  new ec2.TcpPort(8080)
-);
+this.ecsService.service.connections.allowFrom(ec2.Peer.ipv4(props.vpc.vpcCidrBlock),ec2.Port.tcp(8080));
 ```
 
 Notice here the definition of container ports and the customisation of the EC2 SecurityGroups rules created by AWS CDK to limit permitted requests to the cidr block of the VPC we created.
@@ -642,50 +639,54 @@ Now we will add some additional IAM Policy Statements to the Execution and Task 
 **Action:** Write/Copy the following code:
 
 ```typescript
+const taskDefinitionPolicy = new iam.PolicyStatement();
+taskDefinitionPolicy.addActions(
+  // Rules which allow ECS to attach network interfaces to instances
+  // on your behalf in order for awsvpc networking mode to work right
+  "ec2:AttachNetworkInterface",
+  "ec2:CreateNetworkInterface",
+  "ec2:CreateNetworkInterfacePermission",
+  "ec2:DeleteNetworkInterface",
+  "ec2:DeleteNetworkInterfacePermission",
+  "ec2:Describe*",
+  "ec2:DetachNetworkInterface",
+
+  // Rules which allow ECS to update load balancers on your behalf
+  //  with the information sabout how to send traffic to your containers
+  "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+  "elasticloadbalancing:DeregisterTargets",
+  "elasticloadbalancing:Describe*",
+  "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+  "elasticloadbalancing:RegisterTargets",
+
+  //  Rules which allow ECS to run tasks that have IAM roles assigned to them.
+  "iam:PassRole",
+
+  //  Rules that let ECS create and push logs to CloudWatch.
+  "logs:DescribeLogStreams",
+  "logs:CreateLogGroup");
+taskDefinitionPolicy.addAllResources();
+
 this.ecsService.service.taskDefinition.addToExecutionRolePolicy(
-  new iam.PolicyStatement()
-    .addActions(
-      // Rules which allow ECS to attach network interfaces to instances
-      // on your behalf in order for awsvpc networking mode to work right
-      "ec2:AttachNetworkInterface",
-      "ec2:CreateNetworkInterface",
-      "ec2:CreateNetworkInterfacePermission",
-      "ec2:DeleteNetworkInterface",
-      "ec2:DeleteNetworkInterfacePermission",
-      "ec2:Describe*",
-      "ec2:DetachNetworkInterface",
-
-      // Rules which allow ECS to update load balancers on your behalf
-      //  with the information sabout how to send traffic to your containers
-      "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-      "elasticloadbalancing:DeregisterTargets",
-      "elasticloadbalancing:Describe*",
-      "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-      "elasticloadbalancing:RegisterTargets",
-
-      //  Rules which allow ECS to run tasks that have IAM roles assigned to them.
-      "iam:PassRole",
-
-      //  Rules that let ECS create and push logs to CloudWatch.
-      "logs:DescribeLogStreams",
-      "logs:CreateLogGroup")
-    .addAllResources()
+  taskDefinitionPolicy
 );
 
+const taskRolePolicy =  new iam.PolicyStatement();
+taskRolePolicy.addActions(
+  // Allow the ECS Tasks to download images from ECR
+  "ecr:GetAuthorizationToken",
+  "ecr:BatchCheckLayerAvailability",
+  "ecr:GetDownloadUrlForLayer",
+  "ecr:BatchGetImage",
+  // Allow the ECS tasks to upload logs to CloudWatch
+  "logs:CreateLogStream",
+  "logs:CreateLogGroup",
+  "logs:PutLogEvents"
+);
+taskRolePolicy.addAllResources();
+
 this.ecsService.service.taskDefinition.addToTaskRolePolicy(
-  new iam.PolicyStatement()
-    .addActions(
-      // Allow the ECS Tasks to download images from ECR
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      // Allow the ECS tasks to upload logs to CloudWatch
-      "logs:CreateLogStream",
-      "logs:CreateLogGroup",
-      "logs:PutLogEvents"
-    )
-    .addAllResources()
+  taskRolePolicy
 );
 ```
 
@@ -696,7 +697,7 @@ Then, add the EcsStack to our CDK application definition in `bin/cdk.ts`, as we 
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";
@@ -871,7 +872,7 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
@@ -928,17 +929,17 @@ const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository',
 const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
   projectName: "MythicalMysfitsServiceCodeBuildProject",
   environment: {
-    computeType: codebuild.ComputeType.Small,
+    computeType: codebuild.ComputeType.SMALL,
     buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_PYTHON_3_5_2,
     privileged: true,
     environmentVariables: {
       AWS_ACCOUNT_ID: {
-        type: codebuild.BuildEnvironmentVariableType.PlainText,
-        value: cdk.Aws.accountId
+        type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+        value: cdk.Aws.ACCOUNT_ID
       },
       AWS_DEFAULT_REGION: {
-        type: codebuild.BuildEnvironmentVariableType.PlainText,
-        value: cdk.Aws.region
+        type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+        value: cdk.Aws.REGION
       }
     }
   }
@@ -950,14 +951,16 @@ Provide the codebuild project with permissions to query the codecommit repositor
 **Action:** Write/Copy the following code:
 
 ```typescript
-codebuildProject.addToRolePolicy(new iam.PolicyStatement()
-  .addResource(apiRepository.repositoryArn)
-  .addActions(
+const codeBuildPolicy = new iam.PolicyStatement();
+codeBuildPolicy.addResources(apiRepository.repositoryArn)
+codeBuildPolicy.addActions(
     "codecommit:ListBranches",
     "codecommit:ListRepositories",
     "codecommit:BatchGetRepositories",
     "codecommit:GitPull"
   )
+codebuildProject.addToRolePolicy(
+  codeBuildPolicy
 );
 ```
 
@@ -978,7 +981,7 @@ const sourceOutput = new codepipeline.Artifact();
 const sourceAction = new actions.CodeCommitSourceAction({
   actionName: "CodeCommit-Source",
   branch: "master",
-  pollForSourceChanges: false,
+  trigger: actions.CodeCommitTrigger.POLL,
   repository: apiRepository,
   output: sourceOutput
 });
@@ -990,10 +993,12 @@ Define the Pipeline Build action to inform CodePipeline and CodeBuild how to bui
 
 ```typescript
 const buildOutput = new codepipeline.Artifact();
-const buildAction = new codepipelineactions.CodeBuildAction({
+const buildAction = new actions.CodeBuildAction({
   actionName: "Build",
   input: sourceOutput,
-  output: buildOutput,
+  outputs: [
+    buildOutput
+  ],
   project: codebuildProject
 });
 ```
@@ -1003,7 +1008,7 @@ Define the ECS deployment action to instruct the CodePipeline how to deploy the 
 **Action:** Write/Copy the following code:
 
 ```typescript
-const deployAction = new codepipelineactions.EcsDeployAction({
+const deployAction = new actions.EcsDeployAction({
   actionName: "DeployAction",
   service: props.ecsService,
   input: buildOutput
@@ -1019,15 +1024,15 @@ const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
   pipelineName: "MythicalMysfitsPipeline"
 });
 pipeline.addStage({
-  name: "Source",
+  stageName: "Source",
   actions: [sourceAction]
 });
 pipeline.addStage({
-  name: "Build",
+  stageName: "Build",
   actions: [buildAction]
 });
 pipeline.addStage({
-  name: "Deploy",
+  stageName: "Deploy",
   actions: [deployAction]
 });
 ```
@@ -1039,7 +1044,7 @@ Then, add the CiCdStack to our CDK application definition in `bin/cdk.ts`, when 
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";

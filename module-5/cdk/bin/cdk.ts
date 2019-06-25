@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 import 'source-map-support/register';
 import { DynamoDbStack } from '../lib/dynamodb-stack';
 import { NetworkStack } from '../lib/network-stack';
@@ -36,4 +36,4 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDBStack.table
 });
-app.run();
+app.synth();

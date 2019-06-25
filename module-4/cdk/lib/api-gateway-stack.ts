@@ -1,7 +1,7 @@
 import apigateway = require('@aws-cdk/aws-apigateway');
+import cdk = require('@aws-cdk/core');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ecspatterns = require('@aws-cdk/aws-ecs-patterns');
-import cdk = require('@aws-cdk/cdk');
 import fs = require('fs');
 import path = require('path');
 
@@ -18,7 +18,7 @@ export class APIGatewayStack extends cdk.Stack {
     });
     const vpcLink = new apigateway.VpcLink(this, 'VPCLink', {
       description: 'VPC Link for our  REST API',
-      name: 'MysfitsApiVpcLink',
+      vpcLinkName: 'MysfitsApiVpcLink',
       targets: [
         nlb
       ]
@@ -30,13 +30,13 @@ export class APIGatewayStack extends cdk.Stack {
       body: jsonSchema,
       endpointConfiguration: {
         types: [
-          apigateway.EndpointType.Regional
+          apigateway.EndpointType.REGIONAL
         ]
       },
       failOnWarnings: true
     });
     new cdk.CfnOutput(this, 'APIID', {
-      value: api.restApiId,
+      value: api.logicalId,
       description: 'API Gateway ID'
     })
   }
@@ -46,8 +46,8 @@ export class APIGatewayStack extends cdk.Stack {
       const userPoolIdentity = this.getUserPoolIdentity();
       const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
       const apiSchema = fs.readFileSync(schemaFilePath);
-      let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.region);
-      schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.accountId);
+      let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
+      schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
       schema = schema.toString().replace(/REPLACE_ME_COGNITO_USER_POOL_ID/gi, userPoolIdentity);
       schema = schema.toString().replace(/REPLACE_ME_VPC_LINK_ID/gi, vpcLink.vpcLinkId);
       schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);

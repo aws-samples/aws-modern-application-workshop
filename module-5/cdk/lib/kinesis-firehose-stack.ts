@@ -1,4 +1,4 @@
-import cdk = require("@aws-cdk/cdk");
+import cdk = require("@aws-cdk/core");
 import apigw = require("@aws-cdk/aws-apigateway");
 import iam = require("@aws-cdk/aws-iam");
 import dynamodb = require("@aws-cdk/aws-dynamodb");
@@ -22,21 +22,23 @@ export class KinesisFirehoseStack extends cdk.Stack {
     const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
       roleName: "FirehoseDeliveryRole",
       assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
-      externalId: cdk.Aws.accountId
+      externalId: cdk.Aws.ACCOUNT_ID
     });
+
+    const lambdaFunctionPolicy =  new iam.PolicyStatement();
+    lambdaFunctionPolicy.addActions("dynamodb:GetItem");
+    lambdaFunctionPolicy.addResources(props.table.tableArn);
 
     const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
       handler: "streaming_lambda::streaming_lambda.function::FunctionHandlerAsync",
-      runtime: lambda.Runtime.DotNetCore21,
+      runtime: lambda.Runtime.DOTNET_CORE_2_1,
       description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
         " to not just include a mysfitId, but also other attributes that can be analyzed later.",
       memorySize: 128,
-      code: lambda.Code.directory("../lambda"),
-      timeout: 30,
+      code: lambda.Code.asset("../lambda"),
+      timeout: cdk.Duration.seconds(30),
       initialPolicy: [
-        new iam.PolicyStatement()
-          .addAction("dynamodb:GetItem")
-          .addResource(props.table.tableArn)
+        lambdaFunctionPolicy
       ],
       environment: {
         mysfits_api_url: "MysfitsApiUrl"
@@ -74,21 +76,21 @@ export class KinesisFirehoseStack extends cdk.Stack {
       action: "lambda:InvokeFunction",
       functionName: mysfitsClicksProcessor.functionArn,
       principal: "firehose.amazonaws.com",
-      sourceAccount: cdk.Aws.accountId,
-      sourceArn: mysfitsFireHoseToS3.deliveryStreamArn
+      sourceAccount: cdk.Aws.ACCOUNT_ID,
+      sourceArn: mysfitsFireHoseToS3.attrArn
     });
 
     const clickProcessingApiRole = new iam.Role(this, "ClickProcessingApiRole", {
       assumedBy: new ServicePrincipal("apigateway.amazonaws.com")
     });
 
+    const apiPolicy = new iam.PolicyStatement();
+    apiPolicy.addActions("firehose:PutRecord");
+    apiPolicy.addResources(mysfitsFireHoseToS3.attrArn);
     new iam.Policy(this, "ClickProcessingApiPolicy", {
       policyName: "api_gateway_firehose_proxy_role",
       statements: [
-        new iam.PolicyStatement()
-          .allow()
-          .addAction("firehose:PutRecord")
-          .addResource(mysfitsFireHoseToS3.deliveryStreamArn)
+        apiPolicy
       ],
       roles: [clickProcessingApiRole]
     });
@@ -96,7 +98,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
     const clicksIntegration = new apigw.LambdaIntegration(
       mysfitsClicksProcessor,
       {
-        connectionType: apigw.ConnectionType.Internet,
+        connectionType: apigw.ConnectionType.INTERNET,
         credentialsRole: clickProcessingApiRole,
         integrationResponses: [
           {
@@ -136,7 +138,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
             "'OPTIONS,GET,PUT,POST,DELETE'"
         }
       }],
-      passthroughBehavior: apigw.PassthroughBehavior.Never,
+      passthroughBehavior: apigw.PassthroughBehavior.NEVER,
       requestTemplates: {
         "application/json": '{"statusCode": 200}'
       }
@@ -161,7 +163,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
       methodResponses: [{
         statusCode: "200"
       }],
-      authorizationType: apigw.AuthorizationType.None
+      authorizationType: apigw.AuthorizationType.NONE
     });
   }
 }

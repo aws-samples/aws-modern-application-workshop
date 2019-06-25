@@ -50,7 +50,7 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class DynamoDbStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
@@ -68,7 +68,7 @@ Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, wh
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";
@@ -82,13 +82,13 @@ new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    networkStack: networkStack,
-    ncrStack: ecrStack
+  networkStack: networkStack,
+  ncrStack: ecrStack
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
-    ecrRepository: ecrStack.ecrRepository,
-    ecsService: ecsStack.ecsService.service,
-    apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+  ecrRepository: ecrStack.ecrRepository,
+  ecsService: ecsStack.ecsService.service,
+  apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
 });
 new DynamoDbStack(app, 'MythicalMysfits-DynamoDB', {
   fargateService: ecsStack.ecsService.service,
@@ -123,8 +123,8 @@ Then define the following properties interface to define what constructs this st
 
 ```typescript
 interface DynamoDbStackProps extends cdk.StackProps {
-    vpc: ec2.Vpc;
-    fargateService: ecs.FargateService;
+  vpc: ec2.Vpc;
+  fargateService: ecs.FargateService;
 }
 ```
 
@@ -140,16 +140,18 @@ Next, within the DynamoDbStack class, we want to define a VPC endpoint to allow 
 
 ```typescript
 const dynamoDbEndpoint = props.NetworkStack.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-    service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
-    subnets: [{
-        subnetType: ec2.SubnetType.Private
-    }]
+  service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
+  subnets: [{
+      subnetType: ec2.SubnetType.Private
+  }]
 });
+const dynamoDbPolicy = new iam.PolicyStatement();
+dynamoDbPolicy.addAnyPrincipal();
+dynamoDbPolicy.addActions("*");
+dynamoDbPolicy.addAllResources();
+
 dynamoDbEndpoint.addToPolicy(
-    new iam.PolicyStatement() // Restrict to listing and describing tables?
-    .addAnyPrincipal()
-    .addActions("*")
-    .addAllResources()
+  dynamoDbPolicy
 );
 ```
 
@@ -163,39 +165,39 @@ public readonly table: dynamodb.Table;
 
 ```typescript
 this.table = new dynamodb.Table(this, "Table", {
-    tableName: "MysfitsTable",
-    partitionKey: {
-    name: "MysfitId",
-    type: dynamodb.AttributeType.String
-    }
+  tableName: "MysfitsTable",
+  partitionKey: {
+  name: "MysfitId",
+  type: dynamodb.AttributeType.String
+  }
 });
 table.addGlobalSecondaryIndex({
-    indexName: "LawChaosIndex",
-    partitionKey: {
-    name: 'LawChaos',
-    type: dynamodb.AttributeType.String
-    },
-    sortKey: {
-    name: 'MysfitId',
-    type: dynamodb.AttributeType.String
-    },
-    readCapacity: 5,
-    writeCapacity: 5,
-    projectionType: dynamodb.ProjectionType.All
+  indexName: "LawChaosIndex",
+  partitionKey: {
+  name: 'LawChaos',
+  type: dynamodb.AttributeType.String
+  },
+  sortKey: {
+  name: 'MysfitId',
+  type: dynamodb.AttributeType.String
+  },
+  readCapacity: 5,
+  writeCapacity: 5,
+  projectionType: dynamodb.ProjectionType.All
 });
 table.addGlobalSecondaryIndex({
-    indexName: "GoodEvilIndex",
-    partitionKey: {
-    name: 'GoodEvil',
-    type: dynamodb.AttributeType.String
-    },
-    sortKey: {
-    name: 'MysfitId',
-    type: dynamodb.AttributeType.String
-    },
-    readCapacity: 5,
-    writeCapacity: 5,
-    projectionType: dynamodb.ProjectionType.All
+  indexName: "GoodEvilIndex",
+  partitionKey: {
+  name: 'GoodEvil',
+  type: dynamodb.AttributeType.String
+  },
+  sortKey: {
+  name: 'MysfitId',
+  type: dynamodb.AttributeType.String
+  },
+  readCapacity: 5,
+  writeCapacity: 5,
+  projectionType: dynamodb.ProjectionType.All
 });
 ```
 
@@ -204,19 +206,20 @@ Last but not least, we need to allow our ECS Cluster access to our DynamoDB by a
 **Action:** Write/Copy the following code:
 
 ```typescript
+const fargatePolicy = new iam.PolicyStatement();
+fargatePolicy.addActions(
+  //  Allows the ECS tasks to interact with only the MysfitsTable in DynamoDB
+  "dynamodb:Scan",
+  "dynamodb:Query",
+  "dynamodb:UpdateItem",
+  "dynamodb:GetItem",
+  "dynamodb:DescribeTable"
+);
+fargatePolicy.addResources(
+  "arn:aws:dynamodb:*:*:table/MysfitsTable*"
+);
 props.fargateService.taskDefinition.addToTaskRolePolicy(
-    new iam.PolicyStatement()
-    .addActions(
-        //  Allows the ECS tasks to interact with only the MysfitsTable in DynamoDB
-        "dynamodb:Scan",
-        "dynamodb:Query",
-        "dynamodb:UpdateItem",
-        "dynamodb:GetItem",
-        "dynamodb:DescribeTable"
-    )
-    .addResource(
-        "arn:aws:dynamodb:*:*:table/MysfitsTable*"
-    )
+  fargatePolicy
 );
 ```
 

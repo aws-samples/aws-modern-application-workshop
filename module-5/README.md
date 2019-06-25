@@ -90,7 +90,7 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 export class KinesisFirehoseStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
     super(scope, id);
@@ -115,7 +115,7 @@ Define the class imports for the code we will be writing:
 **Action:** Write/Copy the following code:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 import apigw = require("@aws-cdk/aws-apigateway");
 import iam = require("@aws-cdk/aws-iam");
 import dynamodb = require("@aws-cdk/aws-dynamodb");
@@ -142,7 +142,7 @@ Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, wh
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-applicatio-nstack";
@@ -265,21 +265,23 @@ const clicksDestinationBucket = new s3.Bucket(this, "Bucket", {
 const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
   roleName: "FirehoseDeliveryRole",
   assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
-  externalId: cdk.Aws.accountId
+  externalId: cdk.Aws.ACCOUNT_ID
 });
+
+const lambdaFunctionPolicy =  new iam.PolicyStatement();
+lambdaFunctionPolicy.addActions("dynamodb:GetItem");
+lambdaFunctionPolicy.addResources(props.table.tableArn);
 
 const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
   handler: "streaming_lambda::streaming_lambda.function::FunctionHandlerAsync",
-  runtime: lambda.Runtime.DotNetCore21,
+  runtime: lambda.Runtime.DOTNET_CORE_2_1,
   description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
     " to not just include a mysfitId, but also other attributes that can be analyzed later.",
   memorySize: 128,
-  code: lambda.Code.directory("../../lambda"),
-  timeout: 30,
+  code: lambda.Code.asset("../lambda"),
+  timeout: cdk.Duration.seconds(30),
   initialPolicy: [
-    new iam.PolicyStatement()
-      .addAction("dynamodb:GetItem")
-      .addResource(props.table.tableArn)
+    lambdaFunctionPolicy
   ],
   environment: {
     mysfits_api_url: "MysfitsApiUrl"
@@ -317,21 +319,21 @@ new lambda.CfnPermission(this, "Permission", {
   action: "lambda:InvokeFunction",
   functionName: mysfitsClicksProcessor.functionArn,
   principal: "firehose.amazonaws.com",
-  sourceAccount: cdk.Aws.accountId,
-  sourceArn: mysfitsFireHoseToS3.deliveryStreamArn
+  sourceAccount: cdk.Aws.ACCOUNT_ID,
+  sourceArn: mysfitsFireHoseToS3.attrArn
 });
 
 const clickProcessingApiRole = new iam.Role(this, "ClickProcessingApiRole", {
   assumedBy: new ServicePrincipal("apigateway.amazonaws.com")
 });
 
+const apiPolicy = new iam.PolicyStatement();
+apiPolicy.addActions("firehose:PutRecord");
+apiPolicy.addResources(mysfitsFireHoseToS3.attrArn);
 new iam.Policy(this, "ClickProcessingApiPolicy", {
   policyName: "api_gateway_firehose_proxy_role",
   statements: [
-    new iam.PolicyStatement()
-      .allow()
-      .addAction("firehose:PutRecord")
-      .addResource(mysfitsFireHoseToS3.deliveryStreamArn)
+    apiPolicy
   ],
   roles: [clickProcessingApiRole]
 });
@@ -339,7 +341,7 @@ new iam.Policy(this, "ClickProcessingApiPolicy", {
 const clicksIntegration = new apigw.LambdaIntegration(
   mysfitsClicksProcessor,
   {
-    connectionType: apigw.ConnectionType.Internet,
+    connectionType: apigw.ConnectionType.INTERNET,
     credentialsRole: clickProcessingApiRole,
     integrationResponses: [
       {
@@ -379,7 +381,7 @@ api.root.addMethod("OPTIONS", new apigw.MockIntegration({
         "'OPTIONS,GET,PUT,POST,DELETE'"
     }
   }],
-  passthroughBehavior: apigw.PassthroughBehavior.Never,
+  passthroughBehavior: apigw.PassthroughBehavior.NEVER,
   requestTemplates: {
     "application/json": '{"statusCode": 200}'
   }
@@ -404,7 +406,7 @@ clicksMethod.addMethod("PUT", clicksIntegration, {
   methodResponses: [{
     statusCode: "200"
   }],
-  authorizationType: apigw.AuthorizationType.None
+  authorizationType: apigw.AuthorizationType.NONE
 });
 ```
 

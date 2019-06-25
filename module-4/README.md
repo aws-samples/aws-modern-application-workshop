@@ -139,7 +139,7 @@ __Note__ As before, you may find it helpful to run the command `npm run watch` f
 Within the file you just created, define the skeleton CDK Stack structure as we have done before, this time naming the class `APIGatewayStack`:
 
 ```typescript
-import cdk = require('@aws-cdk/cdk');
+import cdk = require('@aws-cdk/core');
 
 export class APIGatewayStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
@@ -155,7 +155,7 @@ Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, wh
 ```typescript
 #!/usr/bin/env node
 
-import cdk = require("@aws-cdk/cdk");
+import cdk = require('@aws-cdk/core');
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/webapplicationstack";
@@ -242,9 +242,9 @@ We then define a VPC Link for our API Gateway, attaching the NLB imported above 
 ```typescript
 const vpcLink = new apigateway.VpcLink(this, 'VPCLink', {
   description: 'VPC Link for our  REST API',
-  name: 'MysfitsApiVpcLink',
+  vpcLinkName: 'MysfitsApiVpcLink',
   targets: [
-      nlb
+    nlb
   ]
 });
 ```
@@ -256,33 +256,33 @@ Now, below the constructor, we will write two helper functions, one to import an
 ```typescript
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
   try {
-      const userPoolIdentity = this.getUserPoolIdentity();
-      const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
-      const apiSchema = fs.readFileSync(schemaFilePath);
-      let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.region);
-      schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.accountId);
-      schema = schema.toString().replace(/REPLACE_ME_COGNITO_USER_POOL_ID/gi, userPoolIdentity);
-      schema = schema.toString().replace(/REPLACE_ME_VPC_LINK_ID/gi, vpcLink.vpcLinkId);
-      schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
-      return schema;
+    const userPoolIdentity = this.getUserPoolIdentity();
+    const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
+    const apiSchema = fs.readFileSync(schemaFilePath);
+    let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
+    schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
+    schema = schema.toString().replace(/REPLACE_ME_COGNITO_USER_POOL_ID/gi, userPoolIdentity);
+    schema = schema.toString().replace(/REPLACE_ME_VPC_LINK_ID/gi, vpcLink.vpcLinkId);
+    schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
+    return schema;
   } catch (exception) {
-      throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
+    throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
   }
 }
 private getUserPoolIdentity(): string {
-  const amplifySettingsFilePath = path.resolve(__dirname + '../../frontend/src/aws-exports.js');
+  const amplifySettingsFilePath = path.resolve(__dirname + '../../../frontend/src/aws-exports.js');
   if (fs.existsSync(amplifySettingsFilePath)) {
-      const amplifySettings = fs.readFileSync(amplifySettingsFilePath).toString();
-      const locateIdentityPool = '"aws_cognito_identity_pool_id": "';
-      const locationOfIdentityPoolString = amplifySettings.indexOf(locateIdentityPool);
-      if (locationOfIdentityPoolString === -1) {
+    const amplifySettings = fs.readFileSync(amplifySettingsFilePath).toString();
+    const locateIdentityPool = '"aws_cognito_identity_pool_id": "';
+    const locationOfIdentityPoolString = amplifySettings.indexOf(locateIdentityPool);
+    if (locationOfIdentityPoolString === -1) {
       throw new Error('Failed to import aws-exports.js.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
-      }
-      const userPoolIdentity = amplifySettings.substring(locationOfIdentityPoolString + locateIdentityPool.length,
+    }
+    const userPoolIdentity = amplifySettings.substring(locationOfIdentityPoolString + locateIdentityPool.length,
       amplifySettings.indexOf('",', locationOfIdentityPoolString + 1));
-      return userPoolIdentity;
+    return userPoolIdentity;
   } else {
-      throw new Error('Failed to locate aws-exports.js.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
+    throw new Error('Failed to locate aws-exports.js.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
   }
 }
 ```
@@ -299,13 +299,13 @@ const api = new apigateway.CfnRestApi(this, 'Schema', {
   body: jsonSchema,
   endpointConfiguration: {
     types: [
-      apigateway.EndpointType.Regional
+      apigateway.EndpointType.REGIONAL
     ]
   },
   failOnWarnings: true
 });
 new cdk.CfnOutput(this, 'APIID', {
-  value: api.restApiId,
+  value: api.logicalId,
   description: 'API Gateway ID'
 })
 ```
