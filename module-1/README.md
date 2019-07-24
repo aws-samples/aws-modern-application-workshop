@@ -4,18 +4,29 @@
 
 **Time to complete:** 20 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-1/cdk-complete`
+
+---
+
+
 **Services used:**
 * [AWS Cloud9](https://aws.amazon.com/cloud9/)
 * [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
+* [Amazon CloudFront](https://aws.amazon.com/cloudfront/)
 
-In this module, follow the instructions to create your cloud-based IDE on [AWS Cloud9](https://aws.amazon.com/cloud9/) and deploy the first version of the static Mythical Mysfits website.  [Amazon S3](https://aws.amazon.com/s3/) is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. This makes it wonderfully useful for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content for our Mythical Mysfits website.
+In this module, follow the instructions to create your cloud-based IDE on [AWS Cloud9](https://aws.amazon.com/cloud9/) and deploy the first version of the static Mythical Mysfits website.  [Amazon S3](https://aws.amazon.com/s3/) is a highly durable, highly available, and inexpensive object storage service that can serve stored objects directly via HTTP. Amazon CloudFront is a highly-secure CDN that provides both network and application level protection. Your traffic and applications benefit through a variety of built-in protections such as AWS Shield Standard, at no additional cost. You can also use configurable features such as AWS Certificate Manager (ACM) to create and manage custom SSL certificates at no extra cost.
 
-### Getting Started
+The combination of S3 and CloudFront makes for a wonderfully useful capability for serving static web content (html, js, css, media content, etc.) directly to web browsers for sites on the Internet.  We will utilize S3 to host the content and the fast content delivery network (CDN) service, CloudFront, to securely deliver our Mythical Mysfits website to customers globally with low latency, high transfer speeds.
 
-#### Sign In to the AWS Console
+## Getting Started
+
+### Sign In to the AWS Console
 To begin, sign in to the [AWS Console](https://console.aws.amazon.com) for the AWS account you will be using in this workshop.
 
 This web application can be deployed in any AWS region that supports all the services used in this application. The supported regions include:
+
+** @@@@ TODO: Review region list @@@@ **
 
 * us-east-1 (N. Virginia)
 * us-east-2 (Ohio)
@@ -69,81 +80,245 @@ In the terminal, change directory to the newly cloned repository directory:
 cd aws-modern-application-workshop
 ```
 
-### Creating a Static Website in Amazon S3
+## Infrastructure As Code
 
-#### Create an S3 Bucket and Configure it for Website Hosting
-Next, we will create the infrastructure components needed for hosting a static website in Amazon S3 via the [AWS CLI](https://aws.amazon.com/cli/).
+Next, we will create the infrastructure components needed for creating a repository for your web application code, the hosting of a static website in Amazon S3 and delivering that content to your customers via the CloudFront Content Delivery Network (CDN). To achieve this we will generate our Infrastructure as Code using a tool called [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
 
-**Note: This workshop uses placeholders for names that you must supply. These placeholders use the prefix `REPLACE_ME_` to make them easy to find using CTRL-F on Windows or ⌘-F on Mac.**
+### AWS CloudFormation
 
-First, create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html), replace *REPLACE_ME_BUCKET_NAME* with your own unique bucket name, as described in [requirements for bucket names](https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html#bucketnamingrules).** Copy the name you choose and save it for later, as you will use it in several other places during this workshop:
+AWS CloudFormation is a service that can programmatically provision AWS resources that you declare within JSON or YAML files called *CloudFormation Templates*, enabling the common best practice of *Infrastructure as Code*.  AWS CloudFormation enables you to:
 
-```
-aws s3 mb s3://REPLACE_ME_BUCKET_NAME
-```
+* Create and provision AWS infrastructure deployments predictably and repeatedly.
+* Leverage AWS products such as Amazon EC2, Amazon Elastic Block Store, Amazon SNS, Elastic Load Balancing, and Auto Scaling.
+* Build highly reliable, highly scalable, cost-effective applications in the cloud without worrying about creating and configuring the underlying AWS infrastructure.
+* Use a template file to create and delete a collection of resources together as a single unit (a stack).
 
-Now that we have created a bucket, we need to set some configuration options that enable the bucket to be used for [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).  This configuration enables the objects in the bucket to be requested using a registered public DNS name for the bucket, as well as direct site requests to the base path of the DNS name to a selected website homepage (index.html in most cases):
+### AWS Cloud Development Kit (AWS CDK)
 
-```
-aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
-```
+To generate our CloudFormation, we will utilise the [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (also known as AWS CDK).  The AWS CDK is an open-source software development framework to define cloud infrastructure in code and provision it through AWS CloudFormation. The CDK integrates fully with AWS services and offers a higher level object-oriented abstraction to define AWS resources imperatively. Using the CDK’s library of infrastructure constructs, you can easily encapsulate AWS best practices in your infrastructure definition and share it without worrying about boilerplate logic. The CDK improves the end-to-end development experience because you get to use the power of modern programming languages to define your AWS infrastructure in a predictable and efficient manner.
 
-#### Update the S3 Bucket Policy
+The CDK can be used to define your cloud resources using one of the supported programming languages: C#/.NET, Java, JavaScript, Python, or TypeScript.  Developers can use one of the supported programming languages to define reusable cloud components known as Constructs. You compose these together into Stacks and Apps.
 
-All buckets created in Amazon S3 are fully private by default.  In order to be used as a public website, we need to create an S3 [Bucket Policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) that indicates objects stored within this new bucket may be publicly accessed by anyone. Bucket policies are represented as JSON documents that define the S3 *Actions* (S3 API calls) that are allowed (or not not allowed) to be performed by different *Principals* (in our case the public, or anyone).
+One of the biggest benefits from AWS CDK is the principal of reusability - Being able to write, reuse and share components throughout your application and team.  These components are referred to as Constructs within AWS CDK.  To this end, the code we will write in Module 1 will be reused throughout all remaining modules.
 
-The JSON document for the necessary bucket policy is located at: `~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json`.  This file contains a string that needs to be replaced with the bucket name you've chosen (indicated with `REPLACE_ME_BUCKET_NAME`).  
+#### Install AWS CDK
 
-To **open a file** in Cloud9, use the File Explorer on the left panel and double click `website-bucket-policy.json`:
+If you haven't already, install the AWS CDK in your Cloud9 environment using the following command:
 
-![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
-
-This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
-
-![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
-
-
-Execute the following CLI command to add a public bucket policy to your website:
-
-```
-aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/environment/aws-modern-application-workshop/module-1/aws-cli/website-bucket-policy.json
+```sh
+npm install -g aws-cdk
 ```
 
-#### Publish the Website Content to S3
+Run the following command to see the version number of the CDK:
 
-Now that our new website bucket is configured appropriately, let's add the first iteration of the Mythical Mysfits homepage to the bucket.  Use the following S3 CLI command that mimics the linux command for copying files (**cp**) to copy the provided index.html page locally from your IDE up to the new S3 bucket (replacing the bucket name appropriately).
-
-```
-aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html s3://REPLACE_ME_BUCKET_NAME/index.html
+```sh
+cdk --version
 ```
 
-Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using.
+#### Initialise CDK App folder
 
-The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you created the S3 bucket within (eg: us-east-1):
+Within the `module-1` folder create a new folder to contain your AWS CDK application
 
-For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
-```
-http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+```sh
+cd module-1
+mkdir cdk && cd cdk/
 ```
 
-For us-east-2 (Ohio) use:
+In the `cdk` folder, lets now initialize a CDK app, where LANGUAGE is one of the supported programming languages: csharp (C#), java (Java), python (Python), or typescript (TypeScript) and TEMPLATE is an optional template that creates an app with different resources than the default app that cdk init creates for the language.
+
+_cdk init app --language LANGUAGE_
+
+For the purposes of this workshop we will use TypeScript as our language:
+
+```sh
+cdk init --language typescript
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
+
+This command has now initialised a new CDK app in your `cdk` folder.  Part of the initialisation process also establishes the given directory as a new git repository.
+
+Notice the standard structure of an AWS CDK app, that consists of a `bin` folder and a `lib` folder.
+
+* The `bin` folder is where we will define the entry point for the CDK app.
+* The `lib` folder is where we will define all our workshop infrastructure components.
+
+## Creating the Mythical Mysfits Static Website
+
+Now, let's define the infrastructure needed to host our static website.  
+
+Create a new file called `static-website-stack.ts` in the `lib` folder, and define the skeleton class structure by writing/copying the following code:
+
+```typescript
+import cdk = require('@aws-cdk/core');
+
+export class StaticWebsiteStack extends cdk.Stack {
+  constructor(app: cdk.App, id: string) {
+    super(app, id);
+
+    // The code that defines your stack goes here
+  }
+}
 ```
+
+Add an import statement for the `StaticWebsiteStack` to the `bin/cdk.ts` file.
+
+```typescript
+import { StaticWebsiteStack } from "../lib/static-website-stack";
+...
+new StaticWebsiteStack(app, "MythicalMysfits-Website");
+
+```
+
+Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `aws-modern-application-workshop/module-1/cdk/` directory: 
+
+```sh
+npm install --save-dev @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
+```
+
+### Define the Website root directory
+
+Ensure the webAppRoot variable points to the `aws-modern-application-workshop/module-1/web` directory. In the `static-website-stack.ts` file, we want to import the `path` module, which we will use to resolve the path to our website folder:
+
+```typescript
+import path = require('path');
+```
+
+Next, import the AWS CDK libraries we will be using.
+
+```typescript
+import s3 = require('@aws-cdk/aws-s3');
+import cloudfront = require('@aws-cdk/aws-cloudfront');
+import iam = require('@aws-cdk/aws-iam');
+import s3deploy = require('@aws-cdk/aws-s3-deployment');
+```
+
+Now, within the `static-website-stack.ts` constructor, write the folllowing code.
+
+```typescript
+const webAppRoot = path.resolve(__dirname, '..', '..', 'web');
+```
+
+### Define the S3 bucket
+
+We are going to define our S3 bucket and define the web index document as 'index.html'
+
+```typescript
+const bucket = new s3.Bucket(this, "Bucket", {
+  websiteIndexDocument: "index.html"
+});
+```
+
+### Restrict access to the S3 bucket
+
+We want to restrict access to our S3 bucket, and only allow access from the CloudFront distribution. We'll use an [Origin Access Identity (OAI)](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html) to allow CloudFront to access and serve files to our users.
+
+Within the `static-website-stack.ts` constructor write the folllowing code:
+
+```typescript
+const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOrigin", {
+  cloudFrontOriginAccessIdentityConfig: {
+    comment: "mythical-mysfits"
+  }
+});
+
+bucket.grantRead(new iam.CanonicalUserPrincipal(
+  origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
+));
+```
+
+### Upload the static content to the S3 bucket
+
+Now we want to use a handy CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket:
+
+```typescript
+new s3deploy.BucketDeployment(this, "DeployWebsite", {
+  source: s3deploy.Source.asset(webAppRoot),
+  destinationKeyPrefix: "web/",
+  destinationBucket: bucket,
+  retainOnDelete: false
+});
+```
+
+### CloudFront Distribution
+
+Next, Write the definition for a new CloudFront web distribution:
+
+```typescript
+const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
+  viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.AllowAll,
+  priceClass: cloudfront.PriceClass.PriceClassAll,
+  originConfigs: [
+    {
+      behaviors: [
+        {
+          isDefaultBehavior: true,
+          maxTtlSeconds: undefined,
+          allowedMethods:
+            cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS
+        }
+      ],
+      originPath: `/web`,
+      s3OriginSource: {
+        s3BucketSource: bucket,
+        originAccessIdentityId: origin.cloudFrontOriginAccessIdentityId
+      }
+    }
+  ]
+});
+```
+
+### CloudFormation Outputs
+
+Finally, we want to define a cloudformation output for the domain name assigned to our CloudFront distribution:
+
+```typescript
+new cdk.CfnOutput(this, "CloudFrontURL", {
+  description: "The CloudFront distribution URL",
+  value: "https://" + cdn.domainName
+});
+```
+
+With that, we have completed writing the components of our module 1 stack.  Your `cdk` folder should resemble like the reference implementation, which can be found in the `module-1/cdk-complete` directory.
+
+### View the synthesized CloudFormation template
+
+From within the `aws-modern-application-workshop/module-1/cdk/` folder run the `cdk synth MythicalMysfits-Website` command to display the CloudFormation template that is generated based on the code you have just written.
+
+### Deploy the Website and Infrastructure
+
+The first time you deploy an AWS CDK app that deploys content into a S3 environment you’ll need to install a “bootstrap stack”. This function creates the resources required for the CDK toolkit’s operation. Currently the bootstrap command creates only an Amazon S3 bucket.
+
+> **Note:** You incur any charges for what the AWS CDK stores in the bucket. Because the AWS CDK does not remove any objects from the bucket, the bucket can accumulate objects as you use the AWS CDK. You can get rid of the bucket by deleting the MythicalMysfits-Website stack from your account.
+
+```sh
+cdk bootstrap
+```
+
+We can now deploy the `MythicalMysfits-Website` by executing the `cdk deploy` command from within the `cdk` folder and defining the stack we wish to deploy, such as:
+
+  cdk deploy _stackname_
+
+Execute the following command:
+
+```sh
+cdk deploy MythicalMysfits-Website
+```
+
+You will be prompted with a messages such as `Do you wish to deploy these changes (y/n)?` to which you should respond by typing `y`
+
+The AWS CDK will then perform the following actions:
+
+* Creates an S3 Bucket
+* Creates a CloudFront distribution to deliver the website code hosted in S3
+* Enables access for CloudFront to access the S3 Bucket
+* Removes any existing files in the bucket.
+* Copies the local static content to the bucket.
+* Prints the URL where you can visit your site.
+
+Try to navigate to the URL displayed and see you website.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
 Congratulations, you have created the basic static Mythical Mysfits Website!
-
-## A Note about Amazon CloudFront - Best Practice for Serving Websites on AWS ##
-
-In order for this workshop to move you quickly past the static website portion of the Mythical Mysfits Website, we've had you make an S3 bucket publicly accessible.  While creating public S3 buckets is perfectly OK and typical for many applications... when creating a public-facing website on AWS, it is best practice for you to use [**Amazon CloudFront**](https://aws.amazon.com/cloudfront/) as the global Content Delivery Network (CDN) and public-facing endpoint for your site. 
-
-Amazon CloudFront enables many different capabilities that are beneficial for public websites (decreased latency, global redundancy, integration with AWS Web Application Firewall, etc.) and even reduces the data transfer costs for a website when compared to having customers directly request data from S3.
-
-But, because of it's global nature, creation of a new CloudFront distribution can take over 15 minutes in some cases before it's available across the globe. Because of that, we've decided to skip that step in this tutorial to move you along faster.  But if you are building a public website on your own, the use of CloudFront should be considered a requirement in order for best practices to be met.
-
-To learn more about CloudFront, see [here.](https://aws.amazon.com/cloudfront/)
 
 That concludes Module 1.
 
