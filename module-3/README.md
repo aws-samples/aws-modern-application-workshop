@@ -25,7 +25,9 @@ To add a DynamoDB table to the architecture, we will write another CloudFormatio
 To create the table using the AWS CDK, run the following command in the Cloud9 terminal:
 
 ```sh
-cd aws-modern-application-workshop/module-3/cdk
+cd aws-modern-application-workshop/module-3
+mkdir cdk && cd cdk/
+cdk init --language typescript
 ```
 
 Create a new file in the `lib` folder called `dynamodb-stack.ts`.
