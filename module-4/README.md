@@ -265,13 +265,13 @@ In this file, replace the strings **REPLACE_ME** inside the single quotes with t
 
 > **Note:** The Cognito UserPool ID and the Cognito UserPool Client ID are the values you saved earlier on, e.g. `us-east-1_ab12345YZ` and  `6p3bs000no6a4ue1idruvd05ad` respectively. To retrieve the values of the API Gateway endpoint and AWS Region, you can use the following commands:
 
-    ```sh
-    aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output text
-    ```
+```sh
+aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output text
+```
 
-    ```sh
-    aws configure get region
-    ```
+```sh
+aws configure get region
+```
 
 Also, for the user registration process, you have an additional two HTML files to insert these values into.  `register.html` and `confirm.html`.  Insert the copied values into the **REPLACE_ME** strings in these files as well.
 
