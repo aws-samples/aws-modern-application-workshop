@@ -47,6 +47,13 @@ mkdir cdk && cd cdk/
 cdk init --language typescript
 ```
 
+Copy over the file we created in the previous module:
+
+```sh
+cp ../../module-1/cdk/lib/* ./lib
+cp ../../module-1/cdk/bin/* ./bin
+```
+
 Create a new file in the `lib` folder called `network-stack.ts`.
 
 ```sh

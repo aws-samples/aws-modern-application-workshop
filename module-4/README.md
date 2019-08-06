@@ -71,6 +71,13 @@ mkdir cdk && cd cdk/
 cdk init --language typescript
 ```
 
+Copy over the file we created in the previous module:
+
+```sh
+cp ../../module-3/cdk/lib/* ./lib
+cp ../../module-3/cdk/bin/* ./bin
+```
+
 Create a new file in the `lib` folder called `apigateway-stack.ts`.
 
 ```sh

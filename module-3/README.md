@@ -30,6 +30,13 @@ mkdir cdk && cd cdk/
 cdk init --language typescript
 ```
 
+Copy over the file we created in the previous module:
+
+```sh
+cp ../../module-2/cdk/lib/* ./lib
+cp ../../module-2/cdk/bin/* ./bin
+```
+
 Create a new file in the `lib` folder called `dynamodb-stack.ts`.
 
 ```sh
