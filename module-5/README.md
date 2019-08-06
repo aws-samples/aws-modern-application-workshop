@@ -4,6 +4,11 @@
 
 **Time to complete:** 30 minutes
 
+---
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-5/cdk-complete`
+
+---
+
 **Services used:**
 * [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
 * [AWS Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/)
@@ -26,36 +31,150 @@ The serverless real-time processing service stack you are creating includes the 
 * An [**Amazon API Gateway REST API**](https://aws.amazon.com/api-gateway/): AWS Kinesis Firehose provides a service API just like other AWS services, and in this case we are using its PutRecord operation to put user click event records into the delivery stream. But, we don't want our website frontend to have to directly integrate with the Kinesis Firehose PutRecord API.  Doing so would require us to manage AWS credentials within our frontend code to authorize those API requests to the PutRecord API, and it would expose to users the direct AWS API that is being depended on (which may encourage malicious site visitors to attempt to add records to the delivery stream that are malformed, or harmful to our goal of understanding real user behavior).  So instead, we will use Amazon API Gateway to create an **AWS Service Proxy** to the PutRecord API of Kinesis Firehose.  This allows us to craft our own public RESTful endpoint that does not require AWS credential management on the frontend for requests. Also, we will use a request **mapping template** in API Gateway as well, which will let us define our own request payload structure that will restrict requests to our expected structure and then transform those well-formed requests into the structure that the Kinesis Firehose PutRecord API requires.
 * [**IAM Roles**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html): Kinesis Firehose requires a service role that allows it to deliver received records as events to the created Lambda function as well as the processed records to the destination S3 bucket. The Amazon API Gateway API also requires a new role that permits the API to invoke the PutRecord API within Kinesis Firehose for each received API request.
 
-Before we launch the CloudFormaiton template described above, we need to update and modify the Lambda function code it will deploy.
+Before we create the resources described above, we need to update and modify the Lambda function code it will deploy.
 
-### Copy the Streaming Service Code
+### Create a new CodeCommit Repository
 
-#### Create a new CodeCommit Repository
+This new stack you will deploy using the AWS Cloud Development Kit (CDK) will not only contain the infrastructure environment resources, but the application code itself that AWS Lambda will execute to process streaming events.  
 
-This new stack you will deploy using CloudFormation will not only contain the infrastructure environment resources, but the application code itself that AWS Lambda will execute to process streaming events.  To bundle the creation of our infrastructure and code together in one deployment, we are going to use another AWS tool that comes pre-installed in the AWS Cloud9 IDE -  **AWS SAM CLI**.  Code for AWS Lambda functions is delivered to the service by uploading the function code in a .zip package to an Amazon S3 bucket.  The SAM CLI automates that process for us.  Using it, we can create a CloudFormation template that references locally in the filesystem where all of the code for our Lambda function is stored.  Then, the SAM CLI will package it into a .zip file, upload it to a configured Amazon S3 bucket, and create a new CloudFormation template that indicates the location in S3 where the created .zip package has been uploaded for deployment to AWS Lambda.  We can then deploy that SAM CLI-generated CloudFormation template to AWS and watch the environment be created along with the Lambda function that uses the SAM CLI-uploaded code package.  
+To create the necessary resources using the AWS CDK, run the following command in the Cloud9 terminal:
 
-First, let's create a new CodeCommit repository where the streaming service code will live:
+```sh
+cd aws-modern-application-workshop/module-5
+mkdir cdk && cd cdk/
+cdk init --language typescript
 ```
-aws codecommit create-repository --repository-name MythicalMysfitsStreamingService-Repository
+
+Copy over the file we created in the previous module:
+
+```sh
+cp ../../module-4/cdk/lib/* ./lib
+cp ../../module-4/cdk/bin/* ./bin
 ```
 
-In the response to that command, copy the value for `"cloneUrlHttp"`.  It should be of the form:
-`https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsStreamingService-Repository`
+Create a new file in the `lib` folder called `kinesis-firehose-stack.ts`.
 
-Next, let's clone that new and empty repository into our IDE:
+```sh
+touch lib/kinesis-firehose-stack.ts
 ```
+
+Within the file you just created, define the skeleton CDK Stack structure as we have done before, this time naming the class `KinesisFirehoseStack`:
+
+```typescript
+import cdk = require('@aws-cdk/core');
+export class KinesisFirehoseStack extends cdk.Stack {
+  constructor(scope: cdk.Construct, id:string) {
+    super(scope, id);
+    // The code that defines your stack goes here
+  }
+}
+```
+
+Install the AWS CDK npm package for Kinesis Firehose by executing the following command from within the `aws-modern-application-workshop/module-5/cdk/` directory:
+
+```sh
+npm install --save-dev @aws-cdk/aws-kinesisfirehose
+```
+
+Define the class imports for the code we will be writing:
+
+```typescript
+import cdk = require('@aws-cdk/core');
+import codecommit = require("@aws-cdk/aws-codecommit");
+import apigw = require("@aws-cdk/aws-apigateway");
+import iam = require("@aws-cdk/aws-iam");
+import dynamodb = require("@aws-cdk/aws-dynamodb");
+import { ServicePrincipal } from "@aws-cdk/aws-iam";
+import { CfnDeliveryStream } from "@aws-cdk/aws-kinesisfirehose";
+import lambda = require("@aws-cdk/aws-lambda");
+import s3 = require("@aws-cdk/aws-s3");
+```
+
+Define an interface that defines the properties our KinesisFirehoseStack will require:
+
+```typescript
+interface KinesisFirehoseStackProps extends cdk.StackProps {
+  table: dynamodb.Table;
+}
+```
+
+Within the `KinesisFirehoseStack` constructor, add the CodeCommit repository we'll use for the Kinesis Firehose and Lambda code we will write:
+
+```typescript
+const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
+  repositoryName: "MythicalMysfitsService-Repository-Lambda"
+});
+
+new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlHttp", {
+  value: lambdaRepository.repositoryCloneUrlHttp,
+  description: "Lambda Repository Clone Url HTTP"
+});
+
+new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlSsh", {
+  value: lambdaRepository.repositoryCloneUrlSsh,
+  description: "Lambda Repository Clone Url SSH"
+});
+```
+
+Then, add the `KinesisFirehoseStack` to our CDK application definition in `bin/cdk.ts`, when done, your `bin/cdk.ts` file should look like this:
+
+```typescript
+#!/usr/bin/env node
+
+import cdk = require("@aws-cdk/core");
+import 'source-map-support/register';
+import { StaticWebsiteStack } from "../lib/static-website-stack";
+import { NetworkStack } from "../lib/network-stack";
+import { EcrStack } from "../lib/ecr-stack";
+import { EcsStack } from "../lib/ecs-stack";
+import { CiCdStack } from "../lib/cicd-stack";
+import { DynamoDbStack } from '../lib/dynamodb-stack';
+import { APIGatewayStack } from "../lib/apigateway-stack";
+import { KinesisFirehoseStack } from "../lib/kinesis-firehose-stack";
+
+const app = new cdk.App();
+new StaticWebsiteStack(app, "MythicalMysfits-Website");
+const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
+const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
+const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
+});
+new CiCdStack(app, "MythicalMysfits-CICD", {
+    ecrRepository: ecrStack.ecrRepository,
+    ecsService: ecsStack.ecsService.service
+});
+new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    fargateService: ecsStack.ecsService
+});
+new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+  fargateService: ecsStack.ecsService
+});
+new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
+    table: DynamoDbStack.table
+});
+```
+
+We are not yet finished writing the `KinesisFirehoseStack` implementation but let's deploy what we have written so far:
+
+```sh
+cdk deploy MythicalMysfits-KinesisFirehose
+```
+
+In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Lambda`
+
+Next, let's clone that new and empty repository:
+
+```sh
 cd ~/environment/
+git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda
 ```
 
-```
-git clone REPLACE_ME_WITH_ABOVE_CLONE_URL
-```
-
-#### Copy the Streaming Service Code Base
+### Copy the Streaming Service Code Base
 
 Now, let's move our working directory into this new repository:
 ```
-cd ~/environment/MythicalMysfitsStreamingService-Repository/
+cd ~/environment/lambda/
 ```
 
 Then, copy the module-5 application components into this new repository directory:
@@ -63,22 +182,10 @@ Then, copy the module-5 application components into this new repository director
 cp -r ~/environment/aws-modern-application-workshop/module-5/app/streaming/* .
 ```
 
-And let's copy the CloudFormation template for this module as well.
-
-```
-cp ~/environment/aws-modern-application-workshop/module-5/cfn/* .
-```
-
 ### Update the Lambda Function Package and Code
 
 #### Use pip to Intall Lambda Function Dependencies
-Now, we have the repository directory set with all of the provided artifacts:
-* A CFN template for creating the full stack.
-* A Python file that contains the code for our Lambda function: `streamProcessor.py`
-
-This is a common approach that AWS customers take - to store their CloudFormation templates alongside their application code in a repository. That way, you have a single place where all changes to application and it's environment can be tracked together.
-
-But, if you look at the code inside the `streamProcessor.py` file, you'll notice that it's using the `requests` Python package to make an API requset to the Mythical Mysfits service you created previously.  External libraries are not automatically included in the AWS Lambda runtime environment, because different AWS customers may depend on different versions of various libraries, etc.  You will need to package all of your library dependencies together with your Lambda code function prior to it being uploaded to the Lambda service.  We will use the Python package manager `pip` to accomplish this.  In the Cloud9 terminal, run the following command to install the `requests` package and it's dependencies locally alongside your function code:
+If you look at the code inside the `streamProcessor.py` file, you'll notice that it's using the `requests` and `os` Python packages to make an API requset to the Mythical Mysfits service you created previously.  External libraries are not automatically included in the AWS Lambda runtime environment, because different AWS customers may depend on different versions of various libraries, etc.  You will need to package all of your library dependencies together with your Lambda code function prior to it being uploaded to the Lambda service.  We will use the Python package manager `pip` to accomplish this.  In the Cloud9 terminal, run the following command to install the required packages and their dependencies locally alongside your function code:
 
 ```
 pip install requests -t .
@@ -96,72 +203,199 @@ That service is responsible for integrating with the MysfitsTable in DynamoDB, s
 #### Push Your Code into CodeCommit
 Let's commit our code changes to the new repository so that they're saved in CodeCommit:
 
-```
+```sh
 git add .
-```
-
-```
 git commit -m "New stream processing service."
-```
-
-```
 git push
 ```
 
 ### Creating the Streaming Service Stack
 
+Change back into the `cdk` folder:
 
-#### Create an S3 Bucket for Lambda Function Code Packages
-With that line changed in the Python file, and our code committed, we are ready to use the AWS SAM CLI to package all of our function code, upload it to S3, and create the deployable CloudFormation template to create our streaming stack.
-
-First, use the AWS CLI to create a new S3 bucket where our Lambda function code packages will be uploaded to.  S3 bucket names need to be globally unique among all AWS customers, so replace the end of this bucket name with a string that's unique to you:
-
-```
-aws s3 mb s3://REPLACE_ME_YOUR_BUCKET_NAME/
+```sh
+cd ~/environment/aws-modern-application-workshop/module-5/cdk
 ```
 
-#### Use the SAM CLI to Package your Code for Lambda
+Back in the `KinesisFirehoseStack` file,  we will now define the Kinesis Firehose infrastructure.  First, let's define the kinesis firehose implementation:
 
-With our bucket created, we are ready to use the SAM CLI to package and upload our code and transform the CloudFormation template, be sure to replace the last command parameter with the bucket name you just created above (this command also assumes your terminal is still in the repository working directory):
+```typescript
+const clicksDestinationBucket = new s3.Bucket(this, "Bucket", {
+  versioned: true
+});
 
+const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
+  roleName: "FirehoseDeliveryRole",
+  assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
+  externalId: cdk.Aws.ACCOUNT_ID
+});
+
+const lambdaFunctionPolicy =  new iam.PolicyStatement();
+lambdaFunctionPolicy.addActions("dynamodb:GetItem");
+lambdaFunctionPolicy.addResources(props.table.tableArn);
+
+const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
+  handler: "streamProcessor.processRecord",
+  runtime: lambda.Runtime.PYTHON_3_6,
+  description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
+    " to not just include a mysfitId, but also other attributes that can be analyzed later.",
+  memorySize: 128,
+  code: lambda.Code.asset("../../lambda"),
+  timeout: cdk.Duration.seconds(30),
+  initialPolicy: [
+    lambdaFunctionPolicy
+  ],
+  environment: {
+    MYSFITS_API_URL: "MysfitsApiUrl"
+  }
+});
+
+const mysfitsFireHoseToS3 = new CfnDeliveryStream(this, "DeliveryStream", {
+  extendedS3DestinationConfiguration: {
+    bucketArn: clicksDestinationBucket.bucketArn,
+    bufferingHints: {
+      intervalInSeconds: 60,
+      sizeInMBs: 50
+    },
+    compressionFormat: "UNCOMPRESSED",
+    prefix: "firehose/",
+    roleArn: firehoseDeliveryRole.roleArn,
+    processingConfiguration: {
+      enabled: true,
+      processors: [
+        {
+          parameters: [
+            {
+              parameterName: "LambdaArn",
+              parameterValue: mysfitsClicksProcessor.functionArn
+            }
+          ],
+          type: "Lambda"
+        }
+      ]
+    }
+  }
+});
+
+new lambda.CfnPermission(this, "Permission", {
+  action: "lambda:InvokeFunction",
+  functionName: mysfitsClicksProcessor.functionArn,
+  principal: "firehose.amazonaws.com",
+  sourceAccount: cdk.Aws.ACCOUNT_ID,
+  sourceArn: mysfitsFireHoseToS3.attrArn
+});
+
+const clickProcessingApiRole = new iam.Role(this, "ClickProcessingApiRole", {
+  assumedBy: new ServicePrincipal("apigateway.amazonaws.com")
+});
+
+const apiPolicy = new iam.PolicyStatement();
+apiPolicy.addActions("firehose:PutRecord");
+apiPolicy.addResources(mysfitsFireHoseToS3.attrArn);
+new iam.Policy(this, "ClickProcessingApiPolicy", {
+  policyName: "api_gateway_firehose_proxy_role",
+  statements: [
+    apiPolicy
+  ],
+  roles: [clickProcessingApiRole]
+});
+
+const clicksIntegration = new apigw.LambdaIntegration(
+  mysfitsClicksProcessor,
+  {
+    connectionType: apigw.ConnectionType.INTERNET,
+    credentialsRole: clickProcessingApiRole,
+    integrationResponses: [
+      {
+        statusCode: "200",
+        responseTemplates: {
+          "application/json": '{"status":"OK"}'
+        }
+      }
+    ],
+    requestParameters: {
+      "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
+    },
+    requestTemplates: {
+      "application/json": `{ "DeliveryStreamName": "${mysfitsFireHoseToS3.ref}", "Record": { "Data": "$util.base64Encode($input.json('$'))" }}`
+    }
+  }
+);
+
+const api = new apigw.LambdaRestApi(this, "APIEndpoint", {
+  handler: mysfitsClicksProcessor,
+  options: {
+    restApiName: "ClickProcessing API Service"
+  },
+  proxy: false
+});
+
+api.root.addMethod("OPTIONS", new apigw.MockIntegration({
+  integrationResponses: [{
+    statusCode: "200",
+    responseParameters: {
+      "method.response.header.Access-Control-Allow-Headers":
+        "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+      "method.response.header.Access-Control-Allow-Origin": "'*'",
+      "method.response.header.Access-Control-Allow-Credentials":
+        "'false'",
+      "method.response.header.Access-Control-Allow-Methods":
+        "'OPTIONS,GET,PUT,POST,DELETE'"
+    }
+  }],
+  passthroughBehavior: apigw.PassthroughBehavior.NEVER,
+  requestTemplates: {
+    "application/json": '{"statusCode": 200}'
+  }
+}), {
+    methodResponses: [
+      {
+        statusCode: "200",
+        responseParameters: {
+          "method.response.header.Access-Control-Allow-Headers": true,
+          "method.response.header.Access-Control-Allow-Methods": true,
+          "method.response.header.Access-Control-Allow-Credentials": true,
+          "method.response.header.Access-Control-Allow-Origin": true
+        }
+      }
+    ]
+  }
+);
+
+const clicksMethod = api.root.addResource("clicks");
+clicksMethod.addMethod("PUT", clicksIntegration, {
+  apiKeyRequired: true,
+  methodResponses: [{
+    statusCode: "200"
+  }],
+  authorizationType: apigw.AuthorizationType.NONE
+});
 ```
-sam package --template-file ./real-time-streaming.yml --output-template-file ./transformed-streaming.yml --s3-bucket REPLACE_ME_YOUR_BUCKET_NAME
+
+Finally, deploy the CDK Application for the final time.
+
+```sh
+cdk deploy MythicalMysfits-KinesisFirehose
 ```
 
-If successful, you will see the newly created `transformed-streaming.yml` file exist within the `./MythicalMysfitsStreamingService-Repository/` directory, if you look in its contents, you'll see that the CodeUri parameter of the serverless Lambda function has been updated with the object location where the SAM CLI has uploaded your packaged code.
-
-#### Deploy the Stack using AWS CloudFormation
-
-Also returned by the SAM CLI command is the CloudFormation command needed to be executed to create our new full stack.  But because our stack creates IAM resources, you'll need to add one additional parameter to the command.  Execute the following command to deploy the streaming stack:
-
-```
-aws cloudformation deploy --template-file /home/ec2-user/environment/MythicalMysfitsStreamingService-Repository/transformed-streaming.yml --stack-name MythicalMysfitsStreamingStack --capabilities CAPABILITY_IAM
-```
-
-Once this stack creation is complete, the full real-time processing microservice will be created.  
-
-In future scenarios where only code changes have been made to your Lambda function, and the rest of your CloudFormation stack remains unchanged, you can repeat the same AWS SAM CLI and CloudFormation commands as above. This will result in the infrastructure environment remaining unchanged, but a code deployment occurring to your Lambda function.
+Note down the API Gateway endpoint, as we will need it in the next step.
 
 ### Sending Mysfit Profile Clicks to the Service
 
-#### Update the Website Content
+#### Update the Website Content and Push the New Site to S3
 With the streaming stack up and running, we now need to publish a new version of our Mythical Mysfits frontend that includes the JavaScript that sends events to our service whenever a mysfit profile is clicked by a user.
 
 The new index.html file is included at: `~/environment/aws-modern-application-workshop/module-5/web/index.html`
 
-This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-4.
+This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-4. The `streamingApiEndpoint` value is the API Gateway endpoint you noted down earlier.
 
-Perform the following command for the new streaming stack to retrieve the new API Gateway endpoint for your stream processing service:
+Also remember to replace the values in the `register.html` and `confirm.html` files. 
 
-```
-aws cloudformation describe-stacks --stack-name MythicalMysfitsStreamingStack
-```
+Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
-#### Push the New Site Version to S3
-Replace the final value within `index.html` with the streamingApiEndpoint and you are ready to publish your final Mythical Mysfits home page update:
-
-```
-aws s3 cp ~/environment/aws-modern-application-workshop/module-5/web/index.html s3://YOUR-S3-BUCKET/
+```sh
+npm run build
+cdk deploy MythicalMysfits-Website
 ```
 
 Refresh your Mythical Mysfits website in the browser once more and you will now have a site that records and publishes each time a user clicks on a mysfits profile!
