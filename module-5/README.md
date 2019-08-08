@@ -165,14 +165,14 @@ Next, let's clone that new and empty repository:
 
 ```sh
 cd ~/environment/
-git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda
+git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda-streaming-processor
 ```
 
 ### Copy the Streaming Service Code Base
 
 Now, let's move our working directory into this new repository:
 ```
-cd ~/environment/lambda/
+cd ~/environment/lambda-streaming-processor/
 ```
 
 Then, copy the module-5 application components into this new repository directory:
@@ -238,7 +238,7 @@ const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
   description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
     " to not just include a mysfitId, but also other attributes that can be analyzed later.",
   memorySize: 128,
-  code: lambda.Code.asset("../../lambda"),
+  code: lambda.Code.asset("../../lambda-streaming-processor"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     lambdaFunctionPolicy
