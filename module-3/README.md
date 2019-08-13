@@ -5,7 +5,7 @@
 **Time to complete:** 20 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-3/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-3/cdk`
 
 ---
 
@@ -22,24 +22,10 @@ Now that you have a service deployed and a working CI/CD pipeline to deliver cha
 
 To add a DynamoDB table to the architecture, we will write another CloudFormation stack using AWS CDK that defines a table called **MysfitsTable**. This table will have a primary index defined by a hash key attribute called **MysfitId**, and two more secondary indexes.  The first secondary index will have the hash key of **GoodEvil** and a range key of **MysfitId**, and the other secondary index will have the hash key of **LawChaos** and a range key of **MysfitId**.  These two secondary indexes will allow us to execute queries against the table to retrieve all of the mysfits that match a given Species or Alignment to enable the filter functionality.
 
-To create the table using the AWS CDK, run the following command in the Cloud9 terminal:
-
-```sh
-cd aws-modern-application-workshop/module-3
-mkdir cdk && cd cdk/
-cdk init --language typescript
-```
-
-Copy over the file we created in the previous module:
-
-```sh
-cp ../../module-2/cdk/lib/* ./lib
-cp ../../module-2/cdk/bin/* ./bin
-```
-
 Create a new file in the `lib` folder called `dynamodb-stack.ts`.
 
 ```sh
+cd ~/environment/workshop/cdk
 touch lib/dynamodb-stack.ts
 ```
 
@@ -218,7 +204,7 @@ aws dynamodb scan --table-name MysfitsTable
 Also provided is a JSON file that can be used to batch insert a number of Mysfit items into this table.  This will be accomplished through the DynamoDB API **BatchWriteItem.** To call this API using the provided JSON file, execute the following terminal command (the response from the service should report that there are no items that went unprocessed):
 
 ```
-aws dynamodb batch-write-item --request-items file://~/environment/aws-modern-application-workshop/module-3/data/populate-dynamodb.json
+aws dynamodb batch-write-item --request-items file://~/environment/workshop/source/module-3/data/populate-dynamodb.json
 ```
 
 Now, if you run the same command to scan all of the table contents, you'll find the items have been loaded into the table:
@@ -235,7 +221,7 @@ Now that we have our data included in the table, let's modify our application co
 The request is formed using the AWS Python SDK called **boto3**. This SDK is a powerful yet simple way to interact with AWS services via Python code. It enables you to use service client definitions and functions that have great symmetry with the AWS APIs and CLI commands you've already been executing as part of this workshop.  Translating those commands to working Python code is simple when using **boto3**.  To copy the new files into your CodeCommit repository directory, execute the following command in the terminal:
 
 ```sh
-cp ~/environment/aws-modern-application-workshop/module-3/app/service/* ~/environment/MythicalMysfitsService-Repository/service/
+cp ~/environment/workshop/source/module-3/app/service/* ~/environment/MythicalMysfits-BackendRepository/service/
 ```
 
 #### Push the Updated Code into the CI/CD Pipeline
@@ -243,7 +229,7 @@ cp ~/environment/aws-modern-application-workshop/module-3/app/service/* ~/enviro
 Now, we need to check in these code changes to CodeCommit using the git command line client.  Run the following commands to check in the new code changes and kick of your CI/CD pipeline:
 
 ```sh
-cd ~/environment/MythicalMysfitsService-Repository
+cd ~/environment/MythicalMysfits-BackendRepository
 git add .
 git commit -m "Add new integration to DynamoDB."
 git push
@@ -253,7 +239,13 @@ Now, in just 5-10 minutes you'll see your code changes make it through your full
 
 #### Update The Website Content in S3
 
-Finally, we need to publish a new static website to our S3 bucket so that the new API functionality using query strings to filter responses will be used.  The new index.html file is located at `~/environment/aws-modern-application-workshop/module-3/web/index.html`.  Open this file in your Cloud9 IDE and replace the string indicating “REPLACE_ME” just as you did in Module 2, with the appropriate NLB endpoint. Remember do not inlcude the /mysfits path. Refer to the file you already edited in the /module-2/ directory if you need to.  
+Finally, we need to publish a new website to our S3 bucket so that the new API functionality using query strings to filter responses will be used.  The new index.html file is located at `~/environment/workshop/source/module-3/web/index.html`. Copy this file to the `workshop/web` directory:
+
+```sh
+cp -r ~/environment/workshop/source/module-3/web/* ~/environment/workshop/web
+```
+
+Open the `~/environment/workshop/web/index.html` file in your Cloud9 IDE and replace the string indicating “REPLACE_ME” just as you did in Module 2, with the appropriate NLB endpoint. Remember do not inlcude the /mysfits path. 
 
 After replacing the endpoint to point at your NLB, update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 

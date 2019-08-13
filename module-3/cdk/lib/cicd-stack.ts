@@ -15,8 +15,8 @@ export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
     super(scope, id);
 
-    const websiteRepository = new codecommit.Repository(this, "WebsiteRepository", {
-      repositoryName: "MythicalMysfitsService-Repository-Website"
+    const backendRepository = new codecommit.Repository(this, "BackendRepository", {
+      repositoryName: "MythicalMysfits-BackendRepository"
     });
     
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
@@ -38,7 +38,7 @@ export class CiCdStack extends cdk.Stack {
       }
     });
     const codeBuildPolicy = new iam.PolicyStatement();
-    codeBuildPolicy.addResources(websiteRepository.repositoryArn)
+    codeBuildPolicy.addResources(backendRepository.repositoryArn)
     codeBuildPolicy.addActions(
         "codecommit:ListBranches",
         "codecommit:ListRepositories",
@@ -55,7 +55,7 @@ export class CiCdStack extends cdk.Stack {
       actionName: "CodeCommit-Source",
       branch: "master",
       trigger: actions.CodeCommitTrigger.POLL,
-      repository: websiteRepository,
+      repository: backendRepository,
       output: sourceOutput
     });
     const buildOutput = new codepipeline.Artifact();
@@ -89,14 +89,14 @@ export class CiCdStack extends cdk.Stack {
       actions: [deployAction]
     });
     
-    new cdk.CfnOutput(this, 'WebRepositoryCloneUrlHttp', {
-      description: 'Web Repository CloneUrl HTTP',
-      value: websiteRepository.repositoryCloneUrlHttp
+    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
+      description: 'Backend Repository CloneUrl HTTP',
+      value: backendRepository.repositoryCloneUrlHttp
     });
 
-    new cdk.CfnOutput(this, 'WebRepositoryCloneUrlSsh', {
-      description: 'Web Repository CloneUrl SSH',
-      value: websiteRepository.repositoryCloneUrlSsh
+    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlSsh', {
+      description: 'Backend Repository CloneUrl SSH',
+      value: backendRepository.repositoryCloneUrlSsh
     });
   }
 }
