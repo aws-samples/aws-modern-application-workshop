@@ -5,7 +5,7 @@
 **Time to complete:** 60 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-4/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-4/cdk`
 
 ---
 
@@ -59,28 +59,14 @@ The VPC Link will be created as part of our Module 4 CDK application.
 
 #### Create the REST API using Swagger
 
-Your MythicalMysfits REST API is defined using **Swagger**, a popular open-source framework for describing APIs via JSON.  This Swagger definition of the API is located at `./module-4/api/api-swagger.json`.  Open this file and you'll see the REST API and all of its resources, methods, and configuration defined within.
+Your MythicalMysfits REST API is defined using **Swagger**, a popular open-source framework for describing APIs via JSON.  This Swagger definition of the API is located at `workshop/source/module-4/api/api-swagger.json`.  Open this file and you'll see the REST API and all of its resources, methods, and configuration defined within.
 
 The `securityDefinitions` object within the API definition indicates that we have setup an apiKey authorization mechanism using the Authorization header.  You will notice that AWS has provided custom extensions to Swagger using the prefix `x-amazon-api-gateway-`, these extensions are where API Gateway specific functionality can be added to typical Swagger files to take advantage of API Gateway-specific capabilities.
 
-To create the VPCLink and the API Gateway using the AWS CDK, run the following command in the Cloud9 terminal:
+To create the VPCLink and the API Gateway using the AWS CDK, create a new file in the `workshop/cdk/lib` folder called `apigateway-stack.ts`.
 
 ```sh
-cd aws-modern-application-workshop/module-4
-mkdir cdk && cd cdk/
-cdk init --language typescript
-```
-
-Copy over the file we created in the previous module:
-
-```sh
-cp ../../module-3/cdk/lib/* ./lib
-cp ../../module-3/cdk/bin/* ./bin
-```
-
-Create a new file in the `lib` folder called `apigateway-stack.ts`.
-
-```sh
+cd ~/environment/workshop/cdk
 touch lib/apigateway-stack.ts
 ```
 
@@ -133,7 +119,7 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 });
 ```
 
-Install the AWS CDK npm package for API Gateway by executing the following command from within the `aws-modern-application-workshop/module-4/cdk/` directory:
+Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory:
 
 ```sh
 npm install --save-dev @aws-cdk/aws-apigateway
@@ -189,7 +175,7 @@ Now, below the constructor, we will write one helper function to import an API s
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
   try {
     const userPoolIdentity = 'us-east-1_ab12345YZ'; // REPLACE THIS WITH YOUR COGNITO POOL ID
-    const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
+    const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
     const apiSchema = fs.readFileSync(schemaFilePath);
     let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
     schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
@@ -198,7 +184,7 @@ private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): strin
     schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
     return schema;
   } catch (exception) {
-    throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
+    throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme for instructions.');
   }
 }
 ```
@@ -250,10 +236,11 @@ Let's take care of that next.
 To accommodate the new functionality to view Mysfit Profiles, like, and adopt them, we have included updated Python code for your backend Flask web service.  Let's overwrite your existing codebase with these files and push them into the repository:
 
 ```sh
-cp ~/environment/aws-modern-application-workshop/module-4/app/service/* ~/environment/MythicalMysfitsService-Repository/service/
+cp ~/environment/workshop/source/module-4/app/service/* ~/environment/MythicalMysfits-BackendRepository/service/
 ```
 
-```
+```sh
+cd ~/environment/MythicalMysfits-BackendRepository
 git add .
 git commit -m "Update service code backend to enable additional website features."
 git push
@@ -263,10 +250,15 @@ While those service updates are being automatically pushed through your CI/CD pi
 
 #### Update the Mythical Mysfits Website in S3
 
-Open the new version of the Mythical Mysfits index.html file we will push to S3 shortly, it is located at: `~/environment/aws-modern-application-workshop/module-4/app/web/index.html`
-In this new `index.html` file, you'll notice additional HTML and JavaScript code that is being used to add a user registration and login experience.  This code is interacting with the AWS Cognito JavaScript SDK to help manage registration, authentication, and authorization to all of the API calls that require it.
+The new version of the Mythical Mysfits website includes additional HTML and JavaScript code that is being used to add a user registration and login experience.  This code is interacting with the AWS Cognito JavaScript SDK to help manage registration, authentication, and authorization to all of the API calls that require it.
 
-In this file, replace the strings **REPLACE_ME** inside the single quotes with the values you copied from above and save the file:
+The new version of the Mythical Mysfits website is located at `~/environment/workshop/source/module-4/web`. Copy the new version of the website to the `workshop/web` directory:
+
+```sh
+cp -r ~/environment/workshop/source/module-4/web/* ~/environment/workshop/web
+```
+
+Open the `~/environment/workshop/web/index.html` file in your Cloud9 IDE and replace the strings **REPLACE_ME** inside the single quotes with the values you copied from above and save the file:
 
 ![before-replace](/images/module-4/before-replace.png)
 
@@ -280,7 +272,7 @@ aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output t
 aws configure get region
 ```
 
-Also, for the user registration process, you have an additional two HTML files to insert these values into.  `register.html` and `confirm.html`.  Insert the copied values into the **REPLACE_ME** strings in these files as well.
+Also, for the user registration process, you have an additional two HTML files to insert these values into: `register.html` and `confirm.html`.  Insert the copied values into the **REPLACE_ME** strings in these files as well.
 
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 

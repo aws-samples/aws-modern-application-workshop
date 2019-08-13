@@ -44,7 +44,7 @@ export class APIGatewayStack extends cdk.Stack {
   private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
     try {
       const userPoolIdentity = 'REPLACE_ME_COGNITO_USER_POOL_ID';
-      const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
+      const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
       const apiSchema = fs.readFileSync(schemaFilePath);
       let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
       schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
@@ -53,7 +53,7 @@ export class APIGatewayStack extends cdk.Stack {
       schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
       return schema;
     } catch (exception) {
-      throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
+      throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme for instructions.');
     }
   }
 }
