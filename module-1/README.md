@@ -26,11 +26,12 @@ To begin, sign in to the [AWS Console](https://console.aws.amazon.com) for the A
 
 This web application can be deployed in any AWS region that supports all the services used in this application. The supported regions include:
 
-** @@@@ TODO: Review region list @@@@ **
-
 * us-east-1 (N. Virginia)
 * us-east-2 (Ohio)
 * us-west-2 (Oregon)
+* ap-southeast-1 (Singapore)
+* ap-northeast-1 (Tokio)
+* eu-central-1 (Frankfurt)
 * eu-west-1 (Ireland)
 
 Select a region from the dropdown in the upper right corner of the AWS Management Console.
