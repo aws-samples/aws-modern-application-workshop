@@ -55,7 +55,7 @@ export class WebApplicationStack extends cdk.Stack {
           originPath: `/web`,
           s3OriginSource: {
             s3BucketSource: bucket,
-            originAccessIdentityId: origin.attrS3CanonicalUserId
+            originAccessIdentityId: origin.ref
           }
         }
       ]

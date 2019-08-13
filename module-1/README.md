@@ -67,7 +67,7 @@ When the IDE has finished being created for you, you'll be presented with a welc
 In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
 ```
-git clone -b python https://github.com/aws-samples/aws-modern-application-workshop.git
+git clone -b python-cdk-ts https://github.com/aws-samples/aws-modern-application-workshop.git
 ```
 
 After cloning the repository, you'll see that your project explorer now includes the files cloned:
@@ -221,7 +221,7 @@ const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOri
 });
 
 bucket.grantRead(new iam.CanonicalUserPrincipal(
-  origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
+  origin.attrS3CanonicalUserId
 ));
 ```
 
@@ -244,14 +244,14 @@ Next, Write the definition for a new CloudFront web distribution:
 
 ```typescript
 const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
-  viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.AllowAll,
-  priceClass: cloudfront.PriceClass.PriceClassAll,
+  viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
+  priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
   originConfigs: [
     {
       behaviors: [
         {
           isDefaultBehavior: true,
-          maxTtlSeconds: undefined,
+          maxTtl: undefined,
           allowedMethods:
             cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS
         }
@@ -259,7 +259,7 @@ const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
       originPath: `/web`,
       s3OriginSource: {
         s3BucketSource: bucket,
-        originAccessIdentityId: origin.cloudFrontOriginAccessIdentityId
+        originAccessIdentityId: origin.ref
       }
     }
   ]
