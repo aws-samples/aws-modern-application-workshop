@@ -5,7 +5,7 @@
 **Time to complete:** 20 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-1/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-1/cdk`
 
 ---
 
@@ -64,21 +64,20 @@ When the IDE has finished being created for you, you'll be presented with a welc
 
 #### Cloning the Mythical Mysfits Workshop Repository
 
-In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
+In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and ready to use. First, let's create a directory within which we will store of the files created and used with this workshop:
 
+```sh
+mkdir workshop && cd workshop
 ```
-git clone -b python-cdk-ts https://github.com/aws-samples/aws-modern-application-workshop.git
+
+Run the following git command in the terminal to clone the necessary code to complete this tutorial:
+
+```sh
+git clone -b python-cdk-ts https://github.com/aws-samples/aws-modern-application-workshop.git source
 ```
 
 After cloning the repository, you'll see that your project explorer now includes the files cloned:
 ![cloud9-explorer](/images/module-1/cloud9-explorer.png)
-
-
-In the terminal, change directory to the newly cloned repository directory:
-
-```
-cd aws-modern-application-workshop
-```
 
 ## Infrastructure As Code
 
@@ -117,10 +116,9 @@ cdk --version
 
 #### Initialise CDK App folder
 
-Within the `module-1` folder create a new folder to contain your AWS CDK application
+Within the `workshop` folder create a new folder to contain your AWS CDK application
 
 ```sh
-cd module-1
 mkdir cdk && cd cdk/
 ```
 
@@ -140,6 +138,8 @@ Notice the standard structure of an AWS CDK app, that consists of a `bin` folder
 
 * The `bin` folder is where we will define the entry point for the CDK app.
 * The `lib` folder is where we will define all our workshop infrastructure components.
+
+> **Note:** feel free to remove the `cdk/lib/cdk-stack.ts` file as we will be creating our own stack files.
 
 ## Creating the Mythical Mysfits Website
 
@@ -162,21 +162,39 @@ export class WebApplicationStack extends cdk.Stack {
 Add an import statement for the `WebApplicationStack` to the `bin/cdk.ts` file.
 
 ```typescript
+#!/usr/bin/env node
+import 'source-map-support/register';
+import cdk = require('@aws-cdk/core');
 import { WebApplicationStack } from "../lib/web-application-stack";
-...
-new WebApplicationStack(app, "MythicalMysfits-Website");
 
+const app = new cdk.App();
+new WebApplicationStack(app, "MythicalMysfits-Website");
 ```
 
-Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `aws-modern-application-workshop/module-1/cdk/` directory: 
+Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory: 
 
 ```sh
 npm install --save-dev @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
 ```
 
+### Copy the Web Application Code
+
+In your `workshop` root directory, create a new directory for the web application code:
+
+```sh
+cd ~/environment/workshop
+mkdir web
+```
+
+Copy the website static content from the `source/module-1/web` directory:
+
+```sh
+cp -r source/module-1/web/* ./web
+```
+
 ### Define the Website root directory
 
-Ensure the webAppRoot variable points to the `aws-modern-application-workshop/module-1/web` directory. In the `web-application-stack.ts` file, we want to import the `path` module, which we will use to resolve the path to our website folder:
+Ensure the webAppRoot variable points to the `~/environment/workshop/web` directory. In the `web-application-stack.ts` file, we want to import the `path` module, which we will use to resolve the path to our website folder:
 
 ```typescript
 import path = require('path');
@@ -277,11 +295,11 @@ new cdk.CfnOutput(this, "CloudFrontURL", {
 });
 ```
 
-With that, we have completed writing the components of our module 1 stack.  Your `cdk` folder should resemble like the reference implementation, which can be found in the `module-1/cdk-complete` directory.
+With that, we have completed writing the components of our module 1 stack.  Your `cdk` folder should resemble like the reference implementation, which can be found in the `workshop/source/module-1/cdk` directory.
 
 ### View the synthesized CloudFormation template
 
-From within the `aws-modern-application-workshop/module-1/cdk/` folder run the `cdk synth MythicalMysfits-Website` command to display the CloudFormation template that is generated based on the code you have just written.
+From within the `workshop/cdk/` folder run the `cdk synth MythicalMysfits-Website` command to display the CloudFormation template that is generated based on the code you have just written.
 
 ### Deploy the Website and Infrastructure
 
