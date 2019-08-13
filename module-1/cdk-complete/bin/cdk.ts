@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import cdk = require('@aws-cdk/core');
-import { StaticWebsiteStack } from "../lib/static-website-stack";
+import { WebApplicationStack } from "../lib/web-application-stack";
 
 const app = new cdk.App();
-new StaticWebsiteStack(app, "MythicalMysfits-Website");
+new WebApplicationStack(app, "MythicalMysfits-Website");

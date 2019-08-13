@@ -64,7 +64,7 @@ Then, add the DynamoDbStack to our CDK application definition in `bin/cdk.ts`, w
 
 import cdk = require("@aws-cdk/core");
 import 'source-map-support/register';
-import { StaticWebsiteStack } from "../lib/static-website-stack";
+import { WebApplicationStack } from "../lib/web-application-stack";
 import { NetworkStack } from "../lib/network-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
@@ -72,7 +72,7 @@ import { CiCdStack } from "../lib/cicd-stack";
 import { DynamoDbStack } from '../lib/dynamodb-stack';
 
 const app = new cdk.App();
-new StaticWebsiteStack(app, "MythicalMysfits-Website");
+new WebApplicationStack(app, "MythicalMysfits-Website");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {

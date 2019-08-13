@@ -539,7 +539,7 @@ After pasting, the line should look similar to below:
 
 ![after replace](/images/module-2/after-replace.png)
 
-#### Update the static website
+#### Update the Mythical Mysfits website
 To update your S3 hosted website, deploy the `MythicalMysfits-Website` stack:
 
 ```sh
@@ -612,14 +612,14 @@ Update the references in the `bin/cdk.ts` file, write/copy the following code:
 
 import cdk = require("@aws-cdk/core");
 import 'source-map-support/register';
-import { StaticWebsiteStack } from "../lib/static-website-stack";
+import { WebApplicationStack } from "../lib/web-application-stack";
 import { NetworkStack } from "../lib/network-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { CiCdStack } from "../lib/cicd-stack";
 
 const app = new cdk.App();
-new StaticWebsiteStack(app, "MythicalMysfits-Website");
+new WebApplicationStack(app, "MythicalMysfits-Website");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {

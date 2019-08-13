@@ -5,7 +5,7 @@ import s3 = require("@aws-cdk/aws-s3");
 import s3deploy = require("@aws-cdk/aws-s3-deployment");
 import path = require('path');
 
-export class StaticWebsiteStack extends cdk.Stack {
+export class WebApplicationStack extends cdk.Stack {
 
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id);

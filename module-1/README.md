@@ -141,16 +141,16 @@ Notice the standard structure of an AWS CDK app, that consists of a `bin` folder
 * The `bin` folder is where we will define the entry point for the CDK app.
 * The `lib` folder is where we will define all our workshop infrastructure components.
 
-## Creating the Mythical Mysfits Static Website
+## Creating the Mythical Mysfits Website
 
-Now, let's define the infrastructure needed to host our static website.  
+Now, let's define the infrastructure needed to host our website.  
 
-Create a new file called `static-website-stack.ts` in the `lib` folder, and define the skeleton class structure by writing/copying the following code:
+Create a new file called `web-application-stack.ts` in the `lib` folder, and define the skeleton class structure by writing/copying the following code:
 
 ```typescript
 import cdk = require('@aws-cdk/core');
 
-export class StaticWebsiteStack extends cdk.Stack {
+export class WebApplicationStack extends cdk.Stack {
   constructor(app: cdk.App, id: string) {
     super(app, id);
 
@@ -159,12 +159,12 @@ export class StaticWebsiteStack extends cdk.Stack {
 }
 ```
 
-Add an import statement for the `StaticWebsiteStack` to the `bin/cdk.ts` file.
+Add an import statement for the `WebApplicationStack` to the `bin/cdk.ts` file.
 
 ```typescript
-import { StaticWebsiteStack } from "../lib/static-website-stack";
+import { WebApplicationStack } from "../lib/web-application-stack";
 ...
-new StaticWebsiteStack(app, "MythicalMysfits-Website");
+new WebApplicationStack(app, "MythicalMysfits-Website");
 
 ```
 
@@ -176,7 +176,7 @@ npm install --save-dev @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 
 
 ### Define the Website root directory
 
-Ensure the webAppRoot variable points to the `aws-modern-application-workshop/module-1/web` directory. In the `static-website-stack.ts` file, we want to import the `path` module, which we will use to resolve the path to our website folder:
+Ensure the webAppRoot variable points to the `aws-modern-application-workshop/module-1/web` directory. In the `web-application-stack.ts` file, we want to import the `path` module, which we will use to resolve the path to our website folder:
 
 ```typescript
 import path = require('path');
@@ -191,7 +191,7 @@ import iam = require('@aws-cdk/aws-iam');
 import s3deploy = require('@aws-cdk/aws-s3-deployment');
 ```
 
-Now, within the `static-website-stack.ts` constructor, write the folllowing code.
+Now, within the `web-application-stack.ts` constructor, write the folllowing code.
 
 ```typescript
 const webAppRoot = path.resolve(__dirname, '..', '..', 'web');
@@ -211,7 +211,7 @@ const bucket = new s3.Bucket(this, "Bucket", {
 
 We want to restrict access to our S3 bucket, and only allow access from the CloudFront distribution. We'll use an [Origin Access Identity (OAI)](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html) to allow CloudFront to access and serve files to our users.
 
-Within the `static-website-stack.ts` constructor write the folllowing code:
+Within the `web-application-stack.ts` constructor write the folllowing code:
 
 ```typescript
 const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOrigin", {
@@ -225,7 +225,7 @@ bucket.grantRead(new iam.CanonicalUserPrincipal(
 ));
 ```
 
-### Upload the static content to the S3 bucket
+### Upload the website content to the S3 bucket
 
 Now we want to use a handy CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket:
 
