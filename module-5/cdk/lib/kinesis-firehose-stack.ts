@@ -16,8 +16,8 @@ export class KinesisFirehoseStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: KinesisFirehoseStackProps) {
     super(scope, id);
     
-    const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-      repositoryName: "MythicalMysfitsService-Repository-Lambda"
+    const lambdaRepository = new codecommit.Repository(this, "ClicksProcessingLambdaRepository", {
+      repositoryName: "MythicalMysfits-ClicksProcessingLambdaRepository"
     });
 
     const clicksDestinationBucket = new s3.Bucket(this, "Bucket", {
@@ -40,7 +40,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
       description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
         " to not just include a mysfitId, but also other attributes that can be analyzed later.",
       memorySize: 128,
-      code: lambda.Code.asset("../../lambda"),
+      code: lambda.Code.asset("../../../lambda-streaming-processor"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         lambdaFunctionPolicy
@@ -173,12 +173,12 @@ export class KinesisFirehoseStack extends cdk.Stack {
     
     new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlHttp", {
       value: lambdaRepository.repositoryCloneUrlHttp,
-      description: "Lambda Repository Clone Url HTTP"
+      description: "Clicks Processing Lambda Repository Clone Url HTTP"
     });
     
     new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlSsh", {
       value: lambdaRepository.repositoryCloneUrlSsh,
-      description: "Lambda Repository Clone Url SSH"
+      description: "Clicks Processing Lambda Repository Clone Url SSH"
     });
   }
 }

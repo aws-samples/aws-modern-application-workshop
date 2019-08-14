@@ -5,7 +5,7 @@
 **Time to complete:** 30 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-5/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-5/cdk`
 
 ---
 
@@ -35,24 +35,10 @@ Before we create the resources described above, we need to update and modify the
 
 This new stack you will deploy using the AWS Cloud Development Kit (CDK) will not only contain the infrastructure environment resources, but the application code itself that AWS Lambda will execute to process streaming events.  
 
-To create the necessary resources using the AWS CDK, run the following command in the Cloud9 terminal:
+To create the necessary resources using the AWS CDK, create a new file in the `workshop/cdk/lib` folder called `kinesis-firehose-stack.ts`.
 
 ```sh
-cd aws-modern-application-workshop/module-5
-mkdir cdk && cd cdk/
-cdk init --language typescript
-```
-
-Copy over the file we created in the previous module:
-
-```sh
-cp ../../module-4/cdk/lib/* ./lib
-cp ../../module-4/cdk/bin/* ./bin
-```
-
-Create a new file in the `lib` folder called `kinesis-firehose-stack.ts`.
-
-```sh
+cd ~/environment/workshop/cdk
 touch lib/kinesis-firehose-stack.ts
 ```
 
@@ -68,7 +54,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
 }
 ```
 
-Install the AWS CDK npm package for Kinesis Firehose by executing the following command from within the `aws-modern-application-workshop/module-5/cdk/` directory:
+Install the AWS CDK npm package for Kinesis Firehose by executing the following command from within the `workshop/cdk/` directory:
 
 ```sh
 npm install --save-dev @aws-cdk/aws-kinesisfirehose
@@ -99,18 +85,18 @@ interface KinesisFirehoseStackProps extends cdk.StackProps {
 Within the `KinesisFirehoseStack` constructor, add the CodeCommit repository we'll use for the Kinesis Firehose and Lambda code we will write:
 
 ```typescript
-const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-  repositoryName: "MythicalMysfitsService-Repository-Lambda"
+const lambdaRepository = new codecommit.Repository(this, "ClicksProcessingLambdaRepository", {
+  repositoryName: "MythicalMysfits-ClicksProcessingLambdaRepository"
 });
 
 new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlHttp", {
   value: lambdaRepository.repositoryCloneUrlHttp,
-  description: "Lambda Repository Clone Url HTTP"
+  description: "Clicks Processing Lambda Repository Clone Url HTTP"
 });
 
 new cdk.CfnOutput(this, "kinesisRepositoryCloneUrlSsh", {
   value: lambdaRepository.repositoryCloneUrlSsh,
-  description: "Lambda Repository Clone Url SSH"
+  description: "Clicks Processing Lambda Repository Clone Url SSH"
 });
 ```
 
@@ -159,7 +145,7 @@ We are not yet finished writing the `KinesisFirehoseStack` implementation but le
 cdk deploy MythicalMysfits-KinesisFirehose
 ```
 
-In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-Lambda`
+In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfits-ClicksProcessingLambdaRepository`
 
 Next, let's clone that new and empty repository:
 
@@ -177,7 +163,7 @@ cd ~/environment/lambda-streaming-processor/
 
 Then, copy the module-5 application components into this new repository directory:
 ```
-cp -r ~/environment/aws-modern-application-workshop/module-5/app/streaming/* .
+cp -r ~/environment/workshop/source/module-5/app/streaming/* .
 ```
 
 ### Update the Lambda Function Package and Code
@@ -212,7 +198,7 @@ git push
 Change back into the `cdk` folder:
 
 ```sh
-cd ~/environment/aws-modern-application-workshop/module-5/cdk
+cd ~/environment/workshop/cdk
 ```
 
 Back in the `KinesisFirehoseStack` file,  we will now define the Kinesis Firehose infrastructure.  First, let's define the kinesis firehose implementation:
@@ -238,7 +224,7 @@ const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
   description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
     " to not just include a mysfitId, but also other attributes that can be analyzed later.",
   memorySize: 128,
-  code: lambda.Code.asset("../../lambda-streaming-processor"),
+  code: lambda.Code.asset("../../../lambda-streaming-processor"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     lambdaFunctionPolicy
@@ -383,12 +369,14 @@ Note down the API Gateway endpoint, as we will need it in the next step.
 #### Update the Website Content and Push the New Site to S3
 With the streaming stack up and running, we now need to publish a new version of our Mythical Mysfits frontend that includes the JavaScript that sends events to our service whenever a mysfit profile is clicked by a user.
 
-The new index.html file is included at: `~/environment/aws-modern-application-workshop/module-5/web/index.html`
+The new index.html file is included at: `~/environment/workshop/source/module-5/web/index.html`. Copy the new version of the website to the `workshop/web` directory:
 
-This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-4. The `streamingApiEndpoint` value is the API Gateway endpoint you noted down earlier.
+```sh
+cp -r ~/environment/workshop/source/module-5/web/* ~/environment/workshop/web
+```
 
-Also remember to replace the values in the `register.html` and `confirm.html` files. 
-
+This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created. The `streamingApiEndpoint` value is the API Gateway endpoint you noted down earlier.
+ 
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
