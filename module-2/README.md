@@ -4,13 +4,7 @@
 
 **Time to complete:** 60 minutes
 
----
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-2/cdk`
-
----
-
 **Services used:**
-
 * [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
 * [AWS Identity and Access Management (IAM)](https://aws.amazon.com/iam/)
 * [Amazon Virtual Private Cloud (VPC)](https://aws.amazon.com/vpc/)
@@ -23,15 +17,14 @@
 * [AWS CodeDeploy](https://aws.amazon.com/codedeploy/)
 * [AWS CodeBuild](https://aws.amazon.com/codebuild/)
 
+
 ### Overview
 
-In Module 2, using [AWS CDK](https://aws.amazon.com/cdk/), you will create a new microservice hosted using [AWS Fargate](https://aws.amazon.com/fargate/) on [Amazon Elastic Container Service](https://aws.amazon.com/ecs/) so that your Mythical Mysfits website can have a application backend to integrate with. AWS Fargate is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use Python and create a Flask app in a Docker container behind a Network Load Balancer. These will form the microservice backend for the frontend website to integrate with.
+In Module 2, you will create a new microservice hosted using [AWS Fargate](https://aws.amazon.com/fargate/) on [Amazon Elastic Container Service](https://aws.amazon.com/ecs/) so that your Mythical Mysfits website can have a application backend to integrate with. AWS Fargate is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use Python and create a Flask app in a Docker container behind a Network Load Balancer. These will form the microservice backend for the frontend website to integrate with.
 
 ### Creating the Core Infrastructure using AWS CloudFormation
 
-Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the [AWS Identity and Access Management](https://aws.amazon.com/iam/) Roles that will define the permissions that ECS and our containers will have on top of AWS.  
-
-The AWS CDK application you are about to write will create the following resources:
+Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the [AWS Identity and Access Management](https://aws.amazon.com/iam/) Roles that will define the permissions that ECS and our containers will have on top of AWS.  We will use [AWS CloudFormation](https://aws.amazon.com/cloudformation/) to accomplish this. AWS CloudFormation is a service that can programmatically provision AWS resources that you declare within JSON or YAML files called *CloudFormation Templates*, enabling the common best practice of *Infrastructure as Code*.  We have provided a CloudFormation template to create all of the necessary Network and Security resources in /module-2/cfn/core.yml.  This template will create the following resources:
 
 * [**An Amazon VPC**](https://aws.amazon.com/vpc/) - a network environment that contains four subnets (two public and two private) in the 10.0.0.0/16 private IP space, as well as all the needed Route Table configurations.  The subnets for this network are created in separate AWS Availability Zones (AZ) to enable high availability across multiple physical facilities in an AWS Region. Learn more about how AZs can help you achieve High Availability [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 * [**Two NAT Gateways**](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) (one for each public subnet, also spanning multiple AZs) - allow the containers we will eventually deploy into our private subnets to communicate out to the Internet to download necessary packages, etc.
@@ -39,120 +32,28 @@ The AWS CDK application you are about to write will create the following resourc
 * [**A Security Group**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) - Allows your docker containers to receive traffic on port 8080 from the Internet through the Network Load Balancer.
 * [**IAM Roles**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) - Identity and Access Management Roles are created. These will be used throughout the workshop to give AWS services or resources you create access to other AWS services like DynamoDB, S3, and more.
 
-In the `workshop/cdk` directory, create a new file in the `lib` folder called `network-stack.ts`.
+To create these resources, run the following command in the Cloud9 terminal (will take ~10 minutes for stack to be created):
 
-```sh
-cd ~/environment/workshop/cdk
-touch lib/network-stack.ts
+```
+aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabilities CAPABILITY_NAMED_IAM --template-body file://~/environment/aws-modern-application-workshop/module-2/cfn/core.yml   
 ```
 
-Within the file you just created, define the skeleton CDK Stack structure, naming the class `NetworkStack`:
+You can check on the status of your stack creation either via the AWS Console or by running the command:
 
-```typescript
-import cdk = require('@aws-cdk/core');
-
-export class NetworkStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id:string) {
-    super(scope, id);
-
-    // The code that defines your stack goes here
-  }
-}
+```
+aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack
 ```
 
-Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, when done, your `bin/cdk.ts` should look like this:
+Run the the `describe-stacks` command, until you see a status of ```"StackStatus": "CREATE_COMPLETE"```
+![cfn-complete.png](/images/module-2/cfn-complete.png)
 
-```typescript
-#!/usr/bin/env node
-import 'source-map-support/register';
-import cdk = require('@aws-cdk/core');
-import { WebApplicationStack } from "../lib/web-application-stack";
-import { NetworkStack } from "../lib/network-stack";
 
-const app = new cdk.App();
-new WebApplicationStack(app, "MythicalMysfits-Website");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
+When you get this response, CloudFormation has finished provisioning all of the core networking and security resources described above and you can proceed. Wait for the above stack to show `CREATE_COMPLETE` before proceeding on.   
+
+**You will be using values from the output of this command throughout the rest of the workshop.  You can run the following command to directly output the above `describe-stacks` command to a new file in your IDE that will be stored as `cloudformation-core-output.json`:**
+
 ```
-
-Now, we can define our VPC using AWS CDK.  Once again, AWS CDK makes the implementation of AWS Components and Services a breeze by providing you with high level abstractions.  Let's demonstrate this now.
-
-First, we need to install the CDK NPM packages for Amazon EC2 and AWS IAM:
-
-```sh
-npm install --save-dev @aws-cdk/aws-ec2 @aws-cdk/aws-iam
-```
-
-Within the `network-stack.ts` file, define the following VPC construct:
-
-```typescript
-import cdk = require('@aws-cdk/core');
-import ec2 = require("@aws-cdk/aws-ec2");
-import iam = require("@aws-cdk/aws-iam");
-
-export class NetworkStack extends cdk.Stack {
-  public readonly vpc: ec2.Vpc;
-
-  constructor(scope: cdk.Construct, id:string) {
-    super(scope, id);
-
-    this.vpc = new ec2.Vpc(this, "VPC");
-  }
-}
-```
-
-That is all you need to define a VPC!  Let's now run the `cdk synth` command to observe what this single line generates.  In a terminal window run the following command:
-
-```sh
-cdk synth MythicalMysfits-NetworkStack -o templates
-```
-
-This command will generate the AWS CloudFormation template for the NetworkStack and place it in a folder called templates.  Open the generated file now and review the contents.  
-
-In the generated file, you will find that one line of code generated a huge amount of AWS CloudFormation, including:
-
-* A VPC construct;
-* Public, private and isolated subnets in each of the availability zones in your region
-* Routing tables for each of the subnets
-* NAT and Internet Gateways for each AZ
-
-But lets now customise the VPC we are creating by adding some property overrides.  Change your VPC definiton to reflect the following:
-
-```typescript
-this.vpc = new ec2.Vpc(this, "VPC", {
-  natGateways: 2,
-  maxAzs: 2
-});
-```
-
-Here we are defining the maximum number of NAT Gateways we want to establish and the maximum number of AZs we want to deploy to.
-
-Next, within the NetworkStack class, we want to define a VPC endpoint to allow a secure path for traffic to travel between our VPC and the DynamoDB database.
-
-```typescript
-const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-  service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
-  subnets: [{
-      subnetType: ec2.SubnetType.Private
-  }]
-});
-
-const dynamoDbPolicy = new iam.PolicyStatement();
-dynamoDbPolicy.addAnyPrincipal();
-dynamoDbPolicy.addActions("*");
-dynamoDbPolicy.addAllResources();
-
-dynamoDbEndpoint.addToPolicy(
-  dynamoDbPolicy
-);
-```
-
-> **Note:** once you've completed the changes above, compare your `network-stack.ts` file with the one in the `workshop/source/module-2/cdk/lib` folder and make sure it looks the same.
-
-Now, deploy your VPC using the following command:
-
-```sh
-npm run build
-cdk deploy MythicalMysfits-NetworkStack
+aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack > ~/environment/cloudformation-core-output.json
 ```
 
 ## Module 2a: Deploying a Service with AWS Fargate
@@ -163,15 +64,17 @@ cdk deploy MythicalMysfits-NetworkStack
 
 Next, you will create a docker container image that contains all of the code and configuration required to run the Mythical Mysfits backend as a microservice API created with Flask.  We will build the docker container image within Cloud9 and then push it to the Amazon Elastic Container Registry, where it will be available to pull when we create our service using Fargate.
 
-All of the code required to run our service backend is stored within the `workshop/source/module-2/app/` directory of the repository you've cloned into your Cloud9 IDE.  If you would like to review the Python code that uses Flask to create the service API, view the `workshop/source/module-2/app/service/mythicalMysfitsService.py` file.
+All of the code required to run our service backend is stored within the `/module-2/app/` directory of the repository you've cloned into your Cloud9 IDE.  If you would like to review the Python code that uses Flask to create the service API, view the `/module-2/app/service/mythicalMysfitsService.py` file.
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
-* Navigate to `~/environment/workshop/source/module-2/app`
+* Navigate to `~/environment/module-2/app`
 
 ```
-cd ~/environment/workshop/source/module-2/app
+cd ~/environment/aws-modern-application-workshop/module-2/app
 ```
+
+* You can get your account ID and default region from the output of the previous CloudFormation **describe-stacks
 
 * Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
 
@@ -208,85 +111,19 @@ This will open another panel in the IDE where the web browser will be available.
 
 ![preview-menu](/images/module-2/address-bar.png)
 
-If successful you will see a response from the service that returns the JSON document stored at `~/environment/workshop/source/module-2/app/service/mysfits-response.json`
+If successful you will see a response from the service that returns the JSON document stored at `/aws-modern-application-workshop/module-2/app/service/mysfits-response.json`
 
 When done testing the service you can stop it by pressing CTRL-c on PC or Mac.
 
-#### Create an Amazon Elastic Container Registry (ECR) repository
-
-With a successful test of our service locally, we're ready to create a container image repository in [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) (Amazon ECR) and push our image into it.  In order to create the registry using CDK, let's create a new file within the `lib` folder, this time called `ecr-stack.ts`.  
-```sh
-cd ~/environment/workshop/cdk
-touch lib/ecr-stack.ts
-```
-
-And again, as before, define the skeleton structure of a CDK Stack.
-
-```typescript
-import cdk = require('@aws-cdk/core');
-
-export class ECRStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string) {
-    super(scope, id);
-
-    // The code that defines your stack goes here
-  }
-}
-```
-
-Then, add the ECRStack to our CDK application definition in `bin/cdk.ts`, as we have done before.  When done, your `bin/cdk.ts` should look like this;
-
-```typescript
-#!/usr/bin/env node
-
-import cdk = require('@aws-cdk/core');
-import "source-map-support/register";
-import { WebApplicationStack } from "../lib/web-application-stack";
-import { NetworkStack } from "../lib/network-stack";
-import { EcrStack } from "../lib/ecr-stack";
-
-const app = new cdk.App();
-new WebApplicationStack(app, "MythicalMysfits-Website");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
-const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
-```
-
-Next, we need to install the CDK NPM packages for Amazon ECR:
-
-```sh
-npm install --save-dev @aws-cdk/aws-ecr
-```
-
-Then we add the definition of our ECR repository to the EcrStack as follows:
-
-```typescript
-import ecr = require("@aws-cdk/aws-ecr");
-...
-export class EcrStack extends cdk.Stack {
-  public readonly ecrRepository: ecr.Repository;
-
-  constructor(scope: cdk.Construct, id: string) {
-    super(scope, id);
-    this.ecrRepository = new ecr.Repository(this, "Repository", {
-      repositoryName: "mythicalmysfits/service"
-    });
-  }
-}
-```
-
-**Note:** We are assigning the instance of our `ecr.Repository` to a readonly property so that it may be referenced by other stacks.
-
-Now, deploy your ECR stack using the following command:
-
-```sh
-npm run build
-cdk deploy MythicalMysfits-ECR
-```
-
-In your browser, go to the ECR Dashboard and verify you can see the ECR repository you just created in the list.
-
 #### Pushing the Docker Image to Amazon ECR
 
+With a successful test of our service locally, we're ready to create a container image repository in [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) (Amazon ECR) and push our image into it.  In order to create the registry, run the following command, this creates a new repository in the default AWS ECR registry created for your account.
+
+```
+aws ecr create-repository --repository-name mythicalmysfits/service
+```
+
+The response to this command will contain additional metadata about the created repository.
 In order to push container images into our new repository, we will need to obtain authentication credentials for our Docker client to the repository.  Run the following command, which will return a login command to retrieve credentials for our Docker client and then automatically execute it (include the full command including the $ below). 'Login Succeeded' will be reported if the command is successful.
 
 ```
@@ -305,223 +142,125 @@ Run the following command to see your newly pushed docker image stored inside th
 aws ecr describe-images --repository-name mythicalmysfits/service
 ```
 
-### Create an Amazon ECS Service with AWS Fargate
+### Configuring the Service Prerequisites in Amazon ECS
+
+#### Create an ECS Cluster
 
 Now,  we have an image available in ECR that we can deploy to a service hosted on Amazon ECS using AWS Fargate.  The same service you tested locally via the terminal in Cloud9 as part of the last module will now be deployed in the cloud and publicly available behind a Network Load Balancer.  
 
-First, we will create a **Cluster** in **Amazon Elastic Container Service (ECS)**. This represents the cluster of “servers” that your service containers will be deployed to.  Servers is in "quotations" because you will be using **AWS Fargate**. Fargate allows you to specify that your containers be deployed to a cluster without having to actually provision or manage any servers yourself.
+First, we will create a **Cluster** in the **Amazon Elastic Container Service (ECS)**. This represents the cluster of “servers” that your service containers will be deployed to.  Servers is in "quotations" because you will be using **AWS Fargate**. Fargate allows you to specify that your containers be deployed to a cluster without having to actually provision or manage any servers yourself.
 
-Now, let's define our ECS instance.  But first, we need to install the CDK NPM packages for AWS ECS, doing so like below:
+To create a new cluster in ECS, run the following command:
 
-```sh
-npm install --save-dev @aws-cdk/aws-ecs @aws-cdk/aws-ecs-patterns
+```
+aws ecs create-cluster --cluster-name MythicalMysfits-Cluster
 ```
 
-As before, let's create a new file within the `lib` folder, this time called `ecs-stack.ts`.  
+#### Create an AWS CloudWatch Logs Group
 
-```sh
-touch lib/ecs-stack.ts
+Next, we will create a new log group in **AWS CloudWatch Logs**.  AWS CloudWatch Logs is a service for log collection and analysis. The logs that your container generates will automatically be pushed to AWS CloudWatch logs as part of this specific group. This is especially important when using AWS Fargate since you will not have access to the server infrastructure where your containers are running.
+
+To create the new log group in CloudWatch logs, run the following command:
+
+```
+aws logs create-log-group --log-group-name mythicalmysfits-logs
 ```
 
-Define the skeleton structure of a CDK Stack.
+#### Register an ECS Task Definition
 
-```typescript
-import cdk = require('@aws-cdk/core');
+Now that we have a cluster created and a log group defined for where our container logs will be pushed to, we're ready to register an ECS **task definition**.  A task in ECS is a set of container images that should be scheduled together. A task definition declares that set of containers and the resources and configuration those containers require.  You will use the AWS CLI to create a new task definition for how your new container image should be scheduled to the ECS cluster we just created.  
 
-export class EcsStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string) {
-    super(scope, id);
+A JSON file has been provided that will serve as the input to the CLI command.
 
-    // The code that defines your stack goes here
-  }
-}
+Open `~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition.json` in the IDE.
+
+Replace the indicated values with the appropriate ones from your created resources.  
+
+These values will be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `REPLACE_ME_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest`
+
+Once you have replaced the values in `task-defintion.json` and saved it. Execute the following command to register a new task definition in ECS:
+
+```
+aws ecs register-task-definition --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition.json
 ```
 
-This time, the stack we are creating depends on two previous stacks that we have created.  The recommended approach for importing dependencies and properties into a stack is via a properties construct.  Let's define that now.  
+### Enabling a Load Balanced Fargate Service
 
-Above your EcsStack definition, import the following modules:
+#### Create a Network Load Balancer
 
-```typescript
-import ec2 = require('@aws-cdk/aws-ec2');
-import ecr = require('@aws-cdk/aws-ecr');
+With a new task definition registered, we're ready to provision the infrastructure needed in our service stack. Rather than directly expose our service to the Internet, we will provision a [**Network Load Balancer (NLB)**](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html) to sit in front of our service tier.  This would enable our frontend website code to communicate with a single DNS name while our backend service would be free to elastically scale in-and-out, in multiple Availability Zones, based on demand or if failures occur and new containers need to be provisioned.
+
+To provision a new NLB, execute the following CLI command in the Cloud9 terminal (retrieve the subnetIds from the CloudFormation output you saved):
+
+```
+aws elbv2 create-load-balancer --name mysfits-nlb --scheme internet-facing --type network --subnets REPLACE_ME_PUBLIC_SUBNET_ONE REPLACE_ME_PUBLIC_SUBNET_TWO > ~/environment/nlb-output.json
 ```
 
-And define the following properties object.
+When this command has successfully completed, a new file will be created in your IDE called `nlb-output.json`. You will be using the `DNSName`, `VpcId`, and `LoadBalancerArn` in later steps.
 
-```typescript
-interface EcsStackProps extends cdk.StackProps {
-    vpc: ec2.Vpc,
-    ecrRepository: ecr.Repository
-}
+#### Create a Load Balancer Target Group
+
+Next, use the CLI to create an NLB **target group**. A target group allows AWS resources to register themselves as targets for requests that the load balancer receives to forward.  Our service containers will automatically register to this target so that they can receive traffic from the NLB when they are provisioned. This command includes one value that will need to be replaced, your `vpc-id` which can be found as a value within the earlier saved `MythicalMysfitsCoreStack` output returned by CloudFormation.
+
+```
+aws elbv2 create-target-group --name MythicalMysfits-TargetGroup --port 8080 --protocol TCP --target-type ip --vpc-id REPLACE_ME_VPC_ID --health-check-interval-seconds 10 --health-check-path / --health-check-protocol HTTP --healthy-threshold-count 3 --unhealthy-threshold-count 3 > ~/environment/target-group-output.json
 ```
 
-Now change the constructor of your EcsStack to require your properties object.
+When this command completes, its output will be saved to `target-group-output.json` in your IDE. You will reference the `TargetGroupArn` value in a subsequent step.
 
-```typescript
-  constructor(scope: cdk.Construct, id: string, props: EcsStackProps) {
+#### Create a Load Balancer Listener
+
+Next, use the CLI to create a load balancer **listener** for the NLB.  This informs that load balancer that for requests received on a specific port, they should be forwarded to targets that have registered to the above target group. Be sure to replace the two indicated values with the appropriate ARN from the TargetGroup and the NLB that you saved from the previous steps:
+
+```
+aws elbv2 create-listener --default-actions TargetGroupArn=REPLACE_ME_NLB_TARGET_GROUP_ARN,Type=forward --load-balancer-arn REPLACE_ME_NLB_ARN --port 80 --protocol TCP
 ```
 
-Import the remaining AWS CDK modules that we will require within the ECS stack.
+### Creating a Service with Fargate
 
-```typescript
-import ecs = require("@aws-cdk/aws-ecs");
-import ecsPatterns = require("@aws-cdk/aws-ecs-patterns");
-import iam = require("@aws-cdk/aws-iam");
+#### Creating a Service Linked Role for ECS
+
+If you have already used ECS in the past you can skip over this step and move on to the next step.  If you have never used ECS before, we need to create an **service linked role** in IAM that grants the ECS service itself permissions to make ECS API requests within your account.  This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling docker images, creating new tasks, etc.
+
+Without creating this role, the ECS service would not be granted permissions to perform the actions required.  To create the role, execute the following command in the terminal:
+
+```
+aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
 ```
 
-Be sure to define two properties at the top of your EcsStack that expose the ecsCluster and ecsService for other stacks to utilise later in the workshop.
+If the above returns an error about the role existing already, you can ignore it, as it would indicate the role has automatically been created in your account in the past.
 
-```typescript
-export class EcsStack extends cdk.Stack {
-  public readonly ecsCluster: ecs.Cluster;
-  public readonly ecsService: ecsPatterns.LoadBalancedFargateService;
 
-  constructor(scope: cdk.Construct, id: string, props: EcsStackProps) {
-    super(scope, id);
+#### Create the Service
+
+With the NLB created and configured, and the ECS service granted appropriate permissions, we're ready to create the actual ECS **service** where our containers will run and register themselves to the load balancer to receive traffic.  We have included a JSON file for the CLI input that is located at: `~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json`.  This file includes all of the configuration details for the service to be created, including indicating that this service should be launched with **AWS Fargate** - which means that you do not have to provision any servers within the targeted cluster.  The containers that are scheduled as part of the task used in this service will run on top of a cluster that is fully managed by AWS.
+
+Open ```~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json``` in the IDE and replace the indicated values of `REPLACE_ME`. Save it, then run the following command to create the service:
+
+```
+aws ecs create-service --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json
 ```
 
-Now we define our ECS Cluster object.
-
-```typescript
-this.ecsCluster = new ecs.Cluster(this, "Cluster", {
-  clusterName: "MythicalMysfits-Cluster",
-  vpc: props.vpc
-});
-this.ecsCluster.connections.allowFromAnyIpv4(ec2.Port.tcp(8080));
-```
-
-Notice how we reference the VPC (`props.vpc`) defined in the `EcsStackProps`.  [AWS CDK](https://aws.amazon.com/cdk/) will automatically create a reference here between the CloudFormation objects.  Also notice that we assign the instance of the `ecs.Cluster` created to a local property so that it can be referenced by this and other stacks.
-
-```typescript
-this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
-  cluster: this.ecsCluster,
-  loadBalancerType: ecsPatterns.LoadBalancerType.Network,
-  desiredCount: 1,
-  createLogs: true,
-  publicLoadBalancer: true,
-  containerPort: 8080,
-  image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
-});
-this.ecsService.service.connections.allowFrom(ec2.Peer.ipv4(props.vpc.vpcCidrBlock),ec2.Port.tcp(8080));
-```
-
-Notice here the definition of container ports and the customisation of the EC2 SecurityGroups rules created by AWS CDK to limit permitted requests to the CIDR block of the VPC we created.
-
-Next we will add some additional IAM Policy Statements to the Execution and Task Roles.
-
-```typescript
-const taskDefinitionPolicy = new iam.PolicyStatement();
-taskDefinitionPolicy.addActions(
-  // Rules which allow ECS to attach network interfaces to instances
-  // on your behalf in order for awsvpc networking mode to work right
-  "ec2:AttachNetworkInterface",
-  "ec2:CreateNetworkInterface",
-  "ec2:CreateNetworkInterfacePermission",
-  "ec2:DeleteNetworkInterface",
-  "ec2:DeleteNetworkInterfacePermission",
-  "ec2:Describe*",
-  "ec2:DetachNetworkInterface",
-
-  // Rules which allow ECS to update load balancers on your behalf
-  //  with the information sabout how to send traffic to your containers
-  "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
-  "elasticloadbalancing:DeregisterTargets",
-  "elasticloadbalancing:Describe*",
-  "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
-  "elasticloadbalancing:RegisterTargets",
-
-  //  Rules which allow ECS to run tasks that have IAM roles assigned to them.
-  "iam:PassRole",
-
-  //  Rules that let ECS create and push logs to CloudWatch.
-  "logs:DescribeLogStreams",
-  "logs:CreateLogGroup");
-taskDefinitionPolicy.addAllResources();
-
-this.ecsService.service.taskDefinition.addToExecutionRolePolicy(
-  taskDefinitionPolicy
-);
-
-const taskRolePolicy =  new iam.PolicyStatement();
-taskRolePolicy.addActions(
-  // Allow the ECS Tasks to download images from ECR
-  "ecr:GetAuthorizationToken",
-  "ecr:BatchCheckLayerAvailability",
-  "ecr:GetDownloadUrlForLayer",
-  "ecr:BatchGetImage",
-  // Allow the ECS tasks to upload logs to CloudWatch
-  "logs:CreateLogStream",
-  "logs:CreateLogGroup",
-  "logs:PutLogEvents"
-);
-taskRolePolicy.addAllResources();
-
-this.ecsService.service.taskDefinition.addToTaskRolePolicy(
-  taskRolePolicy
-);
-```
-
-Then, add the EcsStack to our CDK application definition in `bin/cdk.ts`, as we have done before.  When done, your `bin/cdk.ts` should look like this;
-
-```typescript
-#!/usr/bin/env node
-
-import cdk = require('@aws-cdk/core');
-import "source-map-support/register";
-import { WebApplicationStack } from "../lib/web-application-stack";
-import { NetworkStack } from "../lib/network-stack";
-import { EcrStack } from "../lib/ecr-stack";
-import { EcsStack } from "../lib/ecs-stack";
-
-const app = new cdk.App();
-new WebApplicationStack(app, "MythicalMysfits-Website");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
-const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
-const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    vpc: networkStack.vpc,
-    ecrRepository: ecrStack.ecrRepository
-});
-```
-
-Make sure your CDK application compiles without error (by either running `npm run build` or `npm run watch`) and deploy your application so far to your environment.
-
-```sh
-npm run build
-```
-
-And now deploy the ECS stack:
-
-
-```sh
-cdk deploy MythicalMysfits-ECS
-```
-
-You will be prompted with a messages such as `Do you wish to deploy these changes (y/n)?` to which you should respond by typing `y`
-
-After your service is created, ECS will provision a new task that's running the container you've pushed to ECR and register it to the created NLB.  
+After your service is created, ECS will provision a new task that's running the container you've pushed to ECR, and register it to the created NLB.  
 
 #### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using your browser of choice. Try sending a request to the mysfits resource using the AWS CLI command:
+Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by simply any web browser, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
 
-```sh
-curl http://<replace-with-your-nlb-address>/api/mysfits
+```
+http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/mysfits
 ```
 
-A response showing the same JSON response we received earlier when testing the docker container locally in our browser means your Python Web API is up and running on AWS Fargate.
+A response showing the same JSON response we received earlier when testing the docker container locally in Cloud9 means your Flask API is up and running on AWS Fargate.
 
-> **Note:** This Network Load Balancer only supports HTTP (http://) requests since no SSL/TLS certificates are installed on it. For this tutorial, be sure to submit requests using http:// only, https:// requests will not work properly.
+>Note: This Network Load Balancer only supports HTTP (http://) requests since no SSL/TLS certificates are installed on it. For this tutorial, be sure to submit requests using http:// only, https:// requests will not work properly.
 
 ### Update Mythical Mysfits to Call the NLB
 
 #### Replace the API Endpoint
-Next, we need to integrate our website with your new API backend instead of using the hard coded data that we previously uploaded to S3. Copy the web application code from the `workshop/source/module-2/web` directory:
+Next, we need to integrate our website with your new API backend instead of using the hard coded data that we previously uploaded to S3.  You'll need to update the following file to use the same NLB URL for API calls (do not inlcude the /mysfits path): `/module-2/web/index.html`
 
-```sh
-cp -r ~/environment/workshop/source/module-2/web/* ~/environment/workshop/web
-```
-
-You'll need to update the following file to use the same NLB URL for API calls (do not inlcude the /mysfits path): `workshop/web/index.html`. Open the file in Cloud9 and replace the highlighted area below between the quotes with the NLB URL:
+Open the file in Cloud9 and replace the highlighted area below between the quotes with the NLB URL:
 
 ![before replace](/images/module-2/before-replace.png)
 
@@ -529,399 +268,84 @@ After pasting, the line should look similar to below:
 
 ![after replace](/images/module-2/after-replace.png)
 
-#### Update the Mythical Mysfits website
-To update your S3 hosted website, deploy the `MythicalMysfits-Website` stack:
+#### Upload to S3
+To upload this file to your S3 hosted website, use the bucket name again that was created during Module 1, and run the following command:
 
-```sh
-npm run build
-cdk deploy MythicalMysfits-Website
+```
+aws s3 cp ~/environment/aws-modern-application-workshop/module-2/web/index.html s3://INSERT-YOUR-BUCKET-NAME/index.html
 ```
 
-Open your website using the same URL used at the end of Module 1 in order to see your new Mythical Mysfits website, which is retrieving JSON data from your Flask API running within a docker container deployed to AWS Fargate!
+ Open your website using the same URL used at the end of Module 1 in order to see your new Mythical Mysfits website, which is retrieving JSON data from your Flask API running within a docker container deployed to AWS Fargate!
 
 
 ## Module 2b: Automating Deployments using AWS Code Services
 
 ![Architecture](/images/module-2/architecture-module-2b.png)
 
-Now that you have a service up and running, you may think of code changes that you'd like to make to your Flask service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
-
-In this section, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last section. 
-
-### Create a CodeCommit repository for our backend service
-
-First, we need to install the CDK NPM packages for AWS CodeCommit:
-
-```sh
-cd ~/environment/workshop/cdk
-npm install --save-dev @aws-cdk/aws-codecommit
-```
-
-As before, let's create a new file within the `lib` folder, this time called `cicd-stack.ts`.  
-
-```sh
-touch lib/cicd-stack.ts
-```
-
-Define the skeleton structure of a CDK Stack.
-
-```typescript
-import cdk = require('@aws-cdk/core');
-
-export class CiCdStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string) {
-    super(scope, id);
-
-    // The code that defines your stack goes here
-  }
-}
-```
-
-The stack we are creating depends on two previous stacks that we have created.  The recommended approach for importing dependencies and properties into a stack is via a properties construct.  Let's define that now.  
-
-Above your CiCdStack definition, import the following modules:
-
-```typescript
-import ecr = require("@aws-cdk/aws-ecr");
-import ecs = require("@aws-cdk/aws-ecs");
-```
-
-And define the following properties object.
-
-```typescript
-interface CiCdStackProps extends cdk.StackProps {
-  ecrRepository: ecr.Repository;
-  ecsService: ecs.FargateService;
-}
-```
-
-Update the references in the `bin/cdk.ts` file, write/copy the following code:
-
-```typescript
-#!/usr/bin/env node
-
-import cdk = require("@aws-cdk/core");
-import 'source-map-support/register';
-import { WebApplicationStack } from "../lib/web-application-stack";
-import { NetworkStack } from "../lib/network-stack";
-import { EcrStack } from "../lib/ecr-stack";
-import { EcsStack } from "../lib/ecs-stack";
-import { CiCdStack } from "../lib/cicd-stack";
-
-const app = new cdk.App();
-new WebApplicationStack(app, "MythicalMysfits-Website");
-const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
-const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
-const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-    vpc: networkStack.vpc,
-    ecrRepository: ecrStack.ecrRepository
-});
-new CiCdStack(app, "MythicalMysfits-CICD", {
-    ecrRepository: ecrStack.ecrRepository,
-    ecsService: ecsStack.ecsService.service
-});
-```
-
-Now, let's add an import statement into the `cicd-stack.ts` file:
-
-```typescript
-import codecommit = require('@aws-cdk/aws-codecommit');
-```
-
-Let's add the definition for our AWS CodeCommit repository. The AWS CDK consists of a comprehensive array of high level abstractions that both simplify the implementation of your CloudFormation templates as well as providing you with granular control over the resources you generate.
-
-The AWS CodeCommit repositories are defined by using the `Repository` construct as follows:
-
-```typescript
-new codecommit.Repository(this, 'Repository' ,{
-    repositoryName: 'MyRepositoryName',
-    description: 'Some description.', // optional property
-});
-```
-
-Let's define the CodeCommit repository we need for our Website. In the `cicd-stack.ts` write/copy the following code:
-
-```typescript
-const backendRepository = new codecommit.Repository(this, "BackendRepository", {
-  repositoryName: "MythicalMysfits-BackendRepository"
-});
-```
-
-We can have the generated CloudFormation template provide the clone urls for the generated CodeCommit respository by defining custom output properties defining `cdk.CfnOutput` constructs. Declare `cdk.CfnOutput` both for the HTTP and SSH clone URLs for our repositoriy. Once done, your file should look something list the code block below.
-
-```typescript
-import cdk = require("@aws-cdk/core");
-import ecr = require("@aws-cdk/aws-ecr");
-import ecs = require("@aws-cdk/aws-ecs");
-import codecommit = require("@aws-cdk/aws-codecommit");
-
-interface CiCdStackProps extends cdk.StackProps {
-  ecrRepository: ecr.Repository;
-  ecsService: ecs.FargateService;
-}
-export class CiCdStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
-    super(scope, id);
-
-    const backendRepository = new codecommit.Repository(this, "BackendRepository", {
-      repositoryName: "MythicalMysfits-BackendRepository"
-    });
-    
-    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
-      description: 'Backend Repository CloneUrl HTTP',
-      value: backendRepository.repositoryCloneUrlHttp
-    });
-
-    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlSsh', {
-      description: 'Backend Repository CloneUrl SSH',
-      value: backendRepository.repositoryCloneUrlSsh
-    });
-  }
-}
-```
 
 ### Creating the CI/CD Pipeline
 
-Let's install the CDK NPM package for AWS CodeBuild and AWS CodePipeline, execute the following command in the `workshop/cdk` directory:
+#### Create a S3 Bucket for Pipeline Artifacts
 
-```sh
-npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-cdk/aws-codepipeline-actions
+Now that you have a service up and running, you may think of code changes that you'd like to make to your Flask service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
+
+In this module, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last module.  
+
+First, we need to create another S3 bucket that will be used to store the temporary artifacts that are created in the middle of our CI/CD pipeline executions.  Choose a new bucket name for these artifacts and create one using the following CLI command:
+
+```
+aws s3 mb s3://REPLACE_ME_CHOOSE_ARTIFACTS_BUCKET_NAME
 ```
 
-Add the required library import statements to the `cicd-stack.ts` file:
+Next, this bucket needs a bucket policy to define permissions for the data stored within it. But unlike our website bucket that allowed access to anyone, only our CI/CD pipeline should have access to this bucket.  We have provided the JSON file needed for this policy at `~/environment/aws-modern-application-workshop/module-2/aws-cli/artifacts-bucket-policy.json`.  Open this file, and inside you will need to replace several strings to include the ARNs that were created as part of the MythicalMysfitsCoreStack earlier, as well as your newly chosen bucket name for your CI/CD artifacts.
 
-```typescript
-import ecr = require('@aws-cdk/aws-ecr');
-import ecs = require('@aws-cdk/aws-ecs');
-import codecommit = require('@aws-cdk/aws-codecommit');
-import codebuild = require('@aws-cdk/aws-codebuild');
-import codepipeline = require('@aws-cdk/aws-codepipeline');
-import codepipelineactions = require('@aws-cdk/aws-codepipeline-actions');
-import iam = require('@aws-cdk/aws-iam');
+Once you've modified and saved this file, execute the following command to grant access to this bucket to your CI/CD pipeline:
+
+```
+aws s3api put-bucket-policy --bucket REPLACE_ME_ARTIFACTS_BUCKET_NAME --policy file://~/environment/aws-modern-application-workshop/module-2/aws-cli/artifacts-bucket-policy.json
 ```
 
-Within the `CiCdStack` file, write/copy the following code to define our CodeBuild project to build our Python Flask web app:
+#### Create a CodeCommit Repository
 
-```typescript
-const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
-  projectName: "MythicalMysfitsServiceCodeBuildProject",
-  environment: {
-    computeType: codebuild.ComputeType.SMALL,
-    buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_PYTHON_3_5_2,
-    privileged: true,
-    environmentVariables: {
-      AWS_ACCOUNT_ID: {
-        type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-        value: cdk.Aws.ACCOUNT_ID
-      },
-      AWS_DEFAULT_REGION: {
-        type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-        value: cdk.Aws.REGION
-      }
-    }
-  }
-});
+You'll need a place to push and store your code in. Create an [**AWS CodeCommit Repository**](https://aws.amazon.com/codecommit/) using the CLI for this purpose:
+
+```
+aws codecommit create-repository --repository-name MythicalMysfitsService-Repository
 ```
 
-Provide the CodeBuild project with permissions to query the CodeCommit repository:
+#### Create a CodeBuild Project
 
-```typescript
-const codeBuildPolicy = new iam.PolicyStatement();
-codeBuildPolicy.addResources(backendRepository.repositoryArn)
-codeBuildPolicy.addActions(
-    "codecommit:ListBranches",
-    "codecommit:ListRepositories",
-    "codecommit:BatchGetRepositories",
-    "codecommit:GitPull"
-  )
-codebuildProject.addToRolePolicy(
-  codeBuildPolicy
-);
+With a repository to store our code in, and an S3 bucket that will be used for our CI/CD artifacts, lets add to the CI/CD stack with a way for a service build to occur.  This will be accomplished by creating an [**AWS CodeBuild Project**](https://aws.amazon.com/codebuild/).  Any time a build execution is triggered, AWS CodeBuild will automatically provision a build server to our configuration and execute the steps required to build our docker image and push a new version of it to the ECR repository we created (and then spin the server down when the build is completed).  The steps for our build (which package our Python code and build/push the Docker container) are included in the `~/environment/aws-modern-application-workshop/module-2/app/buildspec.yml` file.  The **buildspec.yml** file is what you create to instruct CodeBuild what steps are required for a build execution within a CodeBuild project.
+
+To create the CodeBuild project, another CLI input file is required to be updated with parameters specific to your resources. It is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/code-build-project.json`.  Similarly replace the values within this file as you have done before from the MythicalMysfitsCoreStackOutput. Once saved, execute the following with the CLI to create the project:
+
+```
+aws codebuild create-project --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/code-build-project.json
 ```
 
-Add permissions for the CodeBuild project to pull and push images to/from the ECR repository:
+#### Create a CodePipeline Pipeline
 
-```typescript
-props.ecrRepository.grantPullPush(codebuildProject.grantPrincipal);
+Finally, we need a way to *continuously integrate* our CodeCommit repository with our CodeBuild project so that builds will automatically occur whenever a code change is pushed to the repository.  Then, we need a way to *continuously deliver* those newly built artifacts to our service in ECS.  [**AWS CodePipeline**](https://aws.amazon.com/codepipeline/) is the service that glues these actions together in a **pipeline** you will create next.  
+
+Your pipeline in CodePipeline will do just what I described above.  Anytime a code change is pushed into your CodeCommit repository, CodePipeline will deliver the latest code to your AWS CodeBuild project so that a build will occur. When successfully built by CodeBuild, CodePipeline will perform a deployment to ECS using the latest container image that the CodeBuild execution pushed into ECR.
+
+All of these steps are defined in a JSON file provided that you will use as the input into the AWS CLI to create the pipeline. This file is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/code-pipeline.json`, open it and replace the required attributes within, and save the file.
+
+Once saved, create a pipeline in CodePipeline with the following command:
+
+```
+aws codepipeline create-pipeline --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/code-pipeline.json
 ```
 
-Now, let's define the CodePipeline Source action which specifies where to obtain the web app source from, in our case our CodeCommit repository:
+#### Enable Automated Access to ECR Image Repository
 
-```typescript
-const sourceOutput = new codepipeline.Artifact();
-const sourceAction = new actions.CodeCommitSourceAction({
-  actionName: "CodeCommit-Source",
-  branch: "master",
-  trigger: actions.CodeCommitTrigger.POLL,
-  repository: backendRepository,
-  output: sourceOutput
-});
+We have one final step before our CI/CD pipeline can execute end-to-end successfully. With a CI/CD pipeline in place, you won't be manually pushing container images into ECR anymore.  CodeBuild will be pushing new images now. We need to give CodeBuild permission to perform actions on your image repository with an **ECR repository policy***.  The policy document needs to be updated with the specific ARN for the CodeBuild role created by the MythicalMysfitsCoreStack, and the policy document is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/ecr-policy.json`.  Update and save this file and then run the following command to create the policy:
+
+```
+aws ecr set-repository-policy --repository-name mythicalmysfits/service --policy-text file://~/environment/aws-modern-application-workshop/module-2/aws-cli/ecr-policy.json
 ```
 
-Define the CodePipeline Build action that uses the CodeBuild project we created earlier to build the Docker image with our Flask web app:
-
-```typescript
-const buildOutput = new codepipeline.Artifact();
-const buildAction = new actions.CodeBuildAction({
-  actionName: "Build",
-  input: sourceOutput,
-  outputs: [
-    buildOutput
-  ],
-  project: codebuildProject
-});
-```
-
-Now, define the ECS deployment action to tell CodePipeline how to deploy the output of the BuildAction:
-
-```typescript
-const deployAction = new actions.EcsDeployAction({
-  actionName: "DeployAction",
-  service: props.ecsService,
-  input: buildOutput
-});
-```
-
-Finally define the CodePipeline pipeline and stich all the stages/actions together:
-
-```typescript
-const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
-  pipelineName: "MythicalMysfitsPipeline"
-});
-pipeline.addStage({
-  stageName: "Source",
-  actions: [sourceAction]
-});
-pipeline.addStage({
-  stageName: "Build",
-  actions: [buildAction]
-});
-pipeline.addStage({
-  stageName: "Deploy",
-  actions: [deployAction]
-});
-```
-
-Your `cicd-stack.ts` file should now look like this:
-
-```typescript
-import cdk = require("@aws-cdk/core");
-import ecr = require("@aws-cdk/aws-ecr");
-import ecs = require("@aws-cdk/aws-ecs");
-import codecommit = require("@aws-cdk/aws-codecommit");
-import codebuild = require("@aws-cdk/aws-codebuild");
-import codepipeline = require("@aws-cdk/aws-codepipeline");
-import actions = require("@aws-cdk/aws-codepipeline-actions");
-import iam = require("@aws-cdk/aws-iam");
-
-interface CiCdStackProps extends cdk.StackProps {
-  ecrRepository: ecr.Repository;
-  ecsService: ecs.FargateService;
-}
-export class CiCdStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
-    super(scope, id);
-
-    const backendRepository = new codecommit.Repository(this, "BackendRepository", {
-      repositoryName: "MythicalMysfits-BackendRepository"
-    });
-    
-    const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
-      projectName: "MythicalMysfitsServiceCodeBuildProject",
-      environment: {
-        computeType: codebuild.ComputeType.SMALL,
-        buildImage: codebuild.LinuxBuildImage.UBUNTU_14_04_PYTHON_3_5_2,
-        privileged: true,
-        environmentVariables: {
-          AWS_ACCOUNT_ID: {
-            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-            value: cdk.Aws.ACCOUNT_ID
-          },
-          AWS_DEFAULT_REGION: {
-            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-            value: cdk.Aws.REGION
-          }
-        }
-      }
-    });
-    const codeBuildPolicy = new iam.PolicyStatement();
-    codeBuildPolicy.addResources(backendRepository.repositoryArn)
-    codeBuildPolicy.addActions(
-        "codecommit:ListBranches",
-        "codecommit:ListRepositories",
-        "codecommit:BatchGetRepositories",
-        "codecommit:GitPull"
-      )
-    codebuildProject.addToRolePolicy(
-      codeBuildPolicy
-    );
-    props.ecrRepository.grantPullPush(codebuildProject.grantPrincipal);
-
-    const sourceOutput = new codepipeline.Artifact();
-    const sourceAction = new actions.CodeCommitSourceAction({
-      actionName: "CodeCommit-Source",
-      branch: "master",
-      trigger: actions.CodeCommitTrigger.POLL,
-      repository: backendRepository,
-      output: sourceOutput
-    });
-    const buildOutput = new codepipeline.Artifact();
-    const buildAction = new actions.CodeBuildAction({
-      actionName: "Build",
-      input: sourceOutput,
-      outputs: [
-        buildOutput
-      ],
-      project: codebuildProject
-    });
-    const deployAction = new actions.EcsDeployAction({
-      actionName: "DeployAction",
-      service: props.ecsService,
-      input: buildOutput
-    });
-
-    const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
-      pipelineName: "MythicalMysfitsPipeline"
-    });
-    pipeline.addStage({
-      stageName: "Source",
-      actions: [sourceAction]
-    });
-    pipeline.addStage({
-      stageName: "Build",
-      actions: [buildAction]
-    });
-    pipeline.addStage({
-      stageName: "Deploy",
-      actions: [deployAction]
-    });
-    
-    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
-      description: 'Backend Repository CloneUrl HTTP',
-      value: backendRepository.repositoryCloneUrlHttp
-    });
-
-    new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlSsh', {
-      description: 'Backend Repository CloneUrl SSH',
-      value: backendRepository.repositoryCloneUrlSsh
-    });
-  }
-}
-```
-
-### Deploy the Pipeline
-
-Make sure our TypeScript has been compiled.
-
-```sh
-npm run build
-```
-
-And now deploy the CICD stack:
-
-```sh
-cdk deploy MythicalMysfits-CICD
-```
+When that has been created successfully, you have a working end-to-end CI/CD pipeline to deliver code changes automatically to your service in ECS.
 
 ### Test the CI/CD Pipeline
 
@@ -930,44 +354,53 @@ To test out the new pipeline, we need to configure git within your Cloud9 IDE an
 
 AWS CodeCommit provides a credential helper for git that we will use to make integration easy.  Run the following commands in sequence the terminal to configure git to be used with AWS CodeCommit (neither will report any response if successful):
 
-```sh
+```
 git config --global user.name "REPLACE_ME_WITH_YOUR_NAME"
+```
+
+```
 git config --global user.email REPLACE_ME_WITH_YOUR_EMAIL@example.com
+```
+
+```
 git config --global credential.helper '!aws codecommit credential-helper $@'
+```
+
+```
 git config --global credential.UseHttpPath true
 ```
 
 Next change directories in your IDE to the environment directory using the terminal:
 
-```sh
+```
 cd ~/environment/
 ```
 
 Now, we are ready to clone our repository using the following terminal command:
 
-```sh
-git clone https://git-codecommit.REPLACE_REGION.amazonaws.com/v1/repos/MythicalMysfits-BackendRepository
+```
+git clone https://git-codecommit.REPLACE_REGION.amazonaws.com/v1/repos/MythicalMysfitsService-Repository
 ```
 
 This will tell us that our repository is empty!  Let's fix that by copying the application files into our repository directory using the following command:
 
-```sh
-cp -r ~/environment/workshop/source/module-2/app/* ~/environment/MythicalMysfits-BackendRepository/
+```
+cp -r ~/environment/aws-modern-application-workshop/module-2/app/* ~/environment/MythicalMysfitsService-Repository/
 ```
 
 #### Pushing a Code Change
 
-Now the completed service code that we used to create our Fargate service in the previous section is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working. In Cloud9, open the file stored at `~/environment/MythicalMysfits-BackendRepository/service/mysfits-response.json` and change the age of one of the mysfits to another value and save the file.
+Now the completed service code that we used to create our Fargate service in Module 2 is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working. In Cloud9, open the file stored at `~/environment/MythicalMysfitsService-Repository/service/mysfits-response.json` and change the age of one of the mysfits to another value and save the file.
 
 After saving the file, change directories to the new repository directory:
 
-```sh
-cd ~/environment/MythicalMysfits-BackendRepository/
+```
+cd ~/environment/MythicalMysfitsService-Repository/
 ```
 
 Then, run the following git commands to push in your code changes.  
 
-```sh
+```
 git add .
 git commit -m "I changed the age of one of the mysfits."
 git push
