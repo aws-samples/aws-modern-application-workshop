@@ -13,8 +13,8 @@ export class XRayStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
     super(scope, id);
     
-    const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-      repositoryName: "MythicalMysfitsQuestionsService-Repository"
+    const lambdaRepository = new codecommit.Repository(this, "QuestionsLambdaRepository", {
+      repositoryName: "MythicalMysfits-QuestionsLambdaRepository"
     });
     
     const table = new dynamodb.Table(this, "Table", {
@@ -47,7 +47,7 @@ export class XRayStack extends cdk.Stack {
       description: "A microservice Lambda function that receives a new question submitted to the MythicalMysfits" +
                       " website from a user and inserts it into a DynamoDB database table.",
       memorySize: 128,
-      code: lambda.Code.asset("../../lambda-question/PostQuestionsService"),
+      code: lambda.Code.asset("../../../lambda-questions/PostQuestionsService"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         postQuestionLambdaFunctionPolicyStmDDB,
@@ -72,7 +72,7 @@ export class XRayStack extends cdk.Stack {
       description: "An AWS Lambda function that will process all new questions posted to mythical mysfits" +
                       " and notify the site administrator of the question that was asked.",
       memorySize: 128,
-      code: lambda.Code.asset("../../lambda-question/ProcessQuestionsStream"),
+      code: lambda.Code.asset("../../../lambda-questions/ProcessQuestionsStream"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         postQuestionLambdaFunctionPolicyStmSNS,
@@ -165,12 +165,12 @@ export class XRayStack extends cdk.Stack {
     
     new cdk.CfnOutput(this, "questionsRepositoryCloneUrlHttp", {
       value: lambdaRepository.repositoryCloneUrlHttp,
-      description: "Lambda Repository Clone Url HTTP"
+      description: "Questions Lambda Repository Clone Url HTTP"
     });
     
     new cdk.CfnOutput(this, "questionsRepositoryCloneUrlSsh", {
       value: lambdaRepository.repositoryCloneUrlSsh,
-      description: "Lambda Repository Clone Url SSH"
+      description: "Questions Lambda Repository Clone Url SSH"
     });
   }
 }

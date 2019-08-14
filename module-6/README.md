@@ -5,13 +5,13 @@
 **Time to complete:** 45 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-6/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-6/cdk`
 
 ---
 
 **Services used:**
 * [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
-* [AWS X-Ray](https://aws.amazon.com/x-ray/)
+* [AWS X-Ray](https://aws.amazon.com/xray/)
 * [Amazon DynamoDB](https://aws.amazon.com/dynamodb/)
 * [Amazon Simple Notification Service (AWS SNS)](https://aws.amazon.com/sns/)
 * [Amazon S3](https://aws.amazon.com/s3/)
@@ -20,7 +20,7 @@
 * [AWS CodeCommit](https://aws.amazon.com/codecommit/)
 
 ### Overview
-Next, we will show you how to deeply inspect and analyze request behavior on new functionality for the Mythical Mysfits site, using [**AWS X-Ray**](https://aws.amazon.com/kinesis/data-firehose/).  The new functionality will enable users to contact the Mythical Mysfits staff, via a **Contact Us** button we'll place on the site.  Much of the steps required to create a new microservice to handle receiving user questions mimics activities you've performed earlier in this workshop.
+Next, we will show you how to deeply inspect and analyze request behavior on new functionality for the Mythical Mysfits site, using [**AWS X-Ray**](https://aws.amazon.com/xray/).  The new functionality will enable users to contact the Mythical Mysfits staff, via a **Contact Us** button we'll place on the site.  Much of the steps required to create a new microservice to handle receiving user questions mimics activities you've performed earlier in this workshop.
 
 The resources we'll create includes:
 * An **API Gateway API**:  A new microservice will be created that has a single REST resource, `/questions`.  This API will receive the text of a user question and the email address for the user who submitted it.
@@ -31,24 +31,10 @@ The resources we'll create includes:
 
 ### Create a new CodeCommit Repository
 
-To create the necessary resources using the AWS CDK, run the following command in the Cloud9 terminal:
+To create the necessary resources using the AWS CDK, create a new file in the `workshop/cdk/lib` folder called `xray-stack.ts`.
 
 ```sh
-cd aws-modern-application-workshop/module-6
-mkdir cdk && cd cdk/
-cdk init --language typescript
-```
-
-Copy over the file we created in the previous module:
-
-```sh
-cp ../../module-5/cdk/lib/* ./lib
-cp ../../module-5/cdk/bin/* ./bin
-```
-
-Create a new file in the `lib` folder called `xray-stack.ts`.
-
-```sh
+cd ~/environment/workshop/cdk
 touch lib/xray-stack.ts
 ```
 
@@ -88,18 +74,18 @@ import subs = require('@aws-cdk/aws-sns-subscriptions');
 Within the `XRayStack` constructor, add the CodeCommit repository we'll use for the Lambda code we will write:
 
 ```typescript
-const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-  repositoryName: "MythicalMysfitsQuestionsService-Repository"
+const lambdaRepository = new codecommit.Repository(this, "QuestionsLambdaRepository", {
+  repositoryName: "MythicalMysfits-QuestionsLambdaRepository"
 });
 
 new cdk.CfnOutput(this, "questionsRepositoryCloneUrlHttp", {
   value: lambdaRepository.repositoryCloneUrlHttp,
-  description: "Lambda Repository Clone Url HTTP"
+  description: "Questions Lambda Repository Clone Url HTTP"
 });
 
 new cdk.CfnOutput(this, "questionsRepositoryCloneUrlSsh", {
   value: lambdaRepository.repositoryCloneUrlSsh,
-  description: "Lambda Repository Clone Url SSH"
+  description: "Questions Lambda Repository Clone Url SSH"
 });
 ```
 
@@ -150,25 +136,25 @@ We are not yet finished writing the `XRayStack` implementation but let's deploy 
 cdk deploy MythicalMysfits-XRay
 ```
 
-In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsQuestionsService-Repository`
+In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfits-QuestionsLambdaRepository`
 
 Next, let's clone that new and empty repository:
 
 ```sh
 cd ~/environment/
-git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda-question
+git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda-questions
 ```
 
 ### Copy the Questions Service Code Base
 
 Now, let's move our working directory into this new repository:
 ```
-cd ~/environment/lambda-question/
+cd ~/environment/lambda-questions/
 ```
 
 Then, copy the module-6 application components into this new repository directory:
 ```
-cp -r ~/environment/aws-modern-application-workshop/module-6/app/* .
+cp -r ~/environment/workshop/source/module-6/app/* .
 ```
 
 For this new microservice, we have included all of the packages necessary for the AWS Lambda functions to be deployed and invoked.
@@ -178,7 +164,7 @@ For this new microservice, we have included all of the packages necessary for th
 Change back into the `cdk` folder:
 
 ```sh
-cd ~/environment/aws-modern-application-workshop/module-6/cdk
+cd ~/environment/workshop/cdk
 ```
 
 Back in the `XRayStack` file,  we will now define the Questions microservice infrastructure:
@@ -214,7 +200,7 @@ const mysfitsPostQuestion = new lambda.Function(this, "Function", {
   description: "A microservice Lambda function that receives a new question submitted to the MythicalMysfits" +
                   " website from a user and inserts it into a DynamoDB database table.",
   memorySize: 128,
-  code: lambda.Code.asset("../../lambda-question/PostQuestionsService"),
+  code: lambda.Code.asset("../../../lambda-questions/PostQuestionsService"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     postQuestionLambdaFunctionPolicyStmDDB,
@@ -239,7 +225,7 @@ const mysfitsProcessQuestionStream = new lambda.Function(this, "Function", {
   description: "An AWS Lambda function that will process all new questions posted to mythical mysfits" +
                   " and notify the site administrator of the question that was asked.",
   memorySize: 128,
-  code: lambda.Code.asset("../../lambda-question/ProcessQuestionsStream"),
+  code: lambda.Code.asset("../../../lambda-questions/ProcessQuestionsStream"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     postQuestionLambdaFunctionPolicyStmSNS,
@@ -327,7 +313,7 @@ questionsMethod.addMethod('OPTIONS', new apigw.MockIntegration({
   }]
 });
 ```
-> **Note:** Make sure to replace "REPLACE@EMAIL_ADDRESS" in the code above with a valid email address you have access to. This will be the email address that user questions are published to by the SNS topic**:
+> **Note:** Make sure to replace "REPLACE@EMAIL_ADDRESS" in the code above with a valid email address you have access to. This will be the email address that user questions are published to by the SNS topic.
 
 Finally, deploy the CDK Application:
 
@@ -343,11 +329,13 @@ Next, visit the email address provided and CONFIRM your subscription to the SNS 
 ### Update the Website Content and Push the New Site to S3
 With the questions stack up and running, we now need to publish a new version of our Mythical Mysfits frontend.
 
-The new index.html file is included at: `~/environment/aws-modern-application-workshop/module-6/web/index.html`
+The new index.html file is included at: `~/environment/workshop/source/module-6/web/index.html`. Copy the new version of the website to the `workshop/web` directory:
 
-This file contains the same placeholders as module-5 that need to be updated, as well as an additional placeholder for the new questions service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-5. The `questionsApiEndpoint` value is the API Gateway endpoint you noted down earlier.
+```sh
+cp -r ~/environment/workshop/source/module-6/web/* ~/environment/workshop/web
+```
 
-Also remember to replace the values in the `register.html` and `confirm.html` files. 
+This file contains the same placeholders as module-5 that need to be updated, as well as an additional placeholder for the new questions service endpoint you just created. The `questionsApiEndpoint` value is the API Gateway endpoint you noted down earlier.
 
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
@@ -403,8 +391,8 @@ Now, submit another question to the Mythical Mysfits website and you'll see that
 Next, you will use the [AWS X-Ray SDK for Python](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python.html) so that the services being called by the two Lambda functions as part of the questions stack are also represented in the X-Ray service map.  The code has been written already to accomplish this, you just need to uncomment the relevant lines (uncommenting is performed by deleting the preceding `#` in a line of python code).  In the Lambda function code, you will see comments that indicate `#UNCOMMENT_BEFORE_2ND_DEPLOYMENT` or `#UNCOMMENT_BEFORE_3RD_DEPLOYMENT`.  
 
 You've already completed the first deployment of these functions using the AWS CDK, so this will be your **2nd Deployment**.  Uncomment each of the lines indicated below all cases of `UNCOMMENT_BEFORE_2ND_DEPLOYMENT` in the following files, and save the files after making the required changes:
-* `~/environment/MythicalMysfitsQuestionsStack-Repository/PostQuestionsService/mysfitsPostQuestion.py`
-* `~/environment/MythicalMysfitsQuestionsStack-Repository/ProcessQuestionsStream/mysfitsProcessStream.py`
+* `~/environment/lambda-questions/PostQuestionsService/mysfitsPostQuestion.py`
+* `~/environment/lambda-questions/ProcessQuestionsStream/mysfitsProcessStream.py`
 
 > **Note:** The changes you've uncommented enable the AWS X-Ray SDK to instrument the AWS Python SDK (boto3) to capture tracing data and record it within the Lambda service anytime an AWS API call is made. Those few lines of code are all that's required in order for X-Ray to automatically trace your AWS service map throughout a serverless application using AWS Lambda!
 
@@ -424,7 +412,7 @@ Once that command completes, submit an additional question to the Mythical Mysfi
 The final step in this module is to familiarize yourself with using AWS X-Ray to triage problems in your application.  To accomplish this, we're going to by *mysfits* ourselves and have you add some terrible code to your application.  All this code will do is cause your web service to add 5 seconds of latency and throw an exception for randomized requests :) .
 
 Go back into the following file and remove the comments indicated by `#UNCOMMENT_BEFORE_3RD_DEPLOYMENT`:  
-* `~/environment/MythicalMysfitsQuestionsStack-Repository/PostQuestionsService/mysfitsPostQuestion.py`
+* `~/environment/lambda-questions/PostQuestionsService/mysfitsPostQuestion.py`
 
 This is the code that will cause your Lambda function to throw an exception.  Also, you can note above the `hangingException()` function that we're using out-of-the-box functionality of the **AWS X-Ray SDK** to record a trace subsegment each time that function is called.  Now when you drill into the Trace for a particular request, you'll be able to see that all requests are stuck sitting within this function for at least 5 seconds before they throw the exception.
 
