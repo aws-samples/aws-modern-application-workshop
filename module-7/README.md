@@ -5,7 +5,7 @@
 **Time to complete:** 45 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-7/cdk-complete`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `module-7/cdk`
 
 ---
 
@@ -16,10 +16,6 @@
 * [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
 * [AWS Lambda](https://aws.amazon.com/lambda/)
 * [AWS CodeCommit](https://aws.amazon.com/codecommit/)
-
-
-* [AWS Serverless Appliation Model (AWS SAM)](https://github.com/awslabs/serverless-application-model)
-* [AWS SAM Command Line Interface (SAM CLI)](https://github.com/awslabs/aws-sam-cli)
 
 ## Overview
 One of the fastest growing areas of technology is machine learning.  As the cost to leverage high performance computing environments has continued to decrease, the number of use cases where Machine Learning algorithms can be economically applied has grown astronomically.  We can even use machine learning to help the visitors of MythicalMysfits.com discover which Mysfit is perfect for them.  And that's just what you will do in this module.  
@@ -39,24 +35,10 @@ However, for our Mysfits site, we obviously do not have vast quantities of accur
 ### Creating a Hosted Notebook instance with SageMaker
 Data Scientists and developers that want to curate data, define and run algorithms, build models, and more, all while thoroughly documenting their work can do so in a single place called a **notebook**.  Through AWS SageMaker, you can create an EC2 instance that is preconfigured and optimized for Machine Learning and already has the [Jupyter Notebooks](http://jupyter.org/) application running on it, this is called a **notebook instance**.  In order to create a notebook instance, we must first create some prerequisites that the notebook requires, namely an IAM Role that will give the notebook instance the permissions it needs to perform everything required.
 
-To create the necessary resources using the AWS CDK, run the following command in the Cloud9 terminal:
+To create the necessary resources using the AWS CDK, create a new file in the `workshop/cdk/lib` folder called `sagemaker-stack.ts`.
 
 ```sh
-cd aws-modern-application-workshop/module-7
-mkdir cdk && cd cdk/
-cdk init --language typescript
-```
-
-Copy over the file we created in the previous module:
-
-```sh
-cp ../../module-6/cdk/lib/* ./lib
-cp ../../module-6/cdk/bin/* ./bin
-```
-
-Create a new file in the `lib` folder called `sagemaker-stack.ts`.
-
-```sh
+cd ~/environment/workshop/cdk
 touch lib/sagemaker-stack.ts
 ```
 
@@ -138,18 +120,18 @@ const notebookInstance = new sagemaker.CfnNotebookInstance(this, "MythicalMysfit
     roleArn: mysfitsNotebookRole.roleArn
 });
 
-const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-  repositoryName: "MythicalMysfitsRecommendationService-Repository"
+const lambdaRepository = new codecommit.Repository(this, "RecommendationsLambdaRepository", {
+  repositoryName: "MythicalMysfits-RecommendationsLambdaRepository"
 });
 
 new cdk.CfnOutput(this, "recommendationsRepositoryCloneUrlHttp", {
   value: lambdaRepository.repositoryCloneUrlHttp,
-  description: "Lambda Repository Clone Url HTTP"
+  description: "Recommendations Lambda Repository Clone Url HTTP"
 });
 
 new cdk.CfnOutput(this, "recommendationsRepositoryCloneUrlSsh", {
   value: lambdaRepository.repositoryCloneUrlSsh,
-  description: "Lambda Repository Clone Url SSH"
+  description: "Recommendations Lambda Repository Clone Url SSH"
 });
 ```
 
@@ -204,9 +186,9 @@ cdk deploy MythicalMysfits-SageMaker
 
 > **Note:** It will take about 10 minutes for your notebook instance to move from `Pending` state to `InService`. You may proceed on to the next steps while the notebook is being provisioned.
 
-In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsRecommendationService-Repository`. Note down this value, we'll use in the next step.
+In the output of that command, copy the value for `"Repository Clone Url HTTP"`.  It should be of the form: `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfits-RecommendationsLambdaRepository`. Note down this value, we'll use in the next step.
 
-Finally, there is a file in your cloned repository that will be used in the next steps that you should download.  In the File Explorer in Cloud9, find `MythicalMysfitsIDE/aws-modern-application-workshop/module-7/sagemaker/mysfit_recommendations_knn.ipynb`, right-click it, and select Download.  Save this file to your local workstation and remember where it has been saved.
+Finally, there is a file in your cloned repository that will be used in the next steps that you should download.  In the File Explorer in Cloud9, find `~environment/workshop/source/module-7/sagemaker/mysfit_recommendations_knn.ipynb`, right-click it, and select Download.  Save this file to your local workstation and remember where it has been saved.
 
 ### Using Amazon SageMaker
 
@@ -224,7 +206,7 @@ Click the radio button next to the **MythicalMysfits-SageMaker-Notebook** instan
 With Jupyter open, you will be presented with the following home page for your notebook instance:
 ![Jupyter Home](/images/module-7/jupyter-home.png)
 
-Click the **Upload** button, and then find the file you downloaded in the previous section `mysfit_recommendations_knn.ipynb`, then click **Upload** on the file line.   This will create a new Notebook document on the notebook instance within Jupyter that uses the notebook file you've just uploaded.
+Click the **Upload** button, and then find the file you downloaded in the previous section `mysfit_recommendations_knn.ipynb`, then click **Upload** on the file line. This will create a new Notebook document on the notebook instance within Jupyter that uses the notebook file you've just uploaded.
 
 We have pre-written the notebook required that will guide you through the code required to build a model.
 
@@ -239,7 +221,7 @@ Once you have completed the steps within the notebook, return here to proceed wi
 ## Creating a Serverless REST API for Model Predictions
 Now that you have a deployed SageMaker endpoint, let's wrap our own Mythical Mysfits serverless REST API around the endpoint. This allows us to define the API exactly to our specifications, and for our frontend application code to continue integrating with APIs that we ourselves define rather than the native AWS service API.  We'll build the microservice to be serverless using API Gateway and AWS Lambda.
 
-We have already created another new CodeCommit repository for where your recommendations service code could be committed. To clone the new repository to your Cloud9 environment use the `cloneUrlHttp` attribute you noted earlier, e.g. `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfitsRecommendationService-Repository`.
+We have already created another new CodeCommit repository for where your recommendations service code could be committed. To clone the new repository to your Cloud9 environment use the `cloneUrlHttp` attribute you noted earlier, e.g. `https://git-codecommit.REPLACE_ME_REGION.amazonaws.com/v1/repos/MythicalMysfits-RecommendationsLambdaRepository`.
 
 Next, let's clone that new and empty repository:
 
@@ -257,11 +239,11 @@ cd ~/environment/lambda-recommendations/
 
 Then, copy the module-7 application components into this new repository directory:
 ```
-cp -r ~/environment/aws-modern-application-workshop/module-7/app/* .
+cp -r ~/environment/workshop/source/module-7/app/* .
 ```
 
 There is one code change that you must make to the service Python code before we
-can deploy the API.  Open `~/environment/MythicalMysfitsRecommendationService-Repository/service/recommendation.py` in Cloud9.  You will see a single entry that needs replacing: `REPLACE_ME_SAGEMAKER_ENDPOINT`
+can deploy the API.  Open `~/environment/lambda-recommendations/service/recommendation.py` in Cloud9.  You will see a single entry that needs replacing: `REPLACE_ME_SAGEMAKER_ENDPOINT`
 
 To retrieve the value required, run the following CLI command to describe your SageMaker endpoints:
 
@@ -278,7 +260,7 @@ Paste the EndpointValue name in the `recommendation.py` file and save the file.
 Change back into the `cdk` folder:
 
 ```sh
-cd ~/environment/aws-modern-application-workshop/module-7/cdk
+cd ~/environment/workshop/cdk
 ```
 
 Back in the `SageMakerStack` file, we will now define the Recommendations microservice infrastructure:
@@ -293,7 +275,7 @@ const mysfitsRecommendations = new lambda.Function(this, "Function", {
   runtime: lambda.Runtime.PYTHON_3_6,
   description: "A microservice backend to invoke a SageMaker endpoint.",
   memorySize: 128,
-  code: lambda.Code.asset("../../lambda-recommendations/service"),
+  code: lambda.Code.asset("../../../lambda-recommendations/service"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     recommandationsLambdaFunctionPolicyStm
@@ -380,7 +362,7 @@ Finally, deploy the CDK Application:
 cdk deploy MythicalMysfits-SageMaker
 ```
 
-When this command completes, you have deployed the REST API microservice wrapper for the SageMaker endpoint you created through the Jupyter notebook. Note down the Recommendations API Gateway endpoint, as we will need it in the next step.
+When this command completes, you have deployed the REST API microservice wrapper for the SageMaker endpoint you created through the Jupyter notebook. Note down the Recommendations API Gateway endpoint, as we will need it next.
 
 Let's test the new service with the following CLI command that uses curl (a Linux tool for making web requests). This will show you the recommendations in action for a new data point matching the CSV lines we used for training data. You'll use the API Gateway endpoint value you noted down above to invoke your own REST API, be sure to append /recommendations after the endpoint, as shown below:
 
@@ -401,9 +383,13 @@ A new `index.html` file has been included in Module 7 that contain the code requ
 
 ![Recommendation Button SS](/images/module-7/recommendation-button-ss.png)
 
-This file contains the same placeholders as module-6 that need to be updated, as well as an additional placeholder for the new recommendations service endpoint you just created.  For the previous variable values, you can refer to the previous `index.html` file you updated as part of module-6. The `recommendationsApiEndpoint` value is the API Gateway endpoint you noted down earlier.
+Copy the new version of the website to the `workshop/web` directory:
 
-Also remember to replace the values in the `register.html` and `confirm.html` files. 
+```sh
+cp -r ~/environment/workshop/source/module-7/web/* ~/environment/workshop/web
+```
+
+This file contains the same placeholders as module-6 that need to be updated, as well as an additional placeholder for the new recommendations service endpoint you just created. The `recommendationsApiEndpoint` value is the API Gateway endpoint you noted down earlier.
 
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 

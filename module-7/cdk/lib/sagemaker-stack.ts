@@ -55,8 +55,8 @@ export class SageMakerStack extends cdk.Stack {
         roleArn: mysfitsNotebookRole.roleArn
     });
     
-    const lambdaRepository = new codecommit.Repository(this, "LambdaRepository", {
-      repositoryName: "MythicalMysfitsRecommendationService-Repository"
+    const lambdaRepository = new codecommit.Repository(this, "RecommendationsLambdaRepository", {
+      repositoryName: "MythicalMysfits-RecommendationsLambdaRepository"
     });
     
     const recommandationsLambdaFunctionPolicyStm =  new iam.PolicyStatement();
@@ -68,7 +68,7 @@ export class SageMakerStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_6,
       description: "A microservice backend to invoke a SageMaker endpoint.",
       memorySize: 128,
-      code: lambda.Code.asset("../../lambda-recommendations/service"),
+      code: lambda.Code.asset("../../../lambda-recommendations/service"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         recommandationsLambdaFunctionPolicyStm
@@ -150,12 +150,12 @@ export class SageMakerStack extends cdk.Stack {
     
     new cdk.CfnOutput(this, "recommendationsRepositoryCloneUrlHttp", {
       value: lambdaRepository.repositoryCloneUrlHttp,
-      description: "Lambda Repository Clone Url HTTP"
+      description: "Recommendations Lambda Repository Clone Url HTTP"
     });
     
     new cdk.CfnOutput(this, "recommendationsRepositoryCloneUrlSsh", {
       value: lambdaRepository.repositoryCloneUrlSsh,
-      description: "Lambda Repository Clone Url SSH"
+      description: "Recommendations Lambda Repository Clone Url SSH"
     });
     
   }
