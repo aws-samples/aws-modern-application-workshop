@@ -27,7 +27,7 @@
 
 In Module 2, using [AWS CDK](https://aws.amazon.com/cdk/), you will create a new microservice hosted using [AWS Fargate](https://aws.amazon.com/fargate/) on [Amazon Elastic Container Service](https://aws.amazon.com/ecs/) so that your Mythical Mysfits website can have a application backend to integrate with. AWS Fargate is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use Python and create a Flask app in a Docker container behind a Network Load Balancer. These will form the microservice backend for the frontend website to integrate with.
 
-### Creating the Core Infrastructure using AWS CloudFormation
+### Creating the Core Infrastructure using the AWS CDK
 
 Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the [AWS Identity and Access Management](https://aws.amazon.com/iam/) Roles that will define the permissions that ECS and our containers will have on top of AWS.  
 
@@ -103,7 +103,7 @@ export class NetworkStack extends cdk.Stack {
 That is all you need to define a VPC!  Let's now run the `cdk synth` command to observe what this single line generates.  In a terminal window run the following command:
 
 ```sh
-cdk synth MythicalMysfits-NetworkStack -o templates
+cdk synth MythicalMysfits-Network -o templates
 ```
 
 This command will generate the AWS CloudFormation template for the NetworkStack and place it in a folder called templates.  Open the generated file now and review the contents.  
@@ -130,9 +130,9 @@ Next, within the NetworkStack class, we want to define a VPC endpoint to allow a
 
 ```typescript
 const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-  service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
+  service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
   subnets: [{
-      subnetType: ec2.SubnetType.Private
+      subnetType: ec2.SubnetType.PRIVATE
   }]
 });
 
@@ -152,7 +152,7 @@ Now, deploy your VPC using the following command:
 
 ```sh
 npm run build
-cdk deploy MythicalMysfits-NetworkStack
+cdk deploy MythicalMysfits-Network
 ```
 
 ## Module 2a: Deploying a Service with AWS Fargate
@@ -225,7 +225,7 @@ And again, as before, define the skeleton structure of a CDK Stack.
 ```typescript
 import cdk = require('@aws-cdk/core');
 
-export class ECRStack extends cdk.Stack {
+export class EcrStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id);
 
@@ -274,7 +274,7 @@ export class EcrStack extends cdk.Stack {
 }
 ```
 
-**Note:** We are assigning the instance of our `ecr.Repository` to a readonly property so that it may be referenced by other stacks.
+> **Note:** We are assigning the instance of our `ecr.Repository` to a readonly property so that it may be referenced by other stacks.
 
 Now, deploy your ECR stack using the following command:
 
@@ -395,10 +395,7 @@ Notice how we reference the VPC (`props.vpc`) defined in the `EcsStackProps`.  [
 ```typescript
 this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
   cluster: this.ecsCluster,
-  loadBalancerType: ecsPatterns.LoadBalancerType.Network,
-  desiredCount: 1,
-  createLogs: true,
-  publicLoadBalancer: true,
+  loadBalancerType: ecsPatterns.LoadBalancerType.NETWORK,
   containerPort: 8080,
   image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
 });
@@ -502,10 +499,10 @@ After your service is created, ECS will provision a new task that's running the 
 
 #### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using your browser of choice. Try sending a request to the mysfits resource using the AWS CLI command:
+Use the NLB DNS name that was printed as the output of the previous command and send a request to it using your browser of choice. Try sending a request to the mysfits resource using the AWS CLI command:
 
 ```sh
-curl http://<replace-with-your-nlb-address>/api/mysfits
+curl http://<replace-with-your-nlb-address>/mysfits
 ```
 
 A response showing the same JSON response we received earlier when testing the docker container locally in our browser means your Python Web API is up and running on AWS Fargate.
@@ -593,6 +590,12 @@ interface CiCdStackProps extends cdk.StackProps {
   ecrRepository: ecr.Repository;
   ecsService: ecs.FargateService;
 }
+```
+
+Now change the constructor of your CiCdStack to require your properties object.
+
+```typescript
+  constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
 ```
 
 Update the references in the `bin/cdk.ts` file, write/copy the following code:
@@ -691,12 +694,13 @@ npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-c
 Add the required library import statements to the `cicd-stack.ts` file:
 
 ```typescript
+import cdk = require('@aws-cdk/core');
 import ecr = require('@aws-cdk/aws-ecr');
 import ecs = require('@aws-cdk/aws-ecs');
 import codecommit = require('@aws-cdk/aws-codecommit');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
-import codepipelineactions = require('@aws-cdk/aws-codepipeline-actions');
+import actions = require('@aws-cdk/aws-codepipeline-actions');
 import iam = require('@aws-cdk/aws-iam');
 ```
 
