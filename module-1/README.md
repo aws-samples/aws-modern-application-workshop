@@ -244,19 +244,6 @@ bucket.grantRead(new iam.CanonicalUserPrincipal(
 ));
 ```
 
-### Upload the website content to the S3 bucket
-
-Now we want to use a handy CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket:
-
-```typescript
-new s3deploy.BucketDeployment(this, "DeployWebsite", {
-  source: s3deploy.Source.asset(webAppRoot),
-  destinationKeyPrefix: "web/",
-  destinationBucket: bucket,
-  retainOnDelete: false
-});
-```
-
 ### CloudFront Distribution
 
 Next, Write the definition for a new CloudFront web distribution:
@@ -282,6 +269,20 @@ const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
       }
     }
   ]
+});
+```
+
+### Upload the website content to the S3 bucket
+
+Now we want to use a handy CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket:
+
+```typescript
+new s3deploy.BucketDeployment(this, "DeployWebsite", {
+  source: s3deploy.Source.asset(webAppRoot),
+  destinationKeyPrefix: "web/",
+  destinationBucket: bucket,
+  distribution: cdn,
+  retainOnDelete: false
 });
 ```
 
