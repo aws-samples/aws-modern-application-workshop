@@ -128,6 +128,7 @@ npm install --save-dev @aws-cdk/aws-apigateway
 Back in `APIGatewayStack.ts`, define the class imports for the code we will be writing:
 
 ```typescript
+import cdk = require('@aws-cdk/core');
 import apigateway = require('@aws-cdk/aws-apigateway');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ecspatterns = require('@aws-cdk/aws-ecs-patterns');
@@ -175,7 +176,7 @@ Now, below the constructor, we will write one helper function to import an API s
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
   try {
     const userPoolIdentity = 'us-east-1_ab12345YZ'; // REPLACE THIS WITH YOUR COGNITO POOL ID
-    const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
+    const schemaFilePath = path.resolve(__dirname + '/../../source/module-4/api/api-swagger.json');
     const apiSchema = fs.readFileSync(schemaFilePath);
     let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
     schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
@@ -204,26 +205,32 @@ const api = new apigateway.CfnRestApi(this, 'Schema', {
   },
   failOnWarnings: true
 });
+
+const prod = new apigateway.CfnDeployment(this, 'Prod', {
+    restApiId: api.ref,
+    stageName: 'prod'
+});
+
 new cdk.CfnOutput(this, 'APIID', {
-  value: api.logicalId,
+  value: api.ref,
   description: 'API Gateway ID'
 })
 ```
 
-Once you have finished, deploy your stacks.
+Once you have finished, deploy your stack.
 
 ```sh
 npm run build
 ```
 
 ```sh
-cdk deploy
+cdk deploy MythicalMysfits-APIGateway
 ```
 
 With that, our REST API that's capable of user authorization is deployed and available on the Internet... but where?!  Your API is available at the following location:
 
 ```sh
-curl https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/api/mysfits
+https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/mysfits
 ```
 
 Copy the above, replacing the appropriate values, and enter it into a browser address bar. You should once again see your Mysfits JSON response.  But, we've added several capabilities like adopting and liking mysfits that our Flask backend doesn't have implemented yet.
@@ -277,6 +284,7 @@ Also, for the user registration process, you have an additional two HTML files t
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
+cd ~/environment/workshop/cdk/
 npm run build
 cdk deploy MythicalMysfits-Website
 ```
