@@ -22,6 +22,6 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service
 });
 new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+    fargateService: ecsStack.ecsService.service
 });
 app.synth();

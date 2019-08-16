@@ -70,7 +70,7 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service
 });
 new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+    fargateService: ecsStack.ecsService.service
 });
 ```
 
@@ -103,7 +103,7 @@ Now change the constructor of your DBStack to require your properties object.
   constructor(scope: cdk.Construct, id: string, props: DynamoDbStackProps) {
 ```
 
-Next, we nned to define the DynamoDB table; within the `DynamoDbStack` class write/copy the following code:
+Next, we need to define the DynamoDB table; within the `DynamoDbStack` class write/copy the following code:
 
 ```typescript
 public readonly table: dynamodb.Table;
@@ -116,36 +116,36 @@ this.table = new dynamodb.Table(this, "Table", {
   tableName: "MysfitsTable",
   partitionKey: {
   name: "MysfitId",
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   }
 });
-table.addGlobalSecondaryIndex({
+this.table.addGlobalSecondaryIndex({
   indexName: "LawChaosIndex",
   partitionKey: {
   name: 'LawChaos',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   sortKey: {
   name: 'MysfitId',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   readCapacity: 5,
   writeCapacity: 5,
-  projectionType: dynamodb.ProjectionType.All
+  projectionType: dynamodb.ProjectionType.ALL
 });
-table.addGlobalSecondaryIndex({
+this.table.addGlobalSecondaryIndex({
   indexName: "GoodEvilIndex",
   partitionKey: {
   name: 'GoodEvil',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   sortKey: {
   name: 'MysfitId',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   readCapacity: 5,
   writeCapacity: 5,
-  projectionType: dynamodb.ProjectionType.All
+  projectionType: dynamodb.ProjectionType.ALL
 });
 ```
 
@@ -250,6 +250,7 @@ Open the `~/environment/workshop/web/index.html` file in your Cloud9 IDE and rep
 After replacing the endpoint to point at your NLB, update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
+cd ~/environment/workshop/cdk/
 npm run build
 cdk deploy MythicalMysfits-Website
 ```

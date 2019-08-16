@@ -14,9 +14,9 @@ export class NetworkStack extends cdk.Stack {
     });
     
     const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-      service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
+      service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
       subnets: [{
-          subnetType: ec2.SubnetType.Private
+          subnetType: ec2.SubnetType.PRIVATE
       }]
     });
     
