@@ -173,7 +173,7 @@ With that done, now we want to deploy the DynamoDB table.  Make sure your CDK ap
 
 ```sh
 npm run build
-cdk deploy MythicalMysfits-DynamoDB
+cdk deploy MythicalMysfits-ECS MythicalMysfits-DynamoDB
 ```
 
 You will be prompted with a messages such as `Do you wish to deploy these changes (y/n)?` to which you should respond by typing `y`
