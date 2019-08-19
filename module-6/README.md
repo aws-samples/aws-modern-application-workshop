@@ -283,7 +283,6 @@ const api = new apigw.LambdaRestApi(this, "APIEndpoint", {
 
 const questionsMethod = api.root.addResource("questions");
 questionsMethod.addMethod("POST", questionsIntegration, {
-  apiKeyRequired: true,
   methodResponses: [{
     statusCode: "200"
   }],
