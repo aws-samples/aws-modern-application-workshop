@@ -68,7 +68,7 @@ export class SageMakerStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_6,
       description: "A microservice backend to invoke a SageMaker endpoint.",
       memorySize: 128,
-      code: lambda.Code.asset("../../../lambda-recommendations/service"),
+      code: lambda.Code.asset("../../lambda-recommendations/service"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         recommandationsLambdaFunctionPolicyStm
@@ -115,9 +115,13 @@ export class SageMakerStack extends cdk.Stack {
     
     const recommendationsMethod = api.root.addResource("recommendations");
     recommendationsMethod.addMethod("POST", questionsIntegration, {
-      apiKeyRequired: true,
       methodResponses: [{
-        statusCode: "200"
+        statusCode: "200",
+        responseParameters: {
+          'method.response.header.Access-Control-Allow-Headers': true,
+          'method.response.header.Access-Control-Allow-Methods': true,
+          'method.response.header.Access-Control-Allow-Origin': true,
+        }
       }],
       authorizationType: apigw.AuthorizationType.NONE
     });

@@ -25,14 +25,14 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   fargateService: ecsStack.ecsService
 });
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
-    table: DynamoDbStack.table
+    table: dynamoDbStack.table
 });
 new XRayStack(app, "MythicalMysfits-XRay");
 new SageMakerStack(app, "MythicalMysfits-SageMaker");
