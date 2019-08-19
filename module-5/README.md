@@ -82,6 +82,12 @@ interface KinesisFirehoseStackProps extends cdk.StackProps {
 }
 ```
 
+Now change the constructor of your KinesisFirehoseStack to require your properties object.
+
+```typescript
+  constructor(scope: cdk.Construct, id: string, props: KinesisFirehoseStackProps) {
+```
+
 Within the `KinesisFirehoseStack` constructor, add the CodeCommit repository we'll use for the Kinesis Firehose and Lambda code we will write:
 
 ```typescript
@@ -128,14 +134,14 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   fargateService: ecsStack.ecsService
 });
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
-    table: DynamoDbStack.table
+    table: dynamoDbStack.table
 });
 ```
 
@@ -177,13 +183,6 @@ pip install requests -t .
 
 Once this command completes, you will see several additional python package folders stored within your repository directory.  
 
-#### Update the Lambda Function Code
-Next, we have one code change to make prior to our Lambda function code being completely ready for deployment.  There is a line within the `streamProcessor.py` file that needs to be replaced with the ApiEndpoint for your Mysfits service API - the same service ApiEndpoint that you created in module-4 and used on the website frontend.  Be sure to update the file you have copied into the new StreamingService repository directory.
-
-![replace me](/images/module-5/replace-api-endpoint.png)
-
-That service is responsible for integrating with the MysfitsTable in DynamoDB, so even though we could write a Lambda function that directly integrated with the DynamoDB table as well, doing so would intrude upon the purpose of the first microservice and leave us with multiple/separate code bases that integrated with the same table.  Instead, we will integrate with that table through the existing service and have a much more decoupled and modular application architecture.
-
 #### Push Your Code into CodeCommit
 Let's commit our code changes to the new repository so that they're saved in CodeCommit:
 
@@ -208,12 +207,6 @@ const clicksDestinationBucket = new s3.Bucket(this, "Bucket", {
   versioned: true
 });
 
-const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
-  roleName: "FirehoseDeliveryRole",
-  assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
-  externalId: cdk.Aws.ACCOUNT_ID
-});
-
 const lambdaFunctionPolicy =  new iam.PolicyStatement();
 lambdaFunctionPolicy.addActions("dynamodb:GetItem");
 lambdaFunctionPolicy.addResources(props.table.tableArn);
@@ -224,15 +217,38 @@ const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
   description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
     " to not just include a mysfitId, but also other attributes that can be analyzed later.",
   memorySize: 128,
-  code: lambda.Code.asset("../../../lambda-streaming-processor"),
+  code: lambda.Code.asset("../../lambda-streaming-processor"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     lambdaFunctionPolicy
   ],
   environment: {
-    MYSFITS_API_URL: "MysfitsApiUrl"
+    MYSFITS_API_URL: "REPLACE_ME_API_URL" 
   }
 });
+
+const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
+  roleName: "FirehoseDeliveryRole",
+  assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
+  externalId: cdk.Aws.ACCOUNT_ID
+});
+
+const firehoseDeliveryPolicyS3Stm = new iam.PolicyStatement();
+firehoseDeliveryPolicyS3Stm.addActions("s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject");
+firehoseDeliveryPolicyS3Stm.addResources(clicksDestinationBucket.bucketArn);
+firehoseDeliveryPolicyS3Stm.addResources(clicksDestinationBucket.arnForObjects('*'));
+
+const firehoseDeliveryPolicyLambdaStm = new iam.PolicyStatement();
+firehoseDeliveryPolicyLambdaStm.addActions("lambda:InvokeFunction");
+firehoseDeliveryPolicyLambdaStm.addResources(mysfitsClicksProcessor.functionArn);
+
+firehoseDeliveryRole.addToPolicy(firehoseDeliveryPolicyS3Stm);
+firehoseDeliveryRole.addToPolicy(firehoseDeliveryPolicyLambdaStm);
 
 const mysfitsFireHoseToS3 = new CfnDeliveryStream(this, "DeliveryStream", {
   extendedS3DestinationConfiguration: {
@@ -284,37 +300,55 @@ new iam.Policy(this, "ClickProcessingApiPolicy", {
   roles: [clickProcessingApiRole]
 });
 
-const clicksIntegration = new apigw.LambdaIntegration(
-  mysfitsClicksProcessor,
-  {
-    connectionType: apigw.ConnectionType.INTERNET,
-    credentialsRole: clickProcessingApiRole,
-    integrationResponses: [
-      {
-        statusCode: "200",
-        responseTemplates: {
-          "application/json": '{"status":"OK"}'
-        }
-      }
-    ],
-    requestParameters: {
-      "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
-    },
-    requestTemplates: {
-      "application/json": `{ "DeliveryStreamName": "${mysfitsFireHoseToS3.ref}", "Record": { "Data": "$util.base64Encode($input.json('$'))" }}`
-    }
-  }
-);
-
-const api = new apigw.LambdaRestApi(this, "APIEndpoint", {
-  handler: mysfitsClicksProcessor,
-  options: {
-    restApiName: "ClickProcessing API Service"
-  },
-  proxy: false
+const api = new apigw.RestApi(this, "APIEndpoint", {
+    restApiName: "ClickProcessing API Service",
+    endpointTypes: [ apigw.EndpointType.REGIONAL ]
 });
 
-api.root.addMethod("OPTIONS", new apigw.MockIntegration({
+const clicks = api.root.addResource('clicks');
+
+clicks.addMethod('PUT', new apigw.AwsIntegration({
+    service: 'firehose',
+    integrationHttpMethod: 'POST',
+    action: 'PutRecord',
+    options: {
+        connectionType: apigw.ConnectionType.INTERNET,
+        credentialsRole: clickProcessingApiRole,
+        integrationResponses: [
+          {
+            statusCode: "200",
+            responseTemplates: {
+              "application/json": '{"status":"OK"}'
+            },
+            responseParameters: {
+              "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT'",
+              "method.response.header.Access-Control-Allow-Origin": "'*'"
+            }
+          }
+        ],
+        requestParameters: {
+          "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
+        },
+        requestTemplates: {
+          "application/json": `{ "DeliveryStreamName": "${mysfitsFireHoseToS3.ref}", "Record": { "Data": "$util.base64Encode($input.json('$'))" }}`
+        }
+    }
+}), {
+    methodResponses: [
+      {
+        statusCode: "200",
+        responseParameters: {
+          "method.response.header.Access-Control-Allow-Headers": true,
+          "method.response.header.Access-Control-Allow-Methods": true,
+          "method.response.header.Access-Control-Allow-Origin": true
+        }
+      }
+    ]
+  }
+); 
+
+clicks.addMethod("OPTIONS", new apigw.MockIntegration({
   integrationResponses: [{
     statusCode: "200",
     responseParameters: {
@@ -345,16 +379,18 @@ api.root.addMethod("OPTIONS", new apigw.MockIntegration({
     ]
   }
 );
-
-const clicksMethod = api.root.addResource("clicks");
-clicksMethod.addMethod("PUT", clicksIntegration, {
-  apiKeyRequired: true,
-  methodResponses: [{
-    statusCode: "200"
-  }],
-  authorizationType: apigw.AuthorizationType.NONE
-});
 ```
+
+In the code we just wrote, there is a line that needs to be replaced with the ApiEndpoint for your Mysfits service API - the same service ApiEndpoint that you created in module-4 and used on the website frontend.  Be sure to update the your code.
+
+```typescript
+  ## Replace "REPLACE_ME_API_URL" with the ApiEndpoint for your Mysfits service API, eg: 'https://ljqomqjzbf.execute-api.us-east-1.amazonaws.com/prod/'
+  environment: {
+    MYSFITS_API_URL: "REPLACE_ME_API_URL"
+  }
+```
+
+That service is responsible for integrating with the MysfitsTable in DynamoDB, so even though we could write a Lambda function that directly integrated with the DynamoDB table as well, doing so would intrude upon the purpose of the first microservice and leave us with multiple/separate code bases that integrated with the same table.  Instead, we will integrate with that table through the existing service and have a much more decoupled and modular application architecture.
 
 Finally, deploy the CDK Application for the final time.
 

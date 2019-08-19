@@ -69,7 +69,7 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     fargateService: ecsStack.ecsService.service
 });
 ```
