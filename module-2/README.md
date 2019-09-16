@@ -103,7 +103,7 @@ export class NetworkStack extends cdk.Stack {
 That is all you need to define a VPC!  Let's now run the `cdk synth` command to observe what this single line generates.  In a terminal window run the following command:
 
 ```sh
-cdk synth MythicalMysfits-NetworkStack -o templates
+cdk synth MythicalMysfits-Network -o templates
 ```
 
 This command will generate the AWS CloudFormation template for the NetworkStack and place it in a folder called templates.  Open the generated file now and review the contents.  
@@ -152,7 +152,7 @@ Now, deploy your VPC using the following command:
 
 ```sh
 npm run build
-cdk deploy MythicalMysfits-NetworkStack
+cdk deploy MythicalMysfits-Network
 ```
 
 ## Module 2a: Deploying a Service with AWS Fargate
