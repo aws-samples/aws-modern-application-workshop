@@ -43,6 +43,8 @@ aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabili
 New-CFNStack -StackName MythicalMysfitsCoreStack -Capability CAPABILITY_NAMED_IAM -TemplateBody $(Get-Content $([io.path]::combine($(Get-Location), "module-2", "cfn", "core.yml")) | Out-String)
 ```
 
+If the script doesn't work make sure your terminal is still in aws-modern-application-workshop folder.
+
 You can check on the status of your stack creation either via the AWS Console or by running the command using either the AWS CLI or the PowerShell command:
 
 ```
