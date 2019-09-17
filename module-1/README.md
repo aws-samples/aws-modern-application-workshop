@@ -35,6 +35,11 @@ Type the following `git` command to clone the necessary code to complete this tu
 git clone https://github.com/aws-samples/aws-modern-application-workshop.git
 ```
 
+Make sure you are working on dotnet branch either on your favorite git client or using the following command:
+```
+git checkout origin/dotnet
+```
+
 After cloning the repository, click **Open Folder** in Visual Studio Code and find the directory you just cloned. It will be named `aws-modern-application-workshop`.
 
 
