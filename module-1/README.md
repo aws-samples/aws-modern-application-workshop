@@ -49,6 +49,11 @@ In the terminal, change directory to the newly cloned repository directory:
 cd aws-modern-application-workshop
 ```
 
+In order to build the solution you will need to install all depedencies listed in package.json. Type:
+```
+npm install
+```
+
 ### Creating a Static Website in Amazon S3
 
 #### Overview of the `frontend`
