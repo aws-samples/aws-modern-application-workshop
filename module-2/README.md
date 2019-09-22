@@ -255,7 +255,7 @@ aws ecs register-task-definition --cli-input-json file://module-2/aws-cli/task-d
 
 With a new task definition registered, we're ready to provision the infrastructure needed in our service stack. Rather than directly expose our service to the Internet, we will provision a **Network Load Balancer (NLB)** to sit in front of our service tier.  This enables our frontend code to communicate with a single DNS name while our backend service is free to provision containers elastically to meet scaling demands or to handle failures.
 
-To provision a new NLB, execute the following CLI command in your Visual Studio Code terminal (retrieve the subnetIds from the CloudFormation output you saved) using either the AWS CLI or the PowerShell command:
+To provision a new NLB, execute the following CLI command in your Visual Studio Code terminal (retrieve the subnetIds from the OutputValue for OutputKeys PublicSubnetOne and PublicSubnetTwo in the CloudFormation output you saved) using either the AWS CLI or the PowerShell command:
 
 `Bash`
 ```
