@@ -280,6 +280,10 @@ Next, use the CLI or PowerShell command to create an NLB **target group**. A tar
 ```
 aws elbv2 create-target-group --name MythicalMysfits-TargetGroup --port 8080 --protocol TCP --target-type ip --vpc-id REPLACE_WITH_VPC_ID --health-check-interval-seconds 10 --health-check-path / --health-check-protocol HTTP --healthy-threshold-count 3 --unhealthy-threshold-count 3
 ```
+
+If you are using Git Bash on Windows you might encounter a validation error with the health check path.
+You'll have to run this command in Powershell ([thanks @vgribok](https://github.com/aws-samples/modernization-unicorn-store/issues/5#issue-470542702))
+
 `PowerShell`
 
 **Note:** This command autoretrieves your VPC ID.
