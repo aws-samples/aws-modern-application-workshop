@@ -374,7 +374,7 @@ Be sure to define two properties at the top of your EcsStack that expose the ecs
 ```typescript
 export class EcsStack extends cdk.Stack {
   public readonly ecsCluster: ecs.Cluster;
-  public readonly ecsService: ecsPatterns.LoadBalancedFargateService;
+  public readonly ecsService: ecsPatterns.NetworkLoadBalancedFargateService;
 
   constructor(scope: cdk.Construct, id: string, props: EcsStackProps) {
     super(scope, id);
@@ -393,9 +393,8 @@ this.ecsCluster.connections.allowFromAnyIpv4(ec2.Port.tcp(8080));
 Notice how we reference the VPC (`props.vpc`) defined in the `EcsStackProps`.  [AWS CDK](https://aws.amazon.com/cdk/) will automatically create a reference here between the CloudFormation objects.  Also notice that we assign the instance of the `ecs.Cluster` created to a local property so that it can be referenced by this and other stacks.
 
 ```typescript
-this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
+this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Service", {
   cluster: this.ecsCluster,
-  loadBalancerType: ecsPatterns.LoadBalancerType.NETWORK,
   containerPort: 8080,
   image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
 });
@@ -543,7 +542,7 @@ Open your website using the same URL used at the end of Module 1 in order to see
 
 Now that you have a service up and running, you may think of code changes that you'd like to make to your Flask service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
 
-In this section, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last section. 
+In this section, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last section.
 
 ### Create a CodeCommit repository for our backend service
 
@@ -669,7 +668,7 @@ export class CiCdStack extends cdk.Stack {
     const backendRepository = new codecommit.Repository(this, "BackendRepository", {
       repositoryName: "MythicalMysfits-BackendRepository"
     });
-    
+
     new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
       description: 'Backend Repository CloneUrl HTTP',
       value: backendRepository.repositoryCloneUrlHttp
@@ -829,7 +828,7 @@ export class CiCdStack extends cdk.Stack {
     const backendRepository = new codecommit.Repository(this, "BackendRepository", {
       repositoryName: "MythicalMysfits-BackendRepository"
     });
-    
+
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
@@ -899,7 +898,7 @@ export class CiCdStack extends cdk.Stack {
       stageName: "Deploy",
       actions: [deployAction]
     });
-    
+
     new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
       description: 'Backend Repository CloneUrl HTTP',
       value: backendRepository.repositoryCloneUrlHttp
