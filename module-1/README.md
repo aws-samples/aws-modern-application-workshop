@@ -74,7 +74,7 @@ mkdir workshop && cd workshop
 Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
 ```sh
-git clone -b python-cdk-ts https://github.com/aws-samples/aws-modern-application-workshop.git source
+git clone -b python-cdk https://github.com/aws-samples/aws-modern-application-workshop.git source
 ```
 
 After cloning the repository, you'll see that your project explorer now includes the files cloned:
@@ -172,7 +172,7 @@ const app = new cdk.App();
 new WebApplicationStack(app, "MythicalMysfits-Website");
 ```
 
-Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory: 
+Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory:
 
 ```sh
 npm install --save-dev @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
@@ -278,7 +278,9 @@ Now we want to use a handy CDK helper that takes the defined source directory, c
 
 ```typescript
 new s3deploy.BucketDeployment(this, "DeployWebsite", {
-  source: s3deploy.Source.asset(webAppRoot),
+  sources: [
+    s3deploy.Source.asset(webAppRoot)
+  ],
   destinationKeyPrefix: "web/",
   destinationBucket: bucket,
   distribution: cdn,

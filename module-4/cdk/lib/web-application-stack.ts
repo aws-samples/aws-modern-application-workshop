@@ -52,10 +52,12 @@ export class WebApplicationStack extends cdk.Stack {
         }
       ]
     });
-    
+
     // A CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
     new s3deploy.BucketDeployment(this, "DeployWebsite", {
-      source: s3deploy.Source.asset(webAppRoot),
+      sources: [
+        s3deploy.Source.asset(webAppRoot)
+      ],
       destinationKeyPrefix: "web/",
       destinationBucket: bucket,
       distribution: cdn,
