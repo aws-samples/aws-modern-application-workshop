@@ -20,7 +20,7 @@
 ### Overview
 Now that your Mythical Mysfits site is up and running, let's create a way to better understand how users are interacting with the website and its Mysfits.  It would be very easy for us to analyze user actions taken on the website that lead to data changes in our backend - when mysfits are adopted or liked.  But understanding the actions your users are taking on the website *before* a decision to like or adopt a mysfit could help you design a better user experience in the future that leads to mysfits getting adopted even faster.  To help us gather these insights, we will implement the ability for the website frontend to submit a tiny request, each time a mysfit profile is clicked by a user, to a new microservice API we'll create. Those records will be processed in real-time by a serverless code function, aggregated, and stored for any future analysis that you may want to perform.
 
-Modern application design principles prefer focused, decoupled, and modular services.  So rather than add additional methods and capabilities within the existing Mysfits service that you have been working with so far, we will create a new and decoupled service for the purpose of receiving user click events from the Mysfits website. 
+Modern application design principles prefer focused, decoupled, and modular services.  So rather than add additional methods and capabilities within the existing Mysfits service that you have been working with so far, we will create a new and decoupled service for the purpose of receiving user click events from the Mysfits website.
 
 The serverless real-time processing service stack you will be creating includes the following AWS resources:
 * An [**AWS Kinesis Data Firehose delivery stream**](https://aws.amazon.com/kinesis/data-firehose/): Kinesis Firehose is a highly available and managed real-time streaming service that accepts data records and automatically ingests them into several possible storage destinations within AWS, examples including an Amazon S3 bucket, or an Amazon Redshift data warehouse cluster. Kinesis Firehose also enables all of the records received by the stream to be automatically delivered to a serverless function created with **AWS Lambda** This means that code you've written can perform any additional processing or transformations of the records before they are aggregated and stored in the configured destination.
@@ -223,7 +223,7 @@ const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
     lambdaFunctionPolicy
   ],
   environment: {
-    MYSFITS_API_URL: "REPLACE_ME_API_URL" 
+    MYSFITS_API_URL: "REPLACE_ME_API_URL"
   }
 });
 
@@ -346,7 +346,7 @@ clicks.addMethod('PUT', new apigw.AwsIntegration({
       }
     ]
   }
-); 
+);
 
 clicks.addMethod("OPTIONS", new apigw.MockIntegration({
   integrationResponses: [{
@@ -412,7 +412,7 @@ cp -r ~/environment/workshop/source/module-5/web/* ~/environment/workshop/web
 ```
 
 This file contains the same placeholders as module-4 that need to be updated, as well as an additional placeholder for the new stream processing service endpoint you just created. The `streamingApiEndpoint` value is the API Gateway endpoint you noted down earlier.
- 
+
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
@@ -422,7 +422,7 @@ cdk deploy MythicalMysfits-Website
 
 Refresh your Mythical Mysfits website in the browser once more and you will now have a site that records and publishes each time a user clicks on a mysfits profile!
 
-To view the records that have been processed, they will arrive in the destination S3 bucket created as part of your MythicalMysfitsStreamingStack.  Visit the S3 console here and explore the bucket you created for the streaming records (it will be prefixed with `mythicalmysfitsstreamings-clicksdestinationbucket`):
+To view the records that have been processed, they will arrive in the destination S3 bucket created as part of your MythicalMysfitsStreamingStack.  Visit the S3 console here and explore the bucket you created for the streaming records (it will be prefixed with `mythicalmysfits-kinesisfirehose-bucket...`):
 [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/home)
 
 This concludes Module 5.
