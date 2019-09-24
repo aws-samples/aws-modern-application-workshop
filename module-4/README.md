@@ -16,7 +16,7 @@
 
 ### Overview
 
-In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a [**User Pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) in [**AWS Cognito**](http://aws.amazon.com/cognito/), a fully managed user identity management service. 
+In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a [**User Pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) in [**AWS Cognito**](http://aws.amazon.com/cognito/), a fully managed user identity management service.
 
 We want to restrict liking and adopting Mysfits to registered users, so we'll need to restrict access to those paths in our Flask web app running on Fargate. Our Fargate service is currently using a Network Load Balancer (NLB), which doesn't support validating request authorization headers. To achieve this we have a few options: we can switch to an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html), we can have our Flask web app validate our authorization headers, or we can use [Amazon API Gateway](https://aws.amazon.com/api-gateway/).
 
@@ -55,7 +55,7 @@ Next, let's turn our attention to creating a new RESTful API in front of our exi
 
 > **Note:** For the purposes of this workshop, we created the NLB to be *internet-facing* so that it could be called directly in earlier modules. Because of this, even though we will be requiring Authorization tokens in our API after this module, our NLB will still actually be open to the public behind the API Gateway API.  In a real-world scenario, you should create your NLB to be *internal* from the beginning (or create a new internal load balancer to replace the existing one), knowing that API Gateway would be your strategy for Internet-facing API authorization. But for the sake of time, we'll use the NLB that we've already created that will stay publicly accessible.
 
-The VPC Link will be created as part of our Module 4 CDK application. 
+The VPC Link will be created as part of our Module 4 CDK application.
 
 #### Create the REST API using Swagger
 
@@ -140,7 +140,7 @@ Next, define the Stack Properties class which details the dependencies our API G
 
 ```typescript
 interface APIGatewayStackProps extends cdk.StackProps {
-  fargateService: ecspatterns.LoadBalancedFargateService;
+  fargateService: ecspatterns.NetworkLoadBalancedFargateService;
 }
 ```
 

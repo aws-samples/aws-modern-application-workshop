@@ -6,7 +6,7 @@ import fs = require('fs');
 import path = require('path');
 
 interface APIGatewayStackProps extends cdk.StackProps {
-  fargateService: ecspatterns.LoadBalancedFargateService;
+  fargateService: ecspatterns.NetworkLoadBalancedFargateService;
 }
 export class APIGatewayStack extends cdk.Stack {
 
@@ -35,12 +35,12 @@ export class APIGatewayStack extends cdk.Stack {
       },
       failOnWarnings: true
     });
-    
+
     const prod = new apigateway.CfnDeployment(this, 'Prod', {
         restApiId: api.ref,
         stageName: 'prod'
     });
-    
+
     new cdk.CfnOutput(this, 'APIID', {
       value: api.ref,
       description: 'API Gateway ID'
