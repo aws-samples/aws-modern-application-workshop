@@ -126,26 +126,6 @@ this.vpc = new ec2.Vpc(this, "VPC", {
 
 Here we are defining the maximum number of NAT Gateways we want to establish and the maximum number of AZs we want to deploy to.
 
-Next, within the NetworkStack class, we want to define a VPC endpoint to allow a secure path for traffic to travel between our VPC and the DynamoDB database.
-
-```typescript
-const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-  service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
-  subnets: [{
-      subnetType: ec2.SubnetType.PRIVATE
-  }]
-});
-
-const dynamoDbPolicy = new iam.PolicyStatement();
-dynamoDbPolicy.addAnyPrincipal();
-dynamoDbPolicy.addActions("*");
-dynamoDbPolicy.addAllResources();
-
-dynamoDbEndpoint.addToPolicy(
-  dynamoDbPolicy
-);
-```
-
 > **Note:** once you've completed the changes above, compare your `network-stack.ts` file with the one in the `workshop/source/module-2/cdk/lib` folder and make sure it looks the same.
 
 Now, deploy your VPC using the following command:
