@@ -74,7 +74,7 @@ mkdir workshop && cd workshop
 Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
 ```sh
-git clone -b python-cdk-ts https://github.com/aws-samples/aws-modern-application-workshop.git source
+git clone -b python-cdk https://github.com/aws-samples/aws-modern-application-workshop.git source
 ```
 
 After cloning the repository, you'll see that your project explorer now includes the files cloned:
