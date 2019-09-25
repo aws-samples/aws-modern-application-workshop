@@ -27,7 +27,7 @@
 
 In Module 2, using [AWS CDK](https://aws.amazon.com/cdk/), you will create a new microservice hosted using [AWS Fargate](https://aws.amazon.com/fargate/) on [Amazon Elastic Container Service](https://aws.amazon.com/ecs/) so that your Mythical Mysfits website can have a application backend to integrate with. AWS Fargate is a deployment option in Amazon ECS that allows you to deploy containers without having to manage any clusters or servers. For our Mythical Mysfits backend, we will use Python and create a Flask app in a Docker container behind a Network Load Balancer. These will form the microservice backend for the frontend website to integrate with.
 
-### Creating the Core Infrastructure using AWS CloudFormation
+### Creating the Core Infrastructure using the AWS CDK
 
 Before we can create our service, we need to create the core infrastructure environment that the service will use, including the networking infrastructure in [Amazon VPC](https://aws.amazon.com/vpc/), and the [AWS Identity and Access Management](https://aws.amazon.com/iam/) Roles that will define the permissions that ECS and our containers will have on top of AWS.  
 
@@ -126,26 +126,6 @@ this.vpc = new ec2.Vpc(this, "VPC", {
 
 Here we are defining the maximum number of NAT Gateways we want to establish and the maximum number of AZs we want to deploy to.
 
-Next, within the NetworkStack class, we want to define a VPC endpoint to allow a secure path for traffic to travel between our VPC and the DynamoDB database.
-
-```typescript
-const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-  service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
-  subnets: [{
-      subnetType: ec2.SubnetType.Private
-  }]
-});
-
-const dynamoDbPolicy = new iam.PolicyStatement();
-dynamoDbPolicy.addAnyPrincipal();
-dynamoDbPolicy.addActions("*");
-dynamoDbPolicy.addAllResources();
-
-dynamoDbEndpoint.addToPolicy(
-  dynamoDbPolicy
-);
-```
-
 > **Note:** once you've completed the changes above, compare your `network-stack.ts` file with the one in the `workshop/source/module-2/cdk/lib` folder and make sure it looks the same.
 
 Now, deploy your VPC using the following command:
@@ -225,7 +205,7 @@ And again, as before, define the skeleton structure of a CDK Stack.
 ```typescript
 import cdk = require('@aws-cdk/core');
 
-export class ECRStack extends cdk.Stack {
+export class EcrStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id);
 
@@ -274,7 +254,7 @@ export class EcrStack extends cdk.Stack {
 }
 ```
 
-**Note:** We are assigning the instance of our `ecr.Repository` to a readonly property so that it may be referenced by other stacks.
+> **Note:** We are assigning the instance of our `ecr.Repository` to a readonly property so that it may be referenced by other stacks.
 
 Now, deploy your ECR stack using the following command:
 
@@ -374,7 +354,7 @@ Be sure to define two properties at the top of your EcsStack that expose the ecs
 ```typescript
 export class EcsStack extends cdk.Stack {
   public readonly ecsCluster: ecs.Cluster;
-  public readonly ecsService: ecsPatterns.LoadBalancedFargateService;
+  public readonly ecsService: ecsPatterns.NetworkLoadBalancedFargateService;
 
   constructor(scope: cdk.Construct, id: string, props: EcsStackProps) {
     super(scope, id);
@@ -393,12 +373,8 @@ this.ecsCluster.connections.allowFromAnyIpv4(ec2.Port.tcp(8080));
 Notice how we reference the VPC (`props.vpc`) defined in the `EcsStackProps`.  [AWS CDK](https://aws.amazon.com/cdk/) will automatically create a reference here between the CloudFormation objects.  Also notice that we assign the instance of the `ecs.Cluster` created to a local property so that it can be referenced by this and other stacks.
 
 ```typescript
-this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
+this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Service", {
   cluster: this.ecsCluster,
-  loadBalancerType: ecsPatterns.LoadBalancerType.Network,
-  desiredCount: 1,
-  createLogs: true,
-  publicLoadBalancer: true,
   containerPort: 8080,
   image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
 });
@@ -502,10 +478,10 @@ After your service is created, ECS will provision a new task that's running the 
 
 #### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using your browser of choice. Try sending a request to the mysfits resource using the AWS CLI command:
+Use the NLB DNS name that was printed as the output of the previous command and send a request to it using your browser of choice. Try sending a request to the mysfits resource using the AWS CLI command:
 
 ```sh
-curl http://<replace-with-your-nlb-address>/api/mysfits
+curl http://<replace-with-your-nlb-address>/mysfits
 ```
 
 A response showing the same JSON response we received earlier when testing the docker container locally in our browser means your Python Web API is up and running on AWS Fargate.
@@ -546,7 +522,7 @@ Open your website using the same URL used at the end of Module 1 in order to see
 
 Now that you have a service up and running, you may think of code changes that you'd like to make to your Flask service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
 
-In this section, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last section. 
+In this section, you will create a fully managed CI/CD stack that will automatically deliver all of the code changes that you make to your code base to the service you created during the last section.
 
 ### Create a CodeCommit repository for our backend service
 
@@ -593,6 +569,12 @@ interface CiCdStackProps extends cdk.StackProps {
   ecrRepository: ecr.Repository;
   ecsService: ecs.FargateService;
 }
+```
+
+Now change the constructor of your CiCdStack to require your properties object.
+
+```typescript
+  constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
 ```
 
 Update the references in the `bin/cdk.ts` file, write/copy the following code:
@@ -666,7 +648,7 @@ export class CiCdStack extends cdk.Stack {
     const backendRepository = new codecommit.Repository(this, "BackendRepository", {
       repositoryName: "MythicalMysfits-BackendRepository"
     });
-    
+
     new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
       description: 'Backend Repository CloneUrl HTTP',
       value: backendRepository.repositoryCloneUrlHttp
@@ -691,12 +673,13 @@ npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-c
 Add the required library import statements to the `cicd-stack.ts` file:
 
 ```typescript
+import cdk = require('@aws-cdk/core');
 import ecr = require('@aws-cdk/aws-ecr');
 import ecs = require('@aws-cdk/aws-ecs');
 import codecommit = require('@aws-cdk/aws-codecommit');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
-import codepipelineactions = require('@aws-cdk/aws-codepipeline-actions');
+import actions = require('@aws-cdk/aws-codepipeline-actions');
 import iam = require('@aws-cdk/aws-iam');
 ```
 
@@ -825,7 +808,7 @@ export class CiCdStack extends cdk.Stack {
     const backendRepository = new codecommit.Repository(this, "BackendRepository", {
       repositoryName: "MythicalMysfits-BackendRepository"
     });
-    
+
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
@@ -895,7 +878,7 @@ export class CiCdStack extends cdk.Stack {
       stageName: "Deploy",
       actions: [deployAction]
     });
-    
+
     new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
       description: 'Backend Repository CloneUrl HTTP',
       value: backendRepository.repositoryCloneUrlHttp

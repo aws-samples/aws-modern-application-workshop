@@ -6,7 +6,7 @@ import fs = require('fs');
 import path = require('path');
 
 interface APIGatewayStackProps extends cdk.StackProps {
-  fargateService: ecspatterns.LoadBalancedFargateService;
+  fargateService: ecspatterns.NetworkLoadBalancedFargateService;
 }
 export class APIGatewayStack extends cdk.Stack {
 
@@ -35,8 +35,14 @@ export class APIGatewayStack extends cdk.Stack {
       },
       failOnWarnings: true
     });
+
+    const prod = new apigateway.CfnDeployment(this, 'Prod', {
+        restApiId: api.ref,
+        stageName: 'prod'
+    });
+
     new cdk.CfnOutput(this, 'APIID', {
-      value: api.logicalId,
+      value: api.ref,
       description: 'API Gateway ID'
     })
   }
@@ -44,7 +50,7 @@ export class APIGatewayStack extends cdk.Stack {
   private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
     try {
       const userPoolIdentity = 'REPLACE_ME_COGNITO_USER_POOL_ID';
-      const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
+      const schemaFilePath = path.resolve(__dirname + '/../../source/module-4/api/api-swagger.json');
       const apiSchema = fs.readFileSync(schemaFilePath);
       let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
       schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);

@@ -12,22 +12,6 @@ export class NetworkStack extends cdk.Stack {
       natGateways: 2,
       maxAzs: 2
     });
-    
-    const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
-      service: ec2.GatewayVpcEndpointAwsService.DynamoDb,
-      subnets: [{
-          subnetType: ec2.SubnetType.Private
-      }]
-    });
-    
-    const dynamoDbPolicy = new iam.PolicyStatement();
-    dynamoDbPolicy.addAnyPrincipal();
-    dynamoDbPolicy.addActions("*");
-    dynamoDbPolicy.addAllResources();
-    
-    dynamoDbEndpoint.addToPolicy(
-      dynamoDbPolicy
-    );
-    
+
   }
 }

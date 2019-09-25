@@ -22,8 +22,9 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    vpc: networkStack.vpc,
+    fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   fargateService: ecsStack.ecsService

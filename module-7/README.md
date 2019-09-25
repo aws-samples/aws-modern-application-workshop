@@ -165,14 +165,14 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   fargateService: ecsStack.ecsService
 });
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
-    table: DynamoDbStack.table
+    table: dynamoDbStack.table
 });
 new XRayStack(app, "MythicalMysfits-XRay");
 new SageMakerStack(app, "MythicalMysfits-SageMaker");
@@ -275,7 +275,7 @@ const mysfitsRecommendations = new lambda.Function(this, "Function", {
   runtime: lambda.Runtime.PYTHON_3_6,
   description: "A microservice backend to invoke a SageMaker endpoint.",
   memorySize: 128,
-  code: lambda.Code.asset("../../../lambda-recommendations/service"),
+  code: lambda.Code.asset("../../lambda-recommendations/service"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     recommandationsLambdaFunctionPolicyStm
@@ -322,9 +322,13 @@ const api = new apigw.LambdaRestApi(this, "APIEndpoint", {
 
 const recommendationsMethod = api.root.addResource("recommendations");
 recommendationsMethod.addMethod("POST", questionsIntegration, {
-  apiKeyRequired: true,
   methodResponses: [{
-    statusCode: "200"
+    statusCode: "200",
+    responseParameters: {
+      'method.response.header.Access-Control-Allow-Headers': true,
+      'method.response.header.Access-Control-Allow-Methods': true,
+      'method.response.header.Access-Control-Allow-Origin': true,
+    }
   }],
   authorizationType: apigw.AuthorizationType.NONE
 });

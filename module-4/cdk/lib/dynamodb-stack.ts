@@ -1,10 +1,12 @@
 import cdk = require("@aws-cdk/core");
 import dynamodb = require("@aws-cdk/aws-dynamodb");
 import iam = require("@aws-cdk/aws-iam");
+import ec2 = require("@aws-cdk/aws-ec2");
 import ecs = require("@aws-cdk/aws-ecs");
 
 
 interface DynamoDbStackProps extends cdk.StackProps {
+  vpc: ec2.Vpc;
   fargateService: ecs.FargateService;
 }
 
@@ -13,6 +15,22 @@ export class DynamoDbStack extends cdk.Stack {
 
   constructor(scope: cdk.App, id: string, props: DynamoDbStackProps) {
     super(scope, id);
+
+    const dynamoDbEndpoint = props.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
+      service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+      subnets: [{
+          subnetType: ec2.SubnetType.PRIVATE
+      }]
+    });
+
+    const dynamoDbPolicy = new iam.PolicyStatement();
+    dynamoDbPolicy.addAnyPrincipal();
+    dynamoDbPolicy.addActions("*");
+    dynamoDbPolicy.addAllResources();
+
+    dynamoDbEndpoint.addToPolicy(
+      dynamoDbPolicy
+    );
 
     this.table = new dynamodb.Table(this, "Table", {
       tableName: "MysfitsTable",

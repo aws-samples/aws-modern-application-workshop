@@ -69,8 +69,9 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    vpc: networkStack.vpc,
+    fargateService: ecsStack.ecsService.service
 });
 ```
 
@@ -103,7 +104,27 @@ Now change the constructor of your DBStack to require your properties object.
   constructor(scope: cdk.Construct, id: string, props: DynamoDbStackProps) {
 ```
 
-Next, we nned to define the DynamoDB table; within the `DynamoDbStack` class write/copy the following code:
+Next, we want to define a VPC endpoint to allow a secure path for traffic to travel between our VPC and the DynamoDB database:
+
+```typescript
+const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
+  service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+  subnets: [{
+      subnetType: ec2.SubnetType.PRIVATE
+  }]
+});
+
+const dynamoDbPolicy = new iam.PolicyStatement();
+dynamoDbPolicy.addAnyPrincipal();
+dynamoDbPolicy.addActions("*");
+dynamoDbPolicy.addAllResources();
+
+dynamoDbEndpoint.addToPolicy(
+  dynamoDbPolicy
+);
+```
+
+Next, we need to define the DynamoDB table; within the `DynamoDbStack` class write/copy the following code:
 
 ```typescript
 public readonly table: dynamodb.Table;
@@ -116,36 +137,36 @@ this.table = new dynamodb.Table(this, "Table", {
   tableName: "MysfitsTable",
   partitionKey: {
   name: "MysfitId",
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   }
 });
-table.addGlobalSecondaryIndex({
+this.table.addGlobalSecondaryIndex({
   indexName: "LawChaosIndex",
   partitionKey: {
   name: 'LawChaos',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   sortKey: {
   name: 'MysfitId',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   readCapacity: 5,
   writeCapacity: 5,
-  projectionType: dynamodb.ProjectionType.All
+  projectionType: dynamodb.ProjectionType.ALL
 });
-table.addGlobalSecondaryIndex({
+this.table.addGlobalSecondaryIndex({
   indexName: "GoodEvilIndex",
   partitionKey: {
   name: 'GoodEvil',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   sortKey: {
   name: 'MysfitId',
-  type: dynamodb.AttributeType.String
+  type: dynamodb.AttributeType.STRING
   },
   readCapacity: 5,
   writeCapacity: 5,
-  projectionType: dynamodb.ProjectionType.All
+  projectionType: dynamodb.ProjectionType.ALL
 });
 ```
 
@@ -173,7 +194,7 @@ With that done, now we want to deploy the DynamoDB table.  Make sure your CDK ap
 
 ```sh
 npm run build
-cdk deploy MythicalMysfits-DynamoDB
+cdk deploy MythicalMysfits-ECS MythicalMysfits-DynamoDB
 ```
 
 You will be prompted with a messages such as `Do you wish to deploy these changes (y/n)?` to which you should respond by typing `y`
@@ -245,11 +266,12 @@ Finally, we need to publish a new website to our S3 bucket so that the new API f
 cp -r ~/environment/workshop/source/module-3/web/* ~/environment/workshop/web
 ```
 
-Open the `~/environment/workshop/web/index.html` file in your Cloud9 IDE and replace the string indicating “REPLACE_ME” just as you did in Module 2, with the appropriate NLB endpoint. Remember do not inlcude the /mysfits path. 
+Open the `~/environment/workshop/web/index.html` file in your Cloud9 IDE and replace the string indicating “REPLACE_ME” just as you did in Module 2, with the appropriate NLB endpoint. Remember do not inlcude the /mysfits path.
 
 After replacing the endpoint to point at your NLB, update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
+cd ~/environment/workshop/cdk/
 npm run build
 cdk deploy MythicalMysfits-Website
 ```

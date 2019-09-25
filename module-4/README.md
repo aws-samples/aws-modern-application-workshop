@@ -16,7 +16,7 @@
 
 ### Overview
 
-In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a [**User Pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) in [**AWS Cognito**](http://aws.amazon.com/cognito/), a fully managed user identity management service. 
+In order to add some more critical aspects to the Mythical Mysfits website, like allowing users to vote for their favorite Mysfit and adopt a Mysfit, we need to first have users register on the website.  To enable registration and authentication of website users, we will create a [**User Pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) in [**AWS Cognito**](http://aws.amazon.com/cognito/), a fully managed user identity management service.
 
 We want to restrict liking and adopting Mysfits to registered users, so we'll need to restrict access to those paths in our Flask web app running on Fargate. Our Fargate service is currently using a Network Load Balancer (NLB), which doesn't support validating request authorization headers. To achieve this we have a few options: we can switch to an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html), we can have our Flask web app validate our authorization headers, or we can use [Amazon API Gateway](https://aws.amazon.com/api-gateway/).
 
@@ -55,7 +55,7 @@ Next, let's turn our attention to creating a new RESTful API in front of our exi
 
 > **Note:** For the purposes of this workshop, we created the NLB to be *internet-facing* so that it could be called directly in earlier modules. Because of this, even though we will be requiring Authorization tokens in our API after this module, our NLB will still actually be open to the public behind the API Gateway API.  In a real-world scenario, you should create your NLB to be *internal* from the beginning (or create a new internal load balancer to replace the existing one), knowing that API Gateway would be your strategy for Internet-facing API authorization. But for the sake of time, we'll use the NLB that we've already created that will stay publicly accessible.
 
-The VPC Link will be created as part of our Module 4 CDK application. 
+The VPC Link will be created as part of our Module 4 CDK application.
 
 #### Create the REST API using Swagger
 
@@ -111,8 +111,8 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   fargateService: ecsStack.ecsService
@@ -128,6 +128,7 @@ npm install --save-dev @aws-cdk/aws-apigateway
 Back in `APIGatewayStack.ts`, define the class imports for the code we will be writing:
 
 ```typescript
+import cdk = require('@aws-cdk/core');
 import apigateway = require('@aws-cdk/aws-apigateway');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
 import ecspatterns = require('@aws-cdk/aws-ecs-patterns');
@@ -139,7 +140,7 @@ Next, define the Stack Properties class which details the dependencies our API G
 
 ```typescript
 interface APIGatewayStackProps extends cdk.StackProps {
-  fargateService: ecspatterns.LoadBalancedFargateService;
+  fargateService: ecspatterns.NetworkLoadBalancedFargateService;
 }
 ```
 
@@ -175,7 +176,7 @@ Now, below the constructor, we will write one helper function to import an API s
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
   try {
     const userPoolIdentity = 'us-east-1_ab12345YZ'; // REPLACE THIS WITH YOUR COGNITO POOL ID
-    const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
+    const schemaFilePath = path.resolve(__dirname + '/../../source/module-4/api/api-swagger.json');
     const apiSchema = fs.readFileSync(schemaFilePath);
     let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
     schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
@@ -204,26 +205,32 @@ const api = new apigateway.CfnRestApi(this, 'Schema', {
   },
   failOnWarnings: true
 });
+
+const prod = new apigateway.CfnDeployment(this, 'Prod', {
+    restApiId: api.ref,
+    stageName: 'prod'
+});
+
 new cdk.CfnOutput(this, 'APIID', {
-  value: api.logicalId,
+  value: api.ref,
   description: 'API Gateway ID'
 })
 ```
 
-Once you have finished, deploy your stacks.
+Once you have finished, deploy your stack.
 
 ```sh
 npm run build
 ```
 
 ```sh
-cdk deploy
+cdk deploy MythicalMysfits-APIGateway
 ```
 
 With that, our REST API that's capable of user authorization is deployed and available on the Internet... but where?!  Your API is available at the following location:
 
 ```sh
-curl https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/api/mysfits
+https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/mysfits
 ```
 
 Copy the above, replacing the appropriate values, and enter it into a browser address bar. You should once again see your Mysfits JSON response.  But, we've added several capabilities like adopting and liking mysfits that our Flask backend doesn't have implemented yet.
@@ -277,6 +284,7 @@ Also, for the user registration process, you have an additional two HTML files t
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
 ```sh
+cd ~/environment/workshop/cdk/
 npm run build
 cdk deploy MythicalMysfits-Website
 ```
