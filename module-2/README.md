@@ -416,7 +416,7 @@ amplify publish
 
 ### Creating the CI/CD Pipeline
 
-#### Create a S3 Bucket for Pipelie Artifacts
+#### Create a S3 Bucket for Pipeline Artifacts
 
 Now that you have a service up and running, you may think of code changes that you'd like to make to your .NET service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
 
