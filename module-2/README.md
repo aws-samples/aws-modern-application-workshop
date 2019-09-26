@@ -475,6 +475,12 @@ aws codebuild create-project --cli-input-json file://module-2/aws-cli/code-build
 `PowerShell`
 
 **Note:** This PowerShell script attempts to retrieve values so that you don't need to replace anything. If the script fails, open the file and replace the variables with your values manually.
+**Note:** Before running this command you'll have to make sure there is a default AWS region configured with:
+```
+Get-DefaultAWSRegion | Select-Object -ExpandProperty Region
+```
+If not the command will run successfully but builds will fail.
+
 ```
 ./module-2/ps1/CreateCodeBuildProject.ps1
 ```
