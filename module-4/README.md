@@ -91,8 +91,6 @@ New-AGVpcLink -Name MysfitsApiVpcLink -TargetArn $(Get-ELB2LoadBalancer -Name my
 ```
 The response to the above will indicate that a new VPC link is being provisioned and is in `PENDING` state. Copy the indicated `id` for future use when we create our REST API in the next step.
 
-The response to the above will indicate that a new VPC link is being provisioned and is in `PENDING` state. Copy the indicated `id` for future use when we create our REST API in the next step.
-
 ```
 {
     "status": "PENDING",
