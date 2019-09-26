@@ -58,7 +58,7 @@ The CLI will ask you a few questions. Be sure to answer these specific questions
 * Start Command: `npm start`
 
 #### Create the Cognito User Pool With Amplify
-After finishing installation, setup, and initialization, we'll add user authentication to our Angular app that uses **Amazon Cognito**. In addition to authenticationm, Cognito offers other user management utilities.
+After finishing installation, setup, and initialization, we'll add user authentication to our Angular app that uses **Amazon Cognito**. In addition to authentication, Cognito offers other user management utilities.
 
 Run the following command to add authentication to the Angular app and also create the necessary resources in your AWS account:
 ```
