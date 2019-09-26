@@ -122,7 +122,7 @@ try {
     }
             
     $accountId = Get-STSCallerIdentity | Select-Object -ExpandProperty Account
-    $bucketName = "{0}-mythical-mysfits-artifacts" -f $accountId
+    $bucketName = "mythical-mysfits-artifacts-{0}" -f $accountId
 
     $artifactStore = @{
         type     = "S3";
