@@ -194,7 +194,7 @@ One of the biggest benefits from AWS CDK is the principal of reusability - Being
 **Action:** If you haven't already, install the AWS CDK using the following command.
 
 ```sh
-npm install -g aws-cdk
+npm install -g aws-cdk@1.9.0
 ```
 
 **Action:** Run the following command to see the version number of the CDK.
