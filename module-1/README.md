@@ -140,7 +140,7 @@ Notice the standard structure of an AWS CDK app, that consists of a `bin` folder
 * The `bin` folder is where we will define the entry point for the CDK app.
 * The `lib` folder is where we will define all our workshop infrastructure components.
 
-> **Note:** feel free to remove the `cdk/lib/cdk-stack.ts` file as we will be creating our own stack files.
+> **Note:** feel free to remove the `cdk/lib/cdk-stack.ts` and `cdk/test/cdk.test.ts` files as we will be creating our own stack files.
 
 ## Creating the Mythical Mysfits Website
 
@@ -175,7 +175,7 @@ new WebApplicationStack(app, "MythicalMysfits-Website");
 Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
+npm install --save-dev @types/node @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
 ```
 
 ### Copy the Web Application Code
@@ -339,6 +339,8 @@ The AWS CDK will then perform the following actions:
 Try to navigate to the URL displayed and see you website.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
+
+> **Note:** If you are not able to see the mysfits images, please allow *mixed content* in your browser settings.
 
 Congratulations, you have created the basic static Mythical Mysfits Website!
 
