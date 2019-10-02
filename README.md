@@ -43,7 +43,7 @@ To learn more about how to build your own **Well Architected** and modern applic
 This workshop is offered in different programming languages so that you can choose the workshop experience most relevant to you!  Please follow one of the below links to begin the workshop in the language of your choosing:
 
 * [**Python**](https://github.com/aws-samples/aws-modern-application-workshop/tree/python) | [**Python CDK**](https://github.com/aws-samples/aws-modern-application-workshop/tree/python-cdk)
-* [**.NET**](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet) | [**.NET CDK **](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet)
+* [**.NET**](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet) | [**.NET CDK**](https://github.com/aws-samples/aws-modern-application-workshop/tree/dotnet)
 * [**Java**](https://github.com/aws-samples/aws-modern-application-workshop/tree/java)
 * [**Go**](https://github.com/aws-samples/aws-modern-application-workshop/tree/go)
 * More coming soon!
