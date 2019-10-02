@@ -30,7 +30,7 @@ This web application can be deployed in any AWS region that supports all the ser
 * us-east-2 (Ohio)
 * us-west-2 (Oregon)
 * ap-southeast-1 (Singapore)
-* ap-northeast-1 (Tokio)
+* ap-northeast-1 (Tokyo)
 * eu-central-1 (Frankfurt)
 * eu-west-1 (Ireland)
 
@@ -140,7 +140,7 @@ Notice the standard structure of an AWS CDK app, that consists of a `bin` folder
 * The `bin` folder is where we will define the entry point for the CDK app.
 * The `lib` folder is where we will define all our workshop infrastructure components.
 
-> **Note:** feel free to remove the `cdk/lib/cdk-stack.ts` and `cdk/test/cdk.test.ts` files as we will be creating our own stack files.
+> **Note:** please remove the `cdk/lib/cdk-stack.ts` and `cdk/test/cdk.test.ts` files as we will be creating our own stack files.
 
 ## Creating the Mythical Mysfits Website
 
@@ -336,7 +336,7 @@ The AWS CDK will then perform the following actions:
 * Copies the local static content to the bucket.
 * Prints the URL where you can visit your site.
 
-Try to navigate to the URL displayed and see you website.
+Try to navigate to the URL displayed and see your website.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 

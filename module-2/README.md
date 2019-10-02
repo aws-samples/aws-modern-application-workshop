@@ -100,6 +100,9 @@ export class NetworkStack extends cdk.Stack {
 }
 ```
 
+> **Note:** We are assigning the instance of our `ec2.Vpc` to a readonly property so that it may be referenced by other stacks.
+
+
 That is all you need to define a VPC!  Let's now run the `cdk synth` command to observe what this single line generates.  In a terminal window run the following command:
 
 ```sh
@@ -497,7 +500,7 @@ Next, we need to integrate our website with your new API backend instead of usin
 cp -r ~/environment/workshop/source/module-2/web/* ~/environment/workshop/web
 ```
 
-You'll need to update the following file to use the same NLB URL for API calls (do not inlcude the /mysfits path): `workshop/web/index.html`. Open the file in Cloud9 and replace the highlighted area below between the quotes with the NLB URL:
+You'll need to update the following file to use the same NLB URL for API calls (do not include the /mysfits path): `workshop/web/index.html`. Open the file in Cloud9 and replace the highlighted area below between the quotes with the NLB URL:
 
 ![before replace](/images/module-2/before-replace.png)
 

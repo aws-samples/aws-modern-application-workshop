@@ -119,6 +119,7 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service
 });
 const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
@@ -178,7 +179,7 @@ const table = new dynamodb.Table(this, "Table", {
   },
   stream: dynamodb.StreamViewType.NEW_IMAGE
 });
-    
+
 const postQuestionLambdaFunctionPolicyStmDDB =  new iam.PolicyStatement();
 postQuestionLambdaFunctionPolicyStmDDB.addActions("dynamodb:PutItem");
 postQuestionLambdaFunctionPolicyStmDDB.addResources(table.tableArn);
@@ -237,7 +238,7 @@ const mysfitsProcessQuestionStream = new lambda.Function(this, "ProcessQuestionS
   },
   events: [
     new event.DynamoEventSource(table, {
-        startingPosition: lambda.StartingPosition.TRIM_HORIZON, 
+        startingPosition: lambda.StartingPosition.TRIM_HORIZON,
         batchSize: 1
     })
   ]

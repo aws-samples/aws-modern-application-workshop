@@ -87,6 +87,7 @@ Within the `dynamodb-stack.ts` file, import the required modules:
 import cdk = require("@aws-cdk/core");
 import dynamodb = require("@aws-cdk/aws-dynamodb");
 import iam = require("@aws-cdk/aws-iam");
+import ec2 = require("@aws-cdk/aws-ec2");
 import ecs = require("@aws-cdk/aws-ecs");
 ```
 
@@ -94,6 +95,7 @@ Then define the following properties interface to define what constructs this st
 
 ```typescript
 interface DynamoDbStackProps extends cdk.StackProps {
+  vpc: ec2.Vpc;
   fargateService: ecs.FargateService;
 }
 ```

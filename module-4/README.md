@@ -115,7 +115,8 @@ const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
-  fargateService: ecsStack.ecsService
+  vpc: networkStack.vpc,
+  fargateService: ecsStack.ecsService.service
 });
 ```
 
@@ -171,6 +172,8 @@ const vpcLink = new apigateway.VpcLink(this, 'VPCLink', {
 ```
 
 Now, below the constructor, we will write one helper function to import an API specified in a swagger file. Make sure to replace the Cognito UserPool ID with the one saved earlier on, e.g. `us-east-1_ab12345YZ`.
+
+> **Note:** The `REPLACE_ME_COGNITO_USER_POOL_ID` is the **only** placeholder that needs to be replaced in this block of code. The remaining `REPLACE_ME` placeholders will be automatically replaced.
 
 ```typescript
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
@@ -279,7 +282,7 @@ aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output t
 aws configure get region
 ```
 
-Also, for the user registration process, you have an additional two HTML files to insert these values into: `register.html` and `confirm.html`.  Insert the copied values into the **REPLACE_ME** strings in these files as well.
+Open the `~/environment/workshop/web/register.html` file in your Cloud9 IDE and replace the strings **REPLACE_ME** inside the single quotes with the Cognito UserPool ID and the Cognito UserPool Client ID values you copied from above and save the file. Repeat the same steps for the `~/environment/workshop/web/confirm.html` file.
 
 Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website` stack:
 
