@@ -109,7 +109,7 @@ Now change the constructor of your DBStack to require your properties object.
 Next, we want to define a VPC endpoint to allow a secure path for traffic to travel between our VPC and the DynamoDB database:
 
 ```typescript
-const dynamoDbEndpoint = this.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
+const dynamoDbEndpoint = props.vpc.addGatewayEndpoint("DynamoDbEndpoint", {
   service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
   subnets: [{
       subnetType: ec2.SubnetType.PRIVATE
@@ -129,7 +129,11 @@ dynamoDbEndpoint.addToPolicy(
 Next, we need to define the DynamoDB table; within the `DynamoDbStack` class write/copy the following code:
 
 ```typescript
-public readonly table: dynamodb.Table;
+export class DynamoDbStack extends cdk.Stack {
+  public readonly table: dynamodb.Table;
+
+  constructor(scope: cdk.App, id: string, props: DynamoDbStackProps) {
+    ...
 ```
 
 Within the constructor write/copy the following code:
