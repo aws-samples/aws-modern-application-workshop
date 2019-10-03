@@ -57,7 +57,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
 Install the AWS CDK npm package for Kinesis Firehose by executing the following command from within the `workshop/cdk/` directory:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-kinesisfirehose
+npm install --save-dev @aws-cdk/aws-kinesisfirehose@1.9.0
 ```
 
 Define the class imports for the code we will be writing:

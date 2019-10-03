@@ -175,7 +175,7 @@ new WebApplicationStack(app, "MythicalMysfits-Website");
 Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory:
 
 ```sh
-npm install --save-dev @types/node @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
+npm install --save-dev @types/node @aws-cdk/aws-cloudfront@1.9.0 @aws-cdk/aws-iam@1.9.0 @aws-cdk/aws-s3@1.9.0 @aws-cdk/aws-s3-deployment@1.9.0
 ```
 
 ### Copy the Web Application Code

@@ -79,7 +79,7 @@ Now, we can define our VPC using AWS CDK.  Once again, AWS CDK makes the impleme
 First, we need to install the CDK NPM packages for Amazon EC2 and AWS IAM:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ec2 @aws-cdk/aws-iam
+npm install --save-dev @aws-cdk/aws-ec2@1.9.0 @aws-cdk/aws-iam@1.9.0
 ```
 
 Within the `network-stack.ts` file, define the following VPC construct:
@@ -237,7 +237,7 @@ const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 Next, we need to install the CDK NPM packages for Amazon ECR:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ecr
+npm install --save-dev @aws-cdk/aws-ecr@1.9.0
 ```
 
 Then we add the definition of our ECR repository to the EcrStack as follows:
@@ -297,7 +297,7 @@ First, we will create a **Cluster** in **Amazon Elastic Container Service (ECS)*
 Now, let's define our ECS instance.  But first, we need to install the CDK NPM packages for AWS ECS, doing so like below:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ecs @aws-cdk/aws-ecs-patterns
+npm install --save-dev @aws-cdk/aws-ecs@1.9.0 @aws-cdk/aws-ecs-patterns@1.9.0
 ```
 
 As before, let's create a new file within the `lib` folder, this time called `ecs-stack.ts`.  
@@ -533,7 +533,7 @@ First, we need to install the CDK NPM packages for AWS CodeCommit:
 
 ```sh
 cd ~/environment/workshop/cdk
-npm install --save-dev @aws-cdk/aws-codecommit
+npm install --save-dev @aws-cdk/aws-codecommit@1.9.0
 ```
 
 As before, let's create a new file within the `lib` folder, this time called `cicd-stack.ts`.  
@@ -670,7 +670,7 @@ export class CiCdStack extends cdk.Stack {
 Let's install the CDK NPM package for AWS CodeBuild and AWS CodePipeline, execute the following command in the `workshop/cdk` directory:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-cdk/aws-codepipeline-actions
+npm install --save-dev @aws-cdk/aws-codebuild@1.9.0  @aws-cdk/aws-codepipeline@1.9.0  @aws-cdk/aws-codepipeline-actions@1.9.0
 ```
 
 Add the required library import statements to the `cicd-stack.ts` file:
