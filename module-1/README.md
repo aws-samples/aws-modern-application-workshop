@@ -9,8 +9,8 @@
 
 ---
 
-
 **Services used:**
+
 * [AWS Cloud9](https://aws.amazon.com/cloud9/)
 * [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
 * [Amazon CloudFront](https://aws.amazon.com/cloudfront/)
@@ -22,6 +22,7 @@ The combination of S3 and CloudFront makes for a wonderfully useful capability f
 ## Getting Started
 
 ### Sign In to the AWS Console
+
 To begin, sign in to the [AWS Console](https://console.aws.amazon.com) for the AWS account you will be using in this workshop.
 
 This web application can be deployed in any AWS region that supports all the services used in this application. The supported regions include:
@@ -43,22 +44,17 @@ Select a region from the dropdown in the upper right corner of the AWS Managemen
  On the AWS Console home page, type **Cloud9** into the service search bar and select it:
  ![aws-console-home](/images/module-1/cloud9-service.png)
 
-
 Click **Create Environment** on the Cloud9 home page:
 ![cloud9-home](/images/module-1/cloud9-home.png)
-
 
 Name your environment **MythicalMysfitsIDE** with any description you'd like, and click **Next Step**:
 ![cloud9-name](/images/module-1/cloud9-name-ide.png)
 
-
 Leave the Environment settings as their defaults and click **Next Step**:
 ![cloud9-configure](/images/module-1/cloud9-configure-env.png)
 
-
 Click **Create Environment**:
 ![cloud9-review](/images/module-1/cloud9-review.png)
-
 
 When the IDE has finished being created for you, you'll be presented with a welcome screen that looks like this:
 ![cloud9-welcome](/images/module-1/cloud9-welcome.png)
@@ -106,7 +102,7 @@ One of the biggest benefits from AWS CDK is the principal of reusability - Being
 If you haven't already, install the AWS CDK in your Cloud9 environment using the following command:
 
 ```sh
-npm install -g aws-cdk@1.9.0
+npm install -g aws-cdk
 ```
 
 Run the following command to see the version number of the CDK:
@@ -125,7 +121,7 @@ mkdir cdk && cd cdk/
 
 In the `cdk` folder, lets now initialize a CDK app, where LANGUAGE is one of the supported programming languages: csharp (C#), java (Java), python (Python), or typescript (TypeScript) and TEMPLATE is an optional template that creates an app with different resources than the default app that cdk init creates for the language.
 
-_cdk init app --language LANGUAGE_
+`cdk init app --language LANGUAGE`
 
 For the purposes of this workshop we will use TypeScript as our language:
 
@@ -175,7 +171,7 @@ new WebApplicationStack(app, "MythicalMysfits-Website");
 Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory:
 
 ```sh
-npm install --save-dev @types/node @aws-cdk/aws-cloudfront@1.9.0 @aws-cdk/aws-iam@1.9.0 @aws-cdk/aws-s3@1.9.0 @aws-cdk/aws-s3-deployment@1.9.0
+npm install --save-dev @types/node @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
 ```
 
 ### Copy the Web Application Code
@@ -347,6 +343,5 @@ Congratulations, you have created the basic static Mythical Mysfits Website!
 That concludes Module 1.
 
 [Proceed to Module 2](/module-2)
-
 
 ## [AWS Developer Center](https://developer.aws)

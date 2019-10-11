@@ -78,7 +78,7 @@ const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
 As we have done previously, we need to install the CDK NPM package for AWS DynamoDB:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-dynamodb@1.9.0
+npm install --save-dev @aws-cdk/aws-dynamodb
 ```
 
 Within the `dynamodb-stack.ts` file, import the required modules:

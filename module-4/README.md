@@ -123,7 +123,7 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-apigateway@1.9.0
+npm install --save-dev @aws-cdk/aws-apigateway
 ```
 
 Back in `APIGatewayStack.ts`, define the class imports for the code we will be writing:

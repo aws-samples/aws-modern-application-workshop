@@ -57,7 +57,7 @@ export class SageMakerStack extends cdk.Stack {
 Next, we need to install the AWS CDK npm packages for SageMaker:
 
 ```sh
-npm install --save-dev @aws-cdk/aws-sagemaker@1.9.0
+npm install --save-dev @aws-cdk/aws-sagemaker
 ```
 
 Define the class imports for the code we will be writing:
