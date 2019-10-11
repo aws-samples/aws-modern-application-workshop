@@ -24,8 +24,13 @@ export class EcsStack extends cdk.Stack {
     // Instantiate Amazon ECS Service with an automatic load balancer
     this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Service", {
       cluster: this.ecsCluster,
-      containerPort: 8080,
-      image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+      desiredCount: 1,
+      publicLoadBalancer: true,
+      taskImageOptions: {
+        enableLogging: true,
+        containerPort: 8080,
+        image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+      }
     });
     this.ecsService.service.connections.allowFrom(ec2.Peer.ipv4(props.vpc.vpcCidrBlock),ec2.Port.tcp(8080));
 
