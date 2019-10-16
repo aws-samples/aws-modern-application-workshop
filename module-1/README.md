@@ -180,6 +180,7 @@ One of the biggest benefits from AWS CDK is the principal of reusability - Being
 
 ```sh
 cd ~/Workshop
+npm install -g aws-cdk
 ```
 
 **Action:** Create a new folder to contain your AWS CDK application
