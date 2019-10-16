@@ -5,12 +5,13 @@
 **Time to complete:** 20 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-3/source/cdk/`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/source/module-3/cdk/`
 
 ---
 
 **Services used:**
 
+* [AWS CDK](https://docs.aws.amazon.com/CDK/latest/userguide/getting_started.html)
 * [Amazon DynamoDB](https://aws.amazon.com/dynamodb/)
 
 ## Overview
@@ -30,7 +31,7 @@ To create the table using the AWS CDK, do the following.
 Let's start off by switching once again to our Workshop's CDK folder, and opening it in our editor:
 
 ```sh
-cd ~/WorkShop/cdk
+cd ~/Workshop/cdk
 ```
 
 ```sh
@@ -82,13 +83,18 @@ new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-  networkStack: networkStack,
-  ncrStack: ecrStack
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository,
+    ecsTaskRoleArn: ecsTaskRoleArn,
+    ecsExecutionRoleArn: ecsExecutionRoleArn
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
-  ecrRepository: ecrStack.ecrRepository,
-  ecsService: ecsStack.ecsService.service,
-  apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+    ecrRepository: ecrStack.ecrRepository,
+    ecsService: ecsStack.ecsService.service,
+    apiRepositoryArn: developerToolStack.apiRepository.repositoryArn,
+    codebuildProjectRoleArn: codebuildProjectRoleArn,
+    codePipelineRoleArn: codePipelineRoleArn,
+    codePipelineActionRoleArn: codePipelineActionRoleArn,
 });
 new DynamoDbStack(app, 'MythicalMysfits-DynamoDB', {
   fargateService: ecsStack.ecsService.service,
@@ -247,34 +253,18 @@ cdk deploy MythicalMysfits-DynamoDB
 
 You will be prompted with a messages such as `Do you wish to deploy these changes (y/n)?` to which you should respond by typing `y`
 
-After the command runs, you can view the details of your newly created table by executing the following AWS CLI or PowerShell command in the terminal:
+After the command runs, you can view the details of your newly created table by executing the following AWS CLI command in the terminal:
 
 **Action:** Execute the following command:
-
-_Note:_ If you use `Bash`, execute the following command:
 
 ```sh
 aws dynamodb describe-table --table-name MysfitsTable
 ```
 
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```powershell
-Get-DDBTable -TableName MysfitsTable
-```
-
 If we execute the following command to retrieve all of the items stored in the table, you'll see that the table is empty:
-
-_Note:_ If you use `Bash`, execute the following command:
 
 ```sh
 aws dynamodb scan --table-name MysfitsTable
-```
-
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```powershell
-$ddbClient = New-Object "Amazon.DynamoDBv2.AmazonDynamoDBClient";$ddbClient.ScanAsync("MysfitsTable").Result;
 ```
 
 ```json
@@ -292,30 +282,14 @@ Also provided is a JSON file that can be used to batch insert a number of Mysfit
 
 **Action:** Execute the following command:
 
-_Note:_ If you use `Bash`, execute the following command:
-
 ```sh
 aws dynamodb batch-write-item --request-items file://~/Workshop/source/module-3/data/populate-dynamodb.json
 ```
 
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```powershell
-~/Workshop/source/module-3/data/BatchWriteToDDBTable.ps1
-```
-
 Now, if you run the same command to scan all of the table contents, you'll find the items have been loaded into the table:
-
-_Note:_ If you use `Bash`, execute the following command:
 
 ```sh
 aws dynamodb scan --table-name MysfitsTable
-```
-
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```powershell
-$ddbClient = New-Object "Amazon.DynamoDBv2.AmazonDynamoDBClient";$ddbClient.ScanAsync("MysfitsTable").Result;
 ```
 
 ### Committing The First *Real* Code change
@@ -401,5 +375,3 @@ Re-visit your Mythical Mysfits website to see the new population of Mysfits load
 That concludes module 3.
 
 [Proceed to Module 4](/module-4)
-
-## [AWS Developer Center](https://developer.aws)

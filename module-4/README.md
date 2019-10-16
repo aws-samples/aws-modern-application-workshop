@@ -5,16 +5,16 @@
 **Time to complete:** 60 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-4/source/cdk/`
+**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/source/module-4/cdk/`
 
 ---
 
 **Services used:**
 
+* [AWS CDK](https://docs.aws.amazon.com/CDK/latest/userguide/getting_started.html)
 * [Amazon Cognito](https://aws.amazon.com/cognito/)
 * [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
 * [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/)
-* [AWS Amplify](https://aws-amplify.github.io/)
 
 ## Overview
 
@@ -28,71 +28,115 @@ Our API Gateway will provide HTTPS and CORS support, and also request authorizat
 
 API Gateway will then pass traffic through to our NLB to be processed by our .NET API running on ECS with Fargate.
 
-### Adding a User Pool for Website Users with Amplify
+### Adding a User Pool for Website Users
 
-#### Install AWS Amplify and Configure
+__Note__ As before, you may find it helpful to run the command `npm run watch` from within the CDK folder to provide compile time error reporting whilst you develop your AWS CDK constructs.  We recommend running this from the terminal window within VS Code.
 
-**Note:** If you already completed installation and setup of the AWS Amplify CLI, and initialization of your AWS Amplify project in Module 1, please skip to the section named [Create the Cognito User Pool With Amplify](#create-the-cognito-user-pool-with-amplify).
+#### Create the Cognito User Pool
 
-To install the AWS Amplify CLI run the following commands in your VS Code terminal
-
-```sh
-npm install -g @aws-amplify/cli
-```
+To create the **Cognito User Pool** where all of the Mythical Mysfits visitors will be stored, create a new TypeScript file which we will use to define the Cognito stack.
 
 ```sh
-amplify configure
+cd ~/workshop/cdk
+touch lib/cognito-stack.ts
 ```
 
-Once you run `amplify configure` it will open the AWS login page in your browser. Login if you are not logged in already. Once logged in, you will be asked to specify a default AWS Region. 
+Open the file `cognito-stack.ts` in your editor (eg: `code ~/workshop/cdk/lib/cognito.ts`) and define the following stack template:
 
-Next, you will be asked to create an IAM user for Amplify to use. You are redirected in your browser to complete the creation of an IAM user in the console. Make sure you give this user Administrator Access on the Policy page.
+```typescript
+import cdk = require("@aws-cdk/core");
 
-After creating this IAM user, you will see an Access Key and Secret in your browser. The AWS Amplify CLI requires you to enter these values when prompted. If you completed this process successfully you should see "Successfully set up the new user." in your terminal.
+export class CognitoStack extends cdk.Stack {
 
-#### Initialize the AWS Amplify Project
+    constructor(scope: cdk.Construct, id: string) {
+    super(scope, id);
 
-To create a new AWS Amplify project, navigate to the `frontend` directory.
-
-```sh
-cp -r ~/Workshop/source/module-3/frontend/* ~/Workshop/frontend/
+    this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
+        userPool: this.userPool,
+        userPoolClientName: 'MysfitsUserPoolClient'
+    })
+  }
+}
 ```
 
-```sh
-cd ~/Workshop/frontend/
+At the top of the file, add the import statement for the AWS Cognito cdk library
+
+```typescript
+import cognito = require("@aws-cdk/aws-cognito");
 ```
 
-In this folder, run the following command:
+Just before the constructor statement, define the following public properties
 
-```sh
-amplify init
+```typescript
+public readonly userPool: cognito.UserPool;
+public readonly userPoolClient: cognito.UserPoolClient;
 ```
 
-The CLI will ask you a few questions. Be sure to answer these specific questions with the following answers:
+Now, within the constructor _(after the super(scope, id); statement)_, define the Amazon Cognito UserPool
 
-* Choose your default editor: `Visual Studio Code`
-* Choose the type of app that you're building: `javascript`
-* What javascript framework are you using: `angular`
-* Source Directory Path: `src`
-* Distribution Directory Path: `dist`
-* Build Command: `npm run build -- --prod`
-* Start Command: `npm start`
-
-#### Create the Cognito User Pool With Amplify
-
-After finishing installation, setup, and initialization, we'll add user authentication to our Angular app that uses **Amazon Cognito**. In addition to authenticationm, Cognito offers other user management utilities.
-
-Run the following command to add authentication to the Angular app and also create the necessary resources in your AWS account:
-
-```sh
-amplify add auth
+```typescript
+this.userPool = new cognito.UserPool(this, 'UserPool', {
+  userPoolName: 'MysfitsUserPool',
+  autoVerifiedAttributes: [
+    cognito.UserPoolAttribute.EMAIL
+  ]
+})
 ```
 
-```sh
-amplify push
+This will create a Cognito UserPool and defines that all users who are registered with this pool should automatically have their email address verified via confirmation email before they become confirmed users.
+
+The last set we have to perform is to define a Amazon Cognito User Pool Client, which our web application will use.
+
+Again, within the constructor _(after the super(scope, id); statement)_, define the Amazon Cognito UserPool Client
+
+```typescript
+this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
+  userPool: this.userPool,
+  userPoolClientName: 'MysfitsUserPoolClient'
+})
 ```
 
-You should now have a Cognito User Pool in your default AWS region. AWS Amplify also creates an `aws-exports.js` file in your Angular app located `./module-4/frontend/src/aws-exports.js`. The `aws-exports.js` file contains information about the backend services AWS Amplify has added to your project.
+With that done, your `cognito_stack.ts` file should resemble the following.
+
+```typescript
+import cdk = require("@aws-cdk/core");
+import cognito = require("@aws-cdk/aws-cognito");
+
+export class CognitoStack extends cdk.Stack {
+  public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient;
+
+  constructor(scope: cdk.Construct, id: string) {
+    super(scope, id);
+
+    this.userPool = new cognito.UserPool(this, 'UserPool', {
+      userPoolName: 'MysfitsUserPool',
+      autoVerifiedAttributes: [
+        cognito.UserPoolAttribute.EMAIL
+      ]
+    })
+
+    this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
+      userPool: this.userPool,
+      userPoolClientName: 'MysfitsUserPoolClient'
+    })
+  }
+}
+```
+
+OK, That is our Amazon Cognito resources defined.  Now, let's add this to our `cdk.ts` bootstrap file.
+
+Import your new `CognitoStack` definition into the `cdk.ts` file by inserting the following `import` statement at the top of the file
+
+```typescript
+import { CognitoStack } from '../lib/cognito-stack';
+```
+
+Insert the following definition at the end your `cdk.ts` file, before the `app.synth();` statement
+
+```typescript
+const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
+```
 
 ### Adding a new REST API with Amazon API Gateway
 
@@ -102,36 +146,40 @@ Next, let's turn our attention to creating a new RESTful API in front of our exi
 
 **Note:** For the purposes of this workshop, we created the NLB to be *internet-facing* so that it could be called directly in earlier modules. Because of this, even though we will be requiring Authorization tokens in our API after this module, our NLB will still actually be open to the public behind the API Gateway API.  In a real-world scenario, you should create your NLB to be *internal* from the beginning (or create a new internal load balancer to replace the existing one), knowing that API Gateway would be your strategy for Internet-facing API authorization. But for the sake of time, we'll use the NLB that we've already created that will stay publicly accessible.
 
-The VPC Link will be created as part of our Module 4 CDK application. 
-
 #### Create the REST API using Swagger
 
-Your MythicalMysfits REST API is defined using **Swagger**, a popular open-source framework for describing APIs via JSON.  This Swagger definition of the API is located at `./module-4/cdk/api-swagger.json`.  Open this file and you'll see the REST API and all of its resources, methods, and configuration defined within.
+Your MythicalMysfits REST API is defined using **Swagger**, a popular open-source framework for describing APIs via JSON.  This Swagger definition of the API is located at `./module-4/api/api-swagger.json`.  Open this file and you'll see the REST API and all of its resources, methods, and configuration defined within.
 
 The `securityDefinitions` object within the API definition indicates that we have setup an apiKey authorization mechanism using the Authorization header.  You will notice that AWS has provided custom extensions to Swagger using the prefix `x-amazon-api-gateway-`, these extensions are where API Gateway specific functionality can be added to typical Swagger files to take advantage of API Gateway-specific capabilities.
 
-Let's deploy the VPCLink and the API Gateway.
+First we will do some prep work in our workshop folder.  Updating the WebAPI code and copying over our swagger file.
 
-To create the table using the AWS CDK, do the following.
+```sh
+cd ~/Workshop/webapi
+```
 
-Let's start off by switching once again to our Workshop's CDK folder, and opening it in our editor:
+```sh
+cp -r ~/Workshop/source/module-4/webapi/* ~/Workshop/webapi/
+```
+
+```sh
+cp ~/Workshop/source/module-4/api/api-swagger.json ~/Workshop/cdk
+```
+
+Let's deploy the VPCLink and the API Gateway.  To create the API using the AWS CDK, start off by switching once again to our Workshop's CDK folder, and opening it in our editor:
 
 ```sh
 cd ~/Workshop/cdk
 ```
 
 ```sh
-cp -r ~/Workshop/source/module-3/webapi/* ~/Workshop/webapi/
-```
-
-```sh
 code .
 ```
 
-Create a new file in the `lib` folder called `apigatewaystack.ts`.
+Create a new file in the `lib` folder called `api-gateway-stack.ts`.
 
 ```sh
-touch ~/Workshop/cdk/lib/apigatewaystack.ts
+touch ~/Workshop/cdk/lib/api-gateway-stack.ts
 ```
 
 __Note__ As before, you may find it helpful to run the command `npm run watch` from within the CDK folder to provide compile time error reporting whilst you develop your AWS CDK constructs.  We recommend running this from the terminal window within VS Code.
@@ -141,8 +189,14 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 ```typescript
 import cdk = require('@aws-cdk/core');
 
+interface APIGatewayStackProps extends cdk.StackProps {
+  loadBalancerDnsName: string;
+  loadBalancerArn: string;
+  userPoolId: string;
+}
+
 export class APIGatewayStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id:string) {
+  constructor(scope: cdk.Construct, id:string, props: APIGatewayStackProps) {
     super(scope, id);
 
     // The code that defines your stack goes here
@@ -156,6 +210,7 @@ Then, add the NetworkStack to our CDK application definition in `bin/cdk.ts`, wh
 #!/usr/bin/env node
 
 import cdk = require('@aws-cdk/core');
+
 import "source-map-support/register";
 import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/webapplicationstack";
@@ -170,20 +225,22 @@ new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-  vpc: networkStack.vpc,
-  ecrRepository: ecrStack.ecrRepository
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
-  ecrRepository: ecrStack.ecrRepository,
-  ecsService: ecsStack.ecsService.service,
-  apiRepository: developerToolStack.apiRepository
+    ecrRepository: ecrStack.ecrRepository,
+    ecsService: ecsStack.ecsService.service
 });
 new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
   vpc: networkStack.vpc,
   fargateService: ecsStack.ecsService.service
 });
-new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
-  fargateService: ecsStack.ecsService
+const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
+const apiGateway = new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+  userPoolId: cognito.userPool.userPoolId,
+  loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
+  loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
 ```
 
@@ -202,27 +259,8 @@ Back in `APIGatewayStack.ts`, define the class imports for the code we will be w
 ```typescript
 import apigateway = require('@aws-cdk/aws-apigateway');
 import elbv2 = require('@aws-cdk/aws-elasticloadbalancingv2');
-import ecspatterns = require('@aws-cdk/aws-ecs-patterns');
 import fs = require('fs');
 import path = require('path');
-```
-
-Next, define the Stack Properties class which details the dependencies our API Gateway implementation has upon other stacks.
-
-**Action:** Write/Copy the following code:
-
-```typescript
-interface APIGatewayStackProps extends cdk.StackProps {
-  fargateService: ecspatterns.LoadBalancedFargateService;
-}
-```
-
-Now change the constructor of your DBStack to require your properties object.
-
-**Action:** Write/Copy the following code:
-
-```typescript
-  constructor(scope: cdk.Construct, id: string, props: APIGatewayStackProps) {
 ```
 
 Now, within the constructor of our `APIGatewayStack` class, first we import the Network Load Balancer from the ECS Cluster created in Module 2.
@@ -231,7 +269,7 @@ Now, within the constructor of our `APIGatewayStack` class, first we import the 
 
 ```typescript
 const nlb = elbv2.NetworkLoadBalancer.fromNetworkLoadBalancerAttributes(this, 'NLB', {
-  loadBalancerArn: props.fargateService.loadBalancer.loadBalancerArn,
+  loadBalancerArn: props.loadBalancerArn
 });
 ```
 
@@ -255,35 +293,14 @@ Now, below the constructor, we will write two helper functions, one to import an
 
 ```typescript
 private generateSwaggerSpec(dnsName: string, vpcLink: apigateway.VpcLink): string {
-  try {
-    const userPoolIdentity = this.getUserPoolIdentity();
-    const schemaFilePath = path.resolve(__dirname + '/../api-swagger.json');
-    const apiSchema = fs.readFileSync(schemaFilePath);
-    let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
-    schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
-    schema = schema.toString().replace(/REPLACE_ME_COGNITO_USER_POOL_ID/gi, userPoolIdentity);
-    schema = schema.toString().replace(/REPLACE_ME_VPC_LINK_ID/gi, vpcLink.vpcLinkId);
-    schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
-    return schema;
-  } catch (exception) {
-    throw new Error('Failed to generate swagger specification.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
-  }
-}
-private getUserPoolIdentity(): string {
-  const amplifySettingsFilePath = path.resolve(__dirname + '../../../frontend/src/aws-exports.js');
-  if (fs.existsSync(amplifySettingsFilePath)) {
-    const amplifySettings = fs.readFileSync(amplifySettingsFilePath).toString();
-    const locateIdentityPool = '"aws_cognito_identity_pool_id": "';
-    const locationOfIdentityPoolString = amplifySettings.indexOf(locateIdentityPool);
-    if (locationOfIdentityPoolString === -1) {
-      throw new Error('Failed to import aws-exports.js.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
-    }
-    const userPoolIdentity = amplifySettings.substring(locationOfIdentityPoolString + locateIdentityPool.length,
-      amplifySettings.indexOf('",', locationOfIdentityPoolString + 1));
-    return userPoolIdentity;
-  } else {
-    throw new Error('Failed to locate aws-exports.js.  Please refer to the Module 4 readme about how to initialise AWS Amplify.');
-  }
+  const schemaFilePath = path.resolve(__dirname + '/../../api/api-swagger.json');
+  const apiSchema = fs.readFileSync(schemaFilePath);
+  let schema: string = apiSchema.toString().replace(/REPLACE_ME_REGION/gi, cdk.Aws.REGION);
+  schema = schema.toString().replace(/REPLACE_ME_ACCOUNT_ID/gi, cdk.Aws.ACCOUNT_ID);
+  schema = schema.toString().replace(/REPLACE_ME_COGNITO_USER_POOL_ID/gi, userPoolId);
+  schema = schema.toString().replace(/REPLACE_ME_VPC_LINK_ID/gi, vpcLink.vpcLinkId);
+  schema = schema.toString().replace(/REPLACE_ME_NLB_DNS/gi, dnsName);
+  return schema;
 }
 ```
 
@@ -292,7 +309,7 @@ And finally, back within the constructor, we define our API Gateway utilising th
 **Action:** Write/Copy the following code:
 
 ```typescript
-const schema = this.generateSwaggerSpec(props.fargateService.loadBalancer.loadBalancerDnsName, vpcLink);
+const schema = this.generateSwaggerSpec(props.loadBalancerDnsName, props.userPoolId, vpcLink);
 const jsonSchema = JSON.parse(schema);
 const api = new apigateway.CfnRestApi(this, 'Schema', {
   name: 'MysfitsApi',
@@ -304,13 +321,19 @@ const api = new apigateway.CfnRestApi(this, 'Schema', {
   },
   failOnWarnings: true
 });
+new apigateway.CfnDeployment(this, 'Prod', {
+  restApiId: api.ref,
+  stageName: 'prod'
+});
 new cdk.CfnOutput(this, 'APIID', {
-  value: api.logicalId,
+  value: api.ref,
   description: 'API Gateway ID'
 })
 ```
 
 Once you have finished, deploy your stacks.
+
+**Action:** Execute the following commands:
 
 ```sh
 cd ~/Workshop/cdk
@@ -326,16 +349,8 @@ cdk deploy
 
 With that, our REST API that's capable of user authorization is deployed and available on the Internet... but where?!  Your API is available at the following location:
 
-_Note:_ If you use `Bash`, execute the following command:
-
 ```sh
 curl https://REPLACE_ME_WITH_API_ID.execute-api.REPLACE_ME_WITH_REGION.amazonaws.com/prod/api/mysfits
-```
-
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```powershell
-Invoke-WebRequest ("https://{0}.execute-api.{1}.amazonaws.com/prod/api/mysfits" -f $(Get-AGRestApiList | Where-Object {$_.Name -eq 'MysfitsApi' } |  Select-Object -ExpandProperty Id), $(Get-DefaultAWSRegion))
 ```
 
 Copy the above, replacing the appropriate values, and add `/api/mysfits` to the end of the URI.  Entered into a browser address bar, you should once again see your Mysfits JSON response.  But, we've added several capabilities like adopting and liking mysfits that our .NET backend doesn't have implemented yet.
@@ -388,24 +403,12 @@ export const environment = {
 
 To retrieve the values you need to replace in the URL, you can visit the API Gateway console in AWS, or use one of the following commands:
 
-_Note:_ If you use `Bash`, execute the following command:
-
 ```sh
 aws apigateway get-rest-apis --query 'items[?name==`MysfitsApi`][id]' --output text
 ```
 
 ```sh
 aws configure get region
-```
-
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```sh
-Get-AGRestApiList | Where-Object {$_.Name -eq 'MysfitsApi' } |  Select-Object -ExpandProperty Id
-```
-
-```sh
-Get-DefaultAWSRegion | Select-Object -ExpandProperty Region
 ```
 
 Once you've updated the `environment.prod.ts` file, Deploy your updated angular app by running the following command:

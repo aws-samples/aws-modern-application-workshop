@@ -10,26 +10,31 @@ import { APIGatewayStack } from "../lib/api-gateway-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { CiCdStack } from '../lib/cicd-stack';
+import { CognitoStack } from '../lib/cognito-stack';
 
 const app = new cdk.App();
+
 const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
     vpc: networkStack.vpc,
-    ecrRepository: ecrStack.ecrRepository
+    ecrRepository: ecrStack.ecrRepository,
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service,
-    apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+    apiRepositoryArn: developerToolStack.apiRepository.repositoryArn,
 });
 new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService
 });
-new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
-    fargateService: ecsStack.ecsService
+const cognito = new CognitoStack(app, "MythicalMysfits-Cognito");
+const apiGateway = new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+    userPoolId: cognito.userPool.userPoolId,
+    loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
+    loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
 app.synth();

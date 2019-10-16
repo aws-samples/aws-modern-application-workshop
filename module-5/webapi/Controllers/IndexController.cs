@@ -16,9 +16,9 @@ namespace ModernWebAppNET.Controllers
         // GET /
         // Used for NLB HealthCheck
         [HttpGet]
-        public IActionResult Get()
+        public ContentResult Get()
         {
-            return Ok();
+            return Content("I think you meant to call /api/mysfits");
         }
 
     }

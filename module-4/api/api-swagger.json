@@ -126,7 +126,7 @@
                     "connectionId": "REPLACE_ME_VPC_LINK_ID",
                     "httpMethod": "GET",
                     "type": "HTTP_PROXY",
-                    "uri": "http://REPLACE_ME_NLB_DNS/mysfits",
+                    "uri": "http://REPLACE_ME_NLB_DNS/api/mysfits",
                     "responses": {
                         "default": {
                             "statusCode": "200",
@@ -220,7 +220,7 @@
                     "connectionId": "REPLACE_ME_VPC_LINK_ID",
                     "httpMethod": "GET",
                     "type": "HTTP_PROXY",
-                    "uri": "http://REPLACE_ME_NLB_DNS/mysfits/{mysfitId}",
+                    "uri": "http://REPLACE_ME_NLB_DNS/api/mysfits/{mysfitId}",
                     "responses": {
                         "default": {
                             "statusCode": "200",
@@ -319,7 +319,7 @@
                     "connectionId": "REPLACE_ME_VPC_LINK_ID",
                     "httpMethod": "POST",
                     "type": "HTTP_PROXY",
-                    "uri": "http://REPLACE_ME_NLB_DNS/mysfits/{mysfitId}/adopt",
+                    "uri": "http://REPLACE_ME_NLB_DNS/api/mysfits/{mysfitId}/adopt",
                     "responses": {
                         "default": {
                             "statusCode": "200",
@@ -433,17 +433,7 @@
                         ]
                     }],
                     "type": "HTTP_PROXY",
-                    "uri": "http://REPLACE_ME_NLB_DNS/mysfits/{mysfitId}/like",
-                    "responses": {
-                        "default": {
-                            "statusCode": "200",
-                            "responseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'*'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    }
+                    "uri": "http://REPLACE_ME_NLB_DNS/api/mysfits/{mysfitId}/like",
                 }
             },
             "options": {

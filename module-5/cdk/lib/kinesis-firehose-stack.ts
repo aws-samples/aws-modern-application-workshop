@@ -2,13 +2,13 @@ import cdk = require("@aws-cdk/core");
 import apigw = require("@aws-cdk/aws-apigateway");
 import iam = require("@aws-cdk/aws-iam");
 import dynamodb = require("@aws-cdk/aws-dynamodb");
-import { ServicePrincipal } from "@aws-cdk/aws-iam";
 import { CfnDeliveryStream } from "@aws-cdk/aws-kinesisfirehose";
 import lambda = require("@aws-cdk/aws-lambda");
 import s3 = require("@aws-cdk/aws-s3");
 
 interface KinesisFirehoseStackProps extends cdk.StackProps {
   table: dynamodb.Table;
+  apiId: string;
 }
 export class KinesisFirehoseStack extends cdk.Stack {
 
@@ -21,11 +21,21 @@ export class KinesisFirehoseStack extends cdk.Stack {
 
     const firehoseDeliveryRole = new iam.Role(this, "FirehoseDeliveryRole", {
       roleName: "FirehoseDeliveryRole",
-      assumedBy: new ServicePrincipal("firehose.amazonaws.com"),
+      assumedBy: new iam.ServicePrincipal("firehose.amazonaws.com"),
       externalId: cdk.Aws.ACCOUNT_ID
     });
 
-    const lambdaFunctionPolicy =  new iam.PolicyStatement();
+    const firehoseDeliveryPolicyS3Stm = new iam.PolicyStatement();
+    firehoseDeliveryPolicyS3Stm.addActions("s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject");
+    firehoseDeliveryPolicyS3Stm.addResources(clicksDestinationBucket.bucketArn);
+    firehoseDeliveryPolicyS3Stm.addResources(clicksDestinationBucket.arnForObjects('*'));
+
+    const lambdaFunctionPolicy = new iam.PolicyStatement();
     lambdaFunctionPolicy.addActions("dynamodb:GetItem");
     lambdaFunctionPolicy.addResources(props.table.tableArn);
 
@@ -35,15 +45,22 @@ export class KinesisFirehoseStack extends cdk.Stack {
       description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
         " to not just include a mysfitId, but also other attributes that can be analyzed later.",
       memorySize: 128,
-      code: lambda.Code.asset("../lambda"),
+      code: lambda.Code.asset("../lambda/stream"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         lambdaFunctionPolicy
       ],
       environment: {
-        mysfits_api_url: "MysfitsApiUrl"
+        mysfits_api_url: `https://${props.apiId}.execute-api.${cdk.Aws.REGION}.amazonaws.com/prod/`
       }
     });
+
+    const firehoseDeliveryPolicyLambdaStm = new iam.PolicyStatement();
+    firehoseDeliveryPolicyLambdaStm.addActions("lambda:InvokeFunction");
+    firehoseDeliveryPolicyLambdaStm.addResources(mysfitsClicksProcessor.functionArn);
+
+    firehoseDeliveryRole.addToPolicy(firehoseDeliveryPolicyS3Stm);
+    firehoseDeliveryRole.addToPolicy(firehoseDeliveryPolicyLambdaStm);
 
     const mysfitsFireHoseToS3 = new CfnDeliveryStream(this, "DeliveryStream", {
       extendedS3DestinationConfiguration: {
@@ -81,9 +98,8 @@ export class KinesisFirehoseStack extends cdk.Stack {
     });
 
     const clickProcessingApiRole = new iam.Role(this, "ClickProcessingApiRole", {
-      assumedBy: new ServicePrincipal("apigateway.amazonaws.com")
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com")
     });
-
     const apiPolicy = new iam.PolicyStatement();
     apiPolicy.addActions("firehose:PutRecord");
     apiPolicy.addResources(mysfitsFireHoseToS3.attrArn);
@@ -95,9 +111,19 @@ export class KinesisFirehoseStack extends cdk.Stack {
       roles: [clickProcessingApiRole]
     });
 
-    const clicksIntegration = new apigw.LambdaIntegration(
-      mysfitsClicksProcessor,
-      {
+    const api = new apigw.RestApi(this, "APIEndpoint", {
+      restApiName: "ClickProcessing API Service",
+      cloudWatchRole: false,
+      endpointTypes: [apigw.EndpointType.REGIONAL]
+    });
+
+    const clicks = api.root.addResource('clicks');
+
+    clicks.addMethod('PUT', new apigw.AwsIntegration({
+      service: 'firehose',
+      integrationHttpMethod: 'POST',
+      action: 'PutRecord',
+      options: {
         connectionType: apigw.ConnectionType.INTERNET,
         credentialsRole: clickProcessingApiRole,
         integrationResponses: [
@@ -105,6 +131,11 @@ export class KinesisFirehoseStack extends cdk.Stack {
             statusCode: "200",
             responseTemplates: {
               "application/json": '{"status":"OK"}'
+            },
+            responseParameters: {
+              "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+              "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT'",
+              "method.response.header.Access-Control-Allow-Origin": "'*'"
             }
           }
         ],
@@ -115,17 +146,21 @@ export class KinesisFirehoseStack extends cdk.Stack {
           "application/json": `{ "DeliveryStreamName": "${mysfitsFireHoseToS3.ref}", "Record": { "Data": "$util.base64Encode($input.json('$'))" }}`
         }
       }
+    }), {
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseParameters: {
+            "method.response.header.Access-Control-Allow-Headers": true,
+            "method.response.header.Access-Control-Allow-Methods": true,
+            "method.response.header.Access-Control-Allow-Origin": true
+          }
+        }
+      ]
+    }
     );
 
-    const api = new apigw.LambdaRestApi(this, "APIEndpoint", {
-      handler: mysfitsClicksProcessor,
-      options: {
-        restApiName: "ClickProcessing API Service"
-      },
-      proxy: false
-    });
-
-    api.root.addMethod("OPTIONS", new apigw.MockIntegration({
+    clicks.addMethod("OPTIONS", new apigw.MockIntegration({
       integrationResponses: [{
         statusCode: "200",
         responseParameters: {
@@ -143,27 +178,18 @@ export class KinesisFirehoseStack extends cdk.Stack {
         "application/json": '{"statusCode": 200}'
       }
     }), {
-        methodResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers": true,
-              "method.response.header.Access-Control-Allow-Methods": true,
-              "method.response.header.Access-Control-Allow-Credentials": true,
-              "method.response.header.Access-Control-Allow-Origin": true
-            }
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseParameters: {
+            "method.response.header.Access-Control-Allow-Headers": true,
+            "method.response.header.Access-Control-Allow-Methods": true,
+            "method.response.header.Access-Control-Allow-Credentials": true,
+            "method.response.header.Access-Control-Allow-Origin": true
           }
-        ]
-      }
+        }
+      ]
+    }
     );
-
-    const clicksMethod = api.root.addResource("clicks");
-    clicksMethod.addMethod("PUT", clicksIntegration, {
-      apiKeyRequired: true,
-      methodResponses: [{
-        statusCode: "200"
-      }],
-      authorizationType: apigw.AuthorizationType.NONE
-    });
   }
 }

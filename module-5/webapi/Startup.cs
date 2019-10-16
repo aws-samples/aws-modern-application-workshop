@@ -36,30 +36,28 @@ namespace ModernWebAppNET
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions()); //options are in appsettings under AWS
             services.AddAWSService<IAmazonDynamoDB>();
             services.AddTransient<MysfitsService>();
-            if (this.HostingEnvironment.IsDevelopment())
-            {
-                services.AddCors();
-            }
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(builder =>
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+            );
             if (env.IsDevelopment())
             {
-                app.UseCors(builder =>
-                builder
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                );
+                app.UseDeveloperExceptionPage();
             }
             else
             {
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
 
-            app.UseHttpsRedirection();
             app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseMvc();
         }

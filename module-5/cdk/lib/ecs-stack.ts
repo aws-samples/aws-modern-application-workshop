@@ -11,7 +11,7 @@ interface EcsStackProps extends cdk.StackProps {
 }
 export class EcsStack extends cdk.Stack {
   public readonly ecsCluster: ecs.Cluster;
-  public readonly ecsService: ecsPatterns.LoadBalancedFargateService;
+  public readonly ecsService: ecsPatterns.NetworkLoadBalancedFargateService;
 
   constructor(scope: cdk.App, id: string, props: EcsStackProps) {
     super(scope, id);
@@ -22,11 +22,15 @@ export class EcsStack extends cdk.Stack {
     this.ecsCluster.connections.allowFromAnyIpv4(ec2.Port.tcp(8080));
 
     // Instantiate Amazon ECS Service with an automatic load balancer
-    this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
+    this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Service", {
       cluster: this.ecsCluster,
-      loadBalancerType: ecsPatterns.LoadBalancerType.NETWORK,
-      containerPort: 8080,
-      image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+      desiredCount: 1,
+      publicLoadBalancer: true,
+      taskImageOptions: {
+        enableLogging: true,
+        containerPort: 8080,
+        image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+      }
     });
     this.ecsService.service.connections.allowFrom(ec2.Peer.ipv4(props.vpc.vpcCidrBlock),ec2.Port.tcp(8080));
 
@@ -56,7 +60,7 @@ export class EcsStack extends cdk.Stack {
       //  Rules that let ECS create and push logs to CloudWatch.
       "logs:DescribeLogStreams",
       "logs:CreateLogGroup");
-      taskDefinitionPolicy.addAllResources();
+    taskDefinitionPolicy.addAllResources();
 
     this.ecsService.service.taskDefinition.addToExecutionRolePolicy(
       taskDefinitionPolicy
