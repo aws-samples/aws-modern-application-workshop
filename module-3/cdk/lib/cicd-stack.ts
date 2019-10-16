@@ -1,22 +1,23 @@
 import cdk = require("@aws-cdk/core");
-import iam = require("@aws-cdk/aws-iam");
-import codebuild = require("@aws-cdk/aws-codebuild");
 import ecr = require("@aws-cdk/aws-ecr");
 import ecs = require("@aws-cdk/aws-ecs");
 import codecommit = require("@aws-cdk/aws-codecommit");
+import codebuild = require("@aws-cdk/aws-codebuild");
 import codepipeline = require("@aws-cdk/aws-codepipeline");
 import actions = require("@aws-cdk/aws-codepipeline-actions");
+import iam = require("@aws-cdk/aws-iam");
 
 interface CiCdStackProps extends cdk.StackProps {
+  apiRepositoryArn: string;
   ecrRepository: ecr.Repository;
   ecsService: ecs.FargateService;
-  apiRepositoryARN: string;
 }
 export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: CiCdStackProps) {
     super(scope, id);
 
-    const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository', props.apiRepositoryARN);
+    const apiRepository = codecommit.Repository.fromRepositoryArn(this, 'Repository', props.apiRepositoryArn);
+
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
@@ -38,11 +39,11 @@ export class CiCdStack extends cdk.Stack {
     const codeBuildPolicy = new iam.PolicyStatement();
     codeBuildPolicy.addResources(apiRepository.repositoryArn)
     codeBuildPolicy.addActions(
-        "codecommit:ListBranches",
-        "codecommit:ListRepositories",
-        "codecommit:BatchGetRepositories",
-        "codecommit:GitPull"
-      )
+      "codecommit:ListBranches",
+      "codecommit:ListRepositories",
+      "codecommit:BatchGetRepositories",
+      "codecommit:GitPull"
+    )
     codebuildProject.addToRolePolicy(
       codeBuildPolicy
     );
@@ -56,6 +57,7 @@ export class CiCdStack extends cdk.Stack {
       repository: apiRepository,
       output: sourceOutput
     });
+
     const buildOutput = new codepipeline.Artifact();
     const buildAction = new actions.CodeBuildAction({
       actionName: "Build",
@@ -65,6 +67,7 @@ export class CiCdStack extends cdk.Stack {
       ],
       project: codebuildProject
     });
+
     const deployAction = new actions.EcsDeployAction({
       actionName: "DeployAction",
       service: props.ecsService,
@@ -72,7 +75,7 @@ export class CiCdStack extends cdk.Stack {
     });
 
     const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
-      pipelineName: "MythicalMysfitsPipeline"
+      pipelineName: "MythicalMysfitsPipeline",
     });
     pipeline.addStage({
       stageName: "Source",

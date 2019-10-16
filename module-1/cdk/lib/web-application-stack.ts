@@ -30,13 +30,6 @@ export class WebApplicationStack extends cdk.Stack {
       origin.attrS3CanonicalUserId
     ));
 
-    // A CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
-    new s3deploy.BucketDeployment(this, "DeployWebsite", {
-      source: s3deploy.Source.asset(webAppRoot),
-      destinationKeyPrefix: "web/",
-      destinationBucket: bucket,
-      retainOnDelete: false
-    });
 
     // Definition for a new CloudFront web distribution, which enforces traffic over HTTPS
     const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
@@ -55,10 +48,19 @@ export class WebApplicationStack extends cdk.Stack {
           originPath: `/web`,
           s3OriginSource: {
             s3BucketSource: bucket,
-            originAccessIdentityId: origin.attrS3CanonicalUserId
+            originAccessIdentityId: origin.ref
           }
         }
       ]
+    });
+
+    // A CDK helper that takes the defined source directory, compresses it, and uploads it to the destination s3 bucket.
+    new s3deploy.BucketDeployment(this, "DeployWebsite", {
+      sources: [s3deploy.Source.asset(webAppRoot)],
+      destinationKeyPrefix: "web/",
+      destinationBucket: bucket,
+      distribution: cdn,
+      retainOnDelete: false,
     });
 
     // Create a CDK Output which details the URL for the CloudFront Distribtion URL.

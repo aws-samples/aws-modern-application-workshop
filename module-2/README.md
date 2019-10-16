@@ -5,13 +5,13 @@
 **Time to complete:** 60 minutes
 
 ---
-**Short of time?:** If you are short of time, refer to the completed reference AWS CDK code in `~/Workshop/module-2/source/cdk/`
+**Short of time?:** If you are short of time, refer to the completed AWS CDK code in `~/Workshop/source/module-2/cdk/`
 
 ---
 
 **Services used:**
 
-* [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
+* [AWS CDK](https://docs.aws.amazon.com/CDK/latest/userguide/getting_started.html)
 * [AWS Identity and Access Management (IAM)](https://aws.amazon.com/iam/)
 * [Amazon Virtual Private Cloud (VPC)](https://aws.amazon.com/vpc/)
 * [Amazon Elastic Load Balancing](https://aws.amazon.com/elasticloadbalancing/)
@@ -63,53 +63,7 @@ git add .
 git commit -m 'Initial commit of WebAPI'
 ```
 
-### Create a GIT repository for the Web API
-
-We will modify the developertoolstack created in module-1 and create another GIT repository to store the Web API code.
-
-Open the `developer-tools-stack.ts` in the editor.
-
-```sh
-code ~/Workshop/cdk/lib/developer-tools-stack.ts
-```
-
-**Action:** Write/Copy the following code:
-
-Create a public property, for other stacks to reference the API repository.
-
-```typescript
-public readonly apiRepository: codecommit.Repository;
-```
-
-Within the constructor, add a definition of a repository for the API code.
-
-```typescript
-this.apiRepository = new codecommit.Repository(this, "APIRepository", {
-    repositoryName: "MythicalMysfitsService-Repository-API"
-});
-```
-
-Add the following two statements so that we export the Clone URLs (SSH/HTTPS) and can use their values once deployed.
-
-```typescript
-new cdk.CfnOutput(this, 'APIRepositoryCloneUrlHttp', {
-  description: 'API Repository CloneUrl HTTP',
-  value: this.apiRepository.repositoryCloneUrlHttp
-});
-
-new cdk.CfnOutput(this, 'APIRepositoryCloneUrlSsh', {
-  description: 'API Repository CloneUrl SSH',
-  value: this.apiRepository.repositoryCloneUrlSsh
-});
-```
-
-Back in `bin/cdk.ts` replace your call to the `DeveloperToolsStack` with the following statement:
-
-```typescript
-const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
-```
-
-#### Using Git with AWS CodeCommit
+### Using Git with AWS CodeCommit
 
 We need to configure git and integrate it with your CodeCommit repository.
 
@@ -150,13 +104,13 @@ cd ~/Workshop/webapi/
 _Note:_ If using HTTPS connection method, execute this command
 
 ```sh
-git remote add origin https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-API
+git remote add origin <<The HTTPS value for your API Respository>
 ```
 
 _Note:_ If using SSH connection method, execute this command
 
 ```sh
-git remote add origin ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/MythicalMysfitsService-Repository-API
+git remote add origin <<The SSH value for your API Respository>
 ```
 
 ## Building A Docker Image
@@ -169,10 +123,6 @@ To retrieve the needed information about your account and region, you can run th
 aws sts get-caller-identity
 ```
 
-```powershell
-Get-STSCallerIdentity | Select-Object -Property Account
-```
-
 Once you have your Account ID, you are ready to build the docker image using the conmand such as the following:
 `docker build . -t REPLACE_ME_AWS_ACCOUNT_ID.dkr.ecr.REPLACE_ME_REGION.amazonaws.com/mythicalmysfits/service:latest`
 
@@ -182,12 +132,6 @@ _Note:_ If you use `Bash`, execute the following command:
 
 ```sh
 docker build . -t $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com/mythicalmysfits/service:latest
-```
-
-_Note:_ If you use `PowerShell`, execute the following command:
-
-```sh
-docker build . -t ("{0}.dkr.ecr.{1}.amazonaws.com/mythicalmysfits/service:latest" -f $(Get-STSCallerIdentity | Select-Object -ExpandProperty Account), $(Get-DefaultAWSRegion | Select-Object -ExpandProperty Region))
 ```
 
 Upon execution, you will now see docker download and install all of the necessary dependency packages that our application needs, and output the tag for the built image.  
@@ -290,7 +234,6 @@ import { DeveloperToolsStack } from "../lib/developer-tools-stack";
 import { WebApplicationStack } from "../lib/web-application-stack";
 import { NetworkStack } from "../lib/network-stack";
 
-const app = new cdk.App();
 const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
@@ -406,7 +349,7 @@ const app = new cdk.App();
 const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
-new EcrStack(app, "MythicalMysfits-ECR");
+const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 ```
 
 Now, let's define our ECR instance.  But first, we need to add a install the CDK NPM package for AWS ECR, doing so like below;
@@ -468,7 +411,7 @@ In your browser, go to the ECR Dashboard and verify you can see the ECR you just
 
 Earlier in this module we successful tested our WebAPI docker image locally, so now we are ready to push our container image to the Amazon Elastic Container Registry (Amazon ECR) we have just created.
 
-Run the below command using either the AWS CLI or the PowerShell command:
+Run the below command using either the AWS CLI command:
 
 _Note:_ If you use `Bash`, execute the following command:
 
@@ -476,32 +419,20 @@ _Note:_ If you use `Bash`, execute the following command:
 $(aws ecr get-login --no-include-email)
 ```
 
-_Note:_ If you use `Powershell`, execute the following command:
-
-```powershell
-Invoke-Expression $(Get-ECRLoginCommand | Select-Object -ExpandProperty Command)
-```
-
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
 
 **Action:** Execute the following command:
 
 ```sh
-docker push REPLACE_ME_WITH_DOCKER_IMAGE_TAG
+docker push $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com/mythicalmysfits/service:latest
 ```
 
-Run the following command to see your newly pushed docker image stored inside the ECR repository using either the AWS CLI or the PowerShell command:
+Run the following command to see your newly pushed docker image stored inside the ECR repository using either the AWS CLI command:
 
 _Note:_ If you use `Bash`, execute the following command:
 
 ```sh
 aws ecr describe-images --repository-name mythicalmysfits/service
-```
-
-_Note:_ If you use `Powershell`, execute the following command:
-
-```powershell
-Get-ECRImage -RepositoryName mythicalmysfits/service
 ```
 
 Now,  we have an image available in ECR that we can create and deploy to a service hosted on Amazon ECS using AWS Fargate.  The same service you tested locally via the terminal in Visual Studio Code as part of the last module will be deployed in the cloud and publicly available behind a Network Load Balancer.
@@ -567,8 +498,10 @@ And define the following properties object.
 
 ```typescript
 interface EcsStackProps extends cdk.StackProps {
-    vpc: ec2.Vpc,
-    ecrRepository: ecr.Repository
+  vpc: ec2.Vpc,
+  ecrRepository: ecr.Repository
+  ecsTaskRoleArn: string;
+  ecsExecutionRoleArn: string;
 }
 ```
 
@@ -597,7 +530,7 @@ Be sure to define two properties at the top of your EcsStack that expose the ecs
 ```typescript
 export class EcsStack extends cdk.Stack {
   public readonly ecsCluster: ecs.Cluster;
-  public readonly ecsService: ecsPatterns.LoadBalancedFargateService;
+  public readonly ecsService: ecsPatterns.NetworkLoadBalancedFargateService;
 
   constructor(scope: cdk.Construct, id: string, props: EcsStackProps) {
     super(scope, id);
@@ -620,14 +553,15 @@ Notice how we reference the VPC (`props.vpc`) defined in the `EcsStackProps`.  [
 **Action:** Write/Copy the following code:
 
 ```typescript
-this.ecsService = new ecsPatterns.LoadBalancedFargateService(this, "Service", {
+this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Service", {
   cluster: this.ecsCluster,
-  loadBalancerType: ecsPatterns.LoadBalancerType.Network,
   desiredCount: 1,
-  createLogs: true,
   publicLoadBalancer: true,
-  containerPort: 8080,
-  image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+  taskImageOptions: {
+    enableLogging: true,
+    containerPort: 8080,
+    image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
+  }
 });
 this.ecsService.service.connections.allowFrom(ec2.Peer.ipv4(props.vpc.vpcCidrBlock),ec2.Port.tcp(8080));
 ```
@@ -712,7 +646,9 @@ const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
   vpc: networkStack.vpc,
-  ecrRepository: ecrStack.ecrRepository
+  ecrRepository: ecrStack.ecrRepository,
+  ecsTaskRoleArn: ecsTaskRoleArn,
+  ecsExecutionRoleArn: ecsExecutionRoleArn
 });
 ```
 
@@ -742,7 +678,7 @@ After your service is created, ECS will provision a new task that's running the 
 
 ### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using your browser of choice. Try sending a request to the mysfits resource using either the AWS CLI or the PowerShell command:
+Copy the DNS name you saved when creating the NLB and send a request to it using your browser of choice. Try sending a request to the mysfits resource using either the AWS CLI command:
 
 _Note:_ If you use `Bash`, execute the following command:
 
@@ -832,7 +768,7 @@ Let's start off by switching once again to our Workshop's CDK folder, and openin
 **Action:** Execute the following command:
 
 ```sh
-cd ~/WorkShop/cdk
+cd ~/Workshop/cdk
 ```
 
 ```sh
@@ -856,15 +792,7 @@ cd ~/Workshop/cdk
 ```
 
 ```sh
-npm install --save-dev @aws-cdk/aws-codebuild
-```
-
-```sh
-npm install --save-dev @aws-cdk/aws-codepipeline
-```
-
-```sh
-npm install --save-dev @aws-cdk/aws-codepipeline-actions
+npm install --save-dev @aws-cdk/aws-codebuild @aws-cdk/aws-codepipeline @aws-cdk/aws-codepipeline-actions
 ```
 
 Within the file you just created, define the skeleton CDK Stack structure as we have done before, this time naming the class  `CiCdStack`:
@@ -901,7 +829,10 @@ Define the interface for the properties our stack will require
 interface CiCdStackProps extends cdk.StackProps {
   ecrRepository: ecr.Repository;
   ecsService: ecs.FargateService;
-  apiRepositoryARN: string;
+  apiRepositoryArn: string;
+  codePipelineActionRoleArn: string;
+  codebuildProjectRoleArn: string;
+  codePipelineRoleArn: string;
 }
 ```
 
@@ -920,7 +851,7 @@ Within the `CiCdStack` file, Write the following code to import the CodeCommit r
 **Action:** Write/Copy the following code:
 
 ```typescript
-const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository', props.apiRepositoryARN);
+const apiRepository = codecommit.Repository.fromRepositoryArn(this,'Repository', props.apiRepositoryArn);
 ```
 
 **Action:** Write/Copy the following code to define our CodeBuild project to compile our .NET Core WebAPI upon change
@@ -954,11 +885,11 @@ Provide the codebuild project with permissions to query the codecommit repositor
 const codeBuildPolicy = new iam.PolicyStatement();
 codeBuildPolicy.addResources(apiRepository.repositoryArn)
 codeBuildPolicy.addActions(
-    "codecommit:ListBranches",
-    "codecommit:ListRepositories",
-    "codecommit:BatchGetRepositories",
-    "codecommit:GitPull"
-  )
+  "codecommit:ListBranches",
+  "codecommit:ListRepositories",
+  "codecommit:BatchGetRepositories",
+  "codecommit:GitPull"
+)
 codebuildProject.addToRolePolicy(
   codeBuildPolicy
 );
@@ -1053,18 +984,18 @@ import { EcsStack } from "../lib/ecs-stack";
 import { NetworkStack } from "../lib/network-stack";
 
 const app = new cdk.App();
-const developerToolsStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
+const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
-  networkStack: networkStack,
-  ecrStack: ecrStack
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository,
 });
 new CiCdStack(app, "MythicalMysfits-CICD", {
-  ecrRepository: ecrStack.ecrRepository,
-  ecsService: ecsStack.ecsService.service,
-  apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+    ecrRepository: ecrStack.ecrRepository,
+    ecsService: ecsStack.ecsService.service,
+    apiRepositoryArn: developerToolStack.apiRepository.repositoryArn,
 });
 ```
 
@@ -1101,7 +1032,7 @@ After saving the file, change directories to the new repository directory:
 **Action:** Execute the following command:
 
 ```sh
-cd ~/WorkShop/webapi
+cd ~/Workshop/webapi
 ```
 
 Then, run the following git commands to push in your code changes.  
@@ -1127,5 +1058,3 @@ You can view the progress of your code change through the [AWS CodePipeline](htt
 This concludes Module 2.
 
 [Proceed to Module 3](/module-3)
-
-## [AWS Developer Center](https://developer.aws)

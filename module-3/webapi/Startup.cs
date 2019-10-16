@@ -49,9 +49,15 @@ namespace ModernWebAppNET
                 .AllowAnyHeader()
             );
 
-            app.UseHsts();
-
-            app.UseHttpsRedirection();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseHsts();
+                app.UseHttpsRedirection();
+            }
             app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseMvc();
         }

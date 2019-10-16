@@ -11,6 +11,7 @@ import { EcsStack } from "../lib/ecs-stack";
 import { CiCdStack } from "../lib/cicd-stack";
 
 const app = new cdk.App();
+
 const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
 new WebApplicationStack(app, "MythicalMysfits-WebApplication");
 const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
@@ -22,7 +23,7 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service,
-    apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+    apiRepositoryArn: developerToolStack.apiRepository.repositoryArn
 });
 new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     vpc: networkStack.vpc,

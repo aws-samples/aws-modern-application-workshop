@@ -11,6 +11,7 @@ import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { KinesisFirehoseStack } from "../lib/kinesis-firehose-stack";
 import { CiCdStack } from "../lib/cicd-stack";
+import { CognitoStack } from '../lib/cognito-stack';
 
 const app = new cdk.App();
 const developerToolStack = new DeveloperToolsStack(app, 'MythicalMysfits-DeveloperTools');
@@ -24,16 +25,20 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service,
-    apiRepositoryARN: developerToolStack.apiRepository.repositoryArn
+    apiRepositoryArn: developerToolStack.apiRepository.repositoryArn
 });
 const dynamoDBStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService
 });
-new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
-    fargateService: ecsStack.ecsService
+const cognito = new CognitoStack(app, "MythicalMysfits-Cognito");
+const apiGateway = new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+    userPoolId: cognito.userPool.userPoolId,
+    loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
+    loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
-    table: dynamoDBStack.table
+    table: dynamoDBStack.table,
+    apiId: apiGateway.apiId
 });
 app.synth();
