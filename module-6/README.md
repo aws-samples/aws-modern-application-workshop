@@ -410,7 +410,7 @@ Once that command completes, submit an additional question to the Mythical Mysfi
 
 ![Services X-Ray](/images/module-6/services-x-ray.png)
 
-### Trobleshoot Problems with AWS -X-Ray
+### Troubleshoot Problems with AWS X-Ray
 
 The final step in this module is to familiarize yourself with using AWS X-Ray to triage problems in your application.  To accomplish this, we're going to by *mysfits* ourselves and have you add some terrible code to your application.  All this code will do is cause your web service to add 5 seconds of latency and throw an exception for randomized requests :) .
 
