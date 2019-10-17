@@ -191,10 +191,24 @@ Then, copy the module-5 application components to our newly cloned repository, w
 **Action:** Execute the following commands:
 
 ```sh
-cp -r ~/Workshop/source/module-5/lambda/* ~/Workshop/lambda/stream
+cp -r ~/Workshop/source/module-5/lambda/* ~/Workshop/lambda/
 ```
 
 ### Update the Lambda Function Package and Code
+
+Restore the resources required by the lambda function and build the function so that it is ready for deployment.
+
+```sh
+cd stream
+```
+
+```sh
+dotnet restore
+```
+
+```sh
+dotnet publish
+```
 
 **Push Your Code into CodeCommit**
 Now, we have the repository directory set with all of the provided artifacts, namely:
@@ -260,7 +274,7 @@ const mysfitsClicksProcessor = new lambda.Function(this, "Function", {
   description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
     " to not just include a mysfitId, but also other attributes that can be analyzed later.",
   memorySize: 128,
-  code: lambda.Code.asset("../lambda"),
+  code: lambda.Code.asset("../lambda/bin/Debug/netcoreapp2.1/Publish"),
   timeout: cdk.Duration.seconds(30),
   initialPolicy: [
     lambdaFunctionPolicy
