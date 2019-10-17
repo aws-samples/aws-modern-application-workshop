@@ -45,7 +45,7 @@ export class KinesisFirehoseStack extends cdk.Stack {
       description: "An Amazon Kinesis Firehose stream processor that enriches click records" +
         " to not just include a mysfitId, but also other attributes that can be analyzed later.",
       memorySize: 128,
-      code: lambda.Code.asset("../lambda/stream/bin/Debug/netcoreapp2.1/Publish"),
+      code: lambda.Code.asset("../lambda/stream"),
       timeout: cdk.Duration.seconds(30),
       initialPolicy: [
         lambdaFunctionPolicy

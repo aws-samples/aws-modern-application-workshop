@@ -1,0 +1,25 @@
+<div class="container">
+  <div style="text-align: center">
+    <img src="https://www.mythicalmysfits.com/images/aws_mythical_banner.png" width="800px">
+  </div>
+</div>
+<div class="container">
+  <div class='btn-toolbar float-right'>
+    <div *ngIf="!isLoggedIn">
+      <button type="button" (click)="login()" class="btn btn-info btn-lg">
+        Log In / Register
+      </button>
+    </div>
+    <div *ngIf="isLoggedIn">
+      <button type="button" (click)="logout()" class="btn btn-danger btn-lg">Log Out</button>
+    </div>
+  </div>
+</div>
+<mm-mystical-mysfit-profile-grid></mm-mystical-mysfit-profile-grid>
+<footer>
+  <p>
+    <br>
+    <br> &nbsp;&nbsp;This site was created for use in the AWS Modern Application Workshop. <a href="https://github.com/aws-samples/aws-modern-application-workshop">Please
+      see details here.</a>
+  </p>
+</footer>

@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="row">
+    <ul class="nav nav-pills">
+      <div class="col" *ngFor="let filterCategory of filterOptionsList.categories">
+        <li class="nav-item dropdown">
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-primary" id="dropdown{{filterCategory.title}}" ngbDropdownToggle>{{filterCategory.title}}</button>
+            <div ngbDropdownMenu>
+              <button class="dropdown-item" (click)="queryMysfits(filterCategory.filter, filterCategorySelection)"
+                *ngFor="let filterCategorySelection of filterCategory.selections">{{filterCategorySelection}}</button>
+            </div>
+          </div>
+        </li>
+      </div>
+      <div class="col">
+        <li class="nav-item">
+          <button type="button" class="btn btn-success" (click)="removeFilter()">View All</button>
+        </li>
+      </div>
+    </ul>
+  </div>
+  <div class="mb-4"></div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 border border-warning" *ngFor="let mysfit of mysfits">
+      <br>
+      <p align="center">
+        <strong> {{mysfit.name}}</strong>
+        <br>
+        <img src="{{mysfit.thumbImageUri}}" alt="{{mysfit.name}}">
+        <button type="button" class="btn btn-primary" (click)="viewProfile(mysfit.mysfitId)">View Profile</button>
+      </p>
+      <div>
+        <br>
+        <b>Species:</b> {{mysfit.species}}
+        <br>
+        <b>Age:</b> {{mysfit.age}}
+        <br>
+        <b>Good/Evil:</b> {{mysfit.goodEvil}}
+        <br>
+        <b>Lawful/Chaotic:</b> {{mysfit.lawChaos}}
+        <span style="float:right;">
+          <div *ngIf="!mysfit.didLike">
+            <img (click)="like(mysfit.mysfitId)" src="https://www.mythicalmysfits.com/images/like_icon_false.png"
+              onmouseover="" style="cursor: pointer;">
+          </div>
+          <div *ngIf="mysfit.didLike">
+            <img id="{{mysfit.mysfitId}}AlreadyLikedIcon" src="https://www.mythicalmysfits.com/images/like_icon_true.png">
+          </div>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

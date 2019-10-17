@@ -1,0 +1,31 @@
+<div class="modal-header">
+  <h3>Mysfit Profile</h3>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div *ngIf="profileMysfit.name !== ''">
+    <p align="center">
+      <img src="{{profileMysfit.profileImageUri}}" align="center" />
+    </p>
+    <br>
+    <p><b>Name:</b> {{profileMysfit.name}}</p>
+    <p><b>Species:</b> {{profileMysfit.species}}</p>
+    <p><b>Good/Evil:</b> {{profileMysfit.goodEvil}} </p>
+    <p><b>Lawful/Chaotic:</b> {{profileMysfit.lawChaos}} </p>
+    <p><b>Age:</b> {{profileMysfit.age}}</p>
+    <p><b>Description:</b> {{profileMysfit.description}}</p>
+    <p><b>Likes:</b> {{profileMysfit.likes}}</p>
+    <div align="center" *ngIf="isLoggedIn">
+      <div *ngIf="!profileMysfit.adopted">
+        <button id="adoptButton" align="center" type="button" (click)="adoptMe()" class="btn btn-primary">Adopt
+          Me Now!</button>
+      </div>
+    </div>
+    <div align="center" *ngIf="profileMysfit.adopted">
+      <button align="center" type="button" class="btn btn-primary" disabled>Mysfit
+        Adopted!</button>
+    </div>
+  </div>
+</div>
