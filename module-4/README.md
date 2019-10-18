@@ -115,8 +115,7 @@ const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     fargateService: ecsStack.ecsService.service
 });
 new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
-  vpc: networkStack.vpc,
-  fargateService: ecsStack.ecsService.service
+    fargateService: ecsStack.ecsService
 });
 ```
 
