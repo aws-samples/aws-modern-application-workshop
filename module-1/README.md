@@ -53,7 +53,7 @@ When the IDE has finished being created for you, you'll be presented with a welc
 In the bottom panel of your new Cloud9 IDE, you will see a terminal command line terminal open and read to use.  Run the following git command in the terminal to clone the necessary code to complete this tutorial:
 
 ```
-git clone https://github.com/aws-samples/aws-modern-application-workshop.git
+git clone -b go https://github.com/aws-samples/aws-modern-application-workshop.git
 ```
 
 After cloning the repository, you'll see that your project explorer now includes the files cloned:
