@@ -423,7 +423,7 @@ export class DeveloperToolsStack extends cdk.Stack {
       description: "Lambda Repository Clone Url HTTP"
     });
 
-    new cdk.CfnOutput(this, "lambdaRepositoryCloneUrlHttp", {
+    new cdk.CfnOutput(this, "lambdaRepositoryCloneUrlShh", {
       value: this.lambdaRepository.repositoryCloneUrlSsh,
       description: "Lambda Repository Clone Url SSH"
     });
