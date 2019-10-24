@@ -673,10 +673,6 @@ npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-c
 Add the required library import statements to the `cicd-stack.ts` file:
 
 ```typescript
-import cdk = require('@aws-cdk/core');
-import ecr = require('@aws-cdk/aws-ecr');
-import ecs = require('@aws-cdk/aws-ecs');
-import codecommit = require('@aws-cdk/aws-codecommit');
 import codebuild = require('@aws-cdk/aws-codebuild');
 import codepipeline = require('@aws-cdk/aws-codepipeline');
 import actions = require('@aws-cdk/aws-codepipeline-actions');
