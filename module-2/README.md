@@ -913,19 +913,23 @@ git config --global credential.UseHttpPath true
 Next change directories in your IDE to the environment directory using the terminal:
 
 ```sh
-cd ~/environment/
+cd ~/environment/workshop
+```
+
+```sh
+rm -rf app
 ```
 
 Now, we are ready to clone our repository using the following terminal command:
 
 ```sh
-git clone https://git-codecommit.$(aws sts get-caller-identity --query Account --output text).amazonaws.com/v1/repos/MythicalMysfits-BackendRepository
+git clone https://git-codecommit.$(aws configure get region).amazonaws.com/v1/repos/MythicalMysfits-BackendRepository app
 ```
 
 This will tell us that our repository is empty!  Let's fix that by copying the application files into our repository directory using the following command:
 
 ```sh
-cp -r ~/environment/workshop/source/module-2/app/* ~/environment/MythicalMysfits-BackendRepository/
+cp -r ~/environment/workshop/source/module-2/app/* ~/environment/workshop/
 ```
 
 #### Pushing a Code Change
