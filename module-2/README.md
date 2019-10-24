@@ -281,19 +281,19 @@ In your browser, go to the ECR Dashboard and verify you can see the ECR reposito
 
 In order to push container images into our new repository, we will need to obtain authentication credentials for our Docker client to the repository.  Run the following command, which will return a login command to retrieve credentials for our Docker client and then automatically execute it (include the full command including the $ below). 'Login Succeeded' will be reported if the command is successful.
 
-```
+```sh
 $(aws ecr get-login --no-include-email)
 ```
 
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
 
-```
-docker push REPLACE_ME_WITH_DOCKER_IMAGE_TAG
+```sh
+docker push $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com/mythicalmysfits/service:latest
 ```
 
 Run the following command to see your newly pushed docker image stored inside the ECR repository:
 
-```
+```sh
 aws ecr describe-images --repository-name mythicalmysfits/service
 ```
 
