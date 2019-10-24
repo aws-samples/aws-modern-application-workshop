@@ -126,7 +126,7 @@ In the `cdk` folder, lets now initialize a CDK app, where LANGUAGE is one of the
 For the purposes of this workshop we will use TypeScript as our language:
 
 ```sh
-cdk init --language typescript
+cdk init app --language typescript
 ```
 
 This command has now initialised a new CDK app in your `cdk` folder.  Part of the initialisation process also establishes the given directory as a new git repository.
