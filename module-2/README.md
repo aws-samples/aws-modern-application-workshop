@@ -267,7 +267,6 @@ export class EcrStack extends cdk.Stack {
 Now, deploy your ECR stack using the following command:
 
 ```sh
-npm run build
 cdk deploy MythicalMysfits-ECR
 ```
 
@@ -472,14 +471,7 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 });
 ```
 
-Make sure your CDK application compiles without error (by either running `npm run build` or `npm run watch`) and deploy your application so far to your environment.
-
-```sh
-npm run build
-```
-
 And now deploy the ECS stack:
-
 
 ```sh
 cdk deploy MythicalMysfits-ECS
@@ -522,7 +514,6 @@ After pasting, the line should look similar to below:
 To update your S3 hosted website, deploy the `MythicalMysfits-Website` stack:
 
 ```sh
-npm run build
 cdk deploy MythicalMysfits-Website
 ```
 
@@ -906,12 +897,6 @@ export class CiCdStack extends cdk.Stack {
 ```
 
 ### Deploy the Pipeline
-
-Make sure our TypeScript has been compiled.
-
-```sh
-npm run build
-```
 
 And now deploy the CICD stack:
 
