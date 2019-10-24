@@ -934,7 +934,12 @@ cp -r ~/environment/workshop/source/module-2/app/* ~/environment/workshop/app
 
 #### Pushing a Code Change
 
-Now the completed service code that we used to create our Fargate service in the previous section is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working. In Cloud9, open the file stored at `~/environment/MythicalMysfits-BackendRepository/service/mysfits-response.json` and change the age of one of the mysfits to another value and save the file.
+Now the completed service code that we used to create our Fargate service in the previous section is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working. 
+
+_Perform the following actions_
+
+1. In Cloud9, open the file stored at `~/environment/workshop/app/service/mysfits-response.json` 
+2. Change the age of one of the mysfits to another value and save the file.
 
 After saving the file, change directories to the new repository directory:
 
