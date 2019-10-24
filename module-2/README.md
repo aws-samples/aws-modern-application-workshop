@@ -247,9 +247,14 @@ npm install --save-dev @aws-cdk/aws-ecr
 
 Then we add the definition of our ECR repository to the EcrStack as follows:
 
+Add this import statement after the `import cdk` statement on the first line.
+
 ```typescript
 import ecr = require("@aws-cdk/aws-ecr");
-...
+```
+Update your EcrStack to reflect the following:
+
+```typescript
 export class EcrStack extends cdk.Stack {
   public readonly ecrRepository: ecr.Repository;
 
