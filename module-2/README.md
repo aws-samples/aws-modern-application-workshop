@@ -929,7 +929,7 @@ git clone https://git-codecommit.$(aws configure get region).amazonaws.com/v1/re
 This will tell us that our repository is empty!  Let's fix that by copying the application files into our repository directory using the following command:
 
 ```sh
-cp -r ~/environment/workshop/source/module-2/app/* ~/environment/workshop/
+cp -r ~/environment/workshop/source/module-2/app/* ~/environment/workshop/app
 ```
 
 #### Pushing a Code Change
