@@ -149,10 +149,18 @@ All of the code required to run our service backend is stored within the `worksh
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
-* Navigate to `~/environment/workshop/source/module-2/app`
+* Navigate to `~/environment/workshop/`
 
+```sh
+cd ~/environment/workshop/
 ```
-cd ~/environment/workshop/source/module-2/app
+
+```sh
+mkdir ~/environment/workshop/app
+```
+
+```sh
+cp -R ~/environment/workshop/source/module-2/app ~/environment/workshop
 ```
 
 * Replace *REPLACE_ME_ACCOUNT_ID* with your account ID and *REPLACE_ME_REGION* with your default region in the following command to build the docker image using the file *Dockerfile*, which contains Docker instructions. The command tags the Docker image, using the `-t` option, with a specific tag format so that the image can later be pushed to the [Amazon Elastic Container Registry](https://aws.amazon.com/ecr/) service.
