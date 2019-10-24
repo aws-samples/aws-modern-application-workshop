@@ -338,7 +338,7 @@ import ec2 = require('@aws-cdk/aws-ec2');
 import ecr = require('@aws-cdk/aws-ecr');
 ```
 
-And define the following properties object.
+And define the following properties object above the definition of the EcsStack
 
 ```typescript
 interface EcsStackProps extends cdk.StackProps {
