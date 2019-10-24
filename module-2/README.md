@@ -621,15 +621,6 @@ import codecommit = require('@aws-cdk/aws-codecommit');
 
 Let's add the definition for our AWS CodeCommit repository. The AWS CDK consists of a comprehensive array of high level abstractions that both simplify the implementation of your CloudFormation templates as well as providing you with granular control over the resources you generate.
 
-The AWS CodeCommit repositories are defined by using the `Repository` construct as follows:
-
-```typescript
-new codecommit.Repository(this, 'Repository' ,{
-    repositoryName: 'MyRepositoryName',
-    description: 'Some description.', // optional property
-});
-```
-
 Let's define the CodeCommit repository we need for our Website. In the `cicd-stack.ts` write/copy the following code:
 
 ```typescript
