@@ -919,7 +919,7 @@ cd ~/environment/
 Now, we are ready to clone our repository using the following terminal command:
 
 ```sh
-git clone https://git-codecommit.REPLACE_REGION.amazonaws.com/v1/repos/MythicalMysfits-BackendRepository
+git clone https://git-codecommit.$(aws sts get-caller-identity --query Account --output text).amazonaws.com/v1/repos/MythicalMysfits-BackendRepository
 ```
 
 This will tell us that our repository is empty!  Let's fix that by copying the application files into our repository directory using the following command:
