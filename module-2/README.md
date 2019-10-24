@@ -939,7 +939,7 @@ Now the completed service code that we used to create our Fargate service in the
 After saving the file, change directories to the new repository directory:
 
 ```sh
-cd ~/environment/MythicalMysfits-BackendRepository/
+cd ~/environment/workshop/app/
 ```
 
 Then, run the following git commands to push in your code changes.  
