@@ -46,6 +46,7 @@ Within the file you just created, define the skeleton CDK Stack structure as we 
 
 ```typescript
 import cdk = require('@aws-cdk/core');
+
 export class SageMakerStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id:string) {
     super(scope, id);
@@ -139,15 +140,15 @@ Then, add the `SageMakerStack` to our CDK application definition in `bin/cdk.ts`
 
 ```typescript
 #!/usr/bin/env node
-
-import cdk = require("@aws-cdk/core");
 import 'source-map-support/register';
+import cdk = require('@aws-cdk/core');
 import { WebApplicationStack } from "../lib/web-application-stack";
 import { NetworkStack } from "../lib/network-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { CiCdStack } from "../lib/cicd-stack";
 import { DynamoDbStack } from '../lib/dynamodb-stack';
+import { CognitoStack } from '../lib/cognito-stack';
 import { APIGatewayStack } from "../lib/apigateway-stack";
 import { KinesisFirehoseStack } from "../lib/kinesis-firehose-stack";
 import { XRayStack } from "../lib/xray-stack";
@@ -166,11 +167,14 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service
 });
 const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
-    fargateService: ecsStack.ecsService.service
-});
-new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
     vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService.service
+});
+const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
+new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
+  userPoolId: cognito.userPool.userPoolId,
+  loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
+  loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDbStack.table
