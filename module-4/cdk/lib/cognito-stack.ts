@@ -13,11 +13,21 @@ export class CognitoStack extends cdk.Stack {
       autoVerifiedAttributes: [
         cognito.UserPoolAttribute.EMAIL
       ]
-    })
+    });
 
     this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
       userPool: this.userPool,
       userPoolClientName: 'MysfitsUserPoolClient'
-    })
+    });
+
+    new cdk.CfnOutput(this, "CognitoUserPool", {
+      description: "The Cognito User Pool",
+      value: this.userPool.userPoolId
+    });
+
+    new cdk.CfnOutput(this, "CognitoUserPoolClient", {
+      description: "The Cognito User Pool Client",
+      value: this.userPoolClient.userPoolClientId
+    });
   }
 }

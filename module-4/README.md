@@ -29,34 +29,33 @@ API Gateway will then pass traffic through to our NLB to be processed by our Fla
 
 ### Adding a User Pool for Website Users
 
-
-__Note__ As before, you may find it helpful to run the command `npm run watch` from within the CDK folder to provide compile time error reporting whilst you develop your AWS CDK constructs.  We recommend running this from the terminal window within VS Code.
-
 #### Create the Cognito User Pool
 
 To create the **Cognito User Pool** where all of the Mythical Mysfits visitors will be stored, create a new TypeScript file which we will use to define the Cognito stack.
 
 ```sh
-cd ~/workshop/cdk
+cd ~/environment/workshop/cdk
 touch lib/cognito-stack.ts
 ```
 
-Open the file `cognito-stack.ts` in your editor (eg: `code ~/workshop/cdk/lib/cognito.ts`) and define the following stack template:
+Open the file `cognito-stack.ts` and define the following stack template:
 
 ```typescript
 import cdk = require("@aws-cdk/core");
 
 export class CognitoStack extends cdk.Stack {
 
-    constructor(scope: cdk.Construct, id: string) {
+  constructor(scope: cdk.Construct, id: string) {
     super(scope, id);
 
-    this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
-        userPool: this.userPool,
-        userPoolClientName: 'MysfitsUserPoolClient'
-    })
   }
 }
+```
+
+As we have done previously, we need to install the CDK NPM package for AWS Cognito:
+
+```sh
+npm install --save-dev @aws-cdk/aws-cognito
 ```
 
 At the top of the file, add the import statement for the AWS Cognito cdk library
@@ -72,7 +71,7 @@ public readonly userPool: cognito.UserPool;
 public readonly userPoolClient: cognito.UserPoolClient;
 ```
 
-Now, within the constructor _(after the super(scope, id); statement)_, define the Amazon Cognito UserPool
+Now, within the constructor _(after the `super(scope, id);` statement)_, define the Amazon Cognito UserPool
 
 ```typescript
 this.userPool = new cognito.UserPool(this, 'UserPool', {
@@ -80,7 +79,7 @@ this.userPool = new cognito.UserPool(this, 'UserPool', {
   autoVerifiedAttributes: [
     cognito.UserPoolAttribute.EMAIL
   ]
-})
+});
 ```
 
 This will create a Cognito UserPool and defines that all users who are registered with this pool should automatically have their email address verified via confirmation email before they become confirmed users.
@@ -93,7 +92,20 @@ Again, within the constructor _(after the super(scope, id); statement)_, define 
 this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
   userPool: this.userPool,
   userPoolClientName: 'MysfitsUserPoolClient'
-})
+});
+```
+We can have the generated CloudFormation template provide the Cognito User Pool ID and the Cognito User Pool Client ID by defining custom output properties defining `cdk.CfnOutput` constructs. Declare `cdk.CfnOutput` both for the Cognito User Pool ID and the Cognito User Pool Client ID.
+
+```typescript
+new cdk.CfnOutput(this, "CognitoUserPool", {
+  description: "The Cognito User Pool",
+  value: this.userPool.userPoolId
+});
+
+new cdk.CfnOutput(this, "CognitoUserPoolClient", {
+  description: "The Cognito User Pool Client",
+  value: this.userPoolClient.userPoolClientId
+});
 ```
 
 With that done, your `cognito_stack.ts` file should resemble the following.
@@ -114,12 +126,22 @@ export class CognitoStack extends cdk.Stack {
       autoVerifiedAttributes: [
         cognito.UserPoolAttribute.EMAIL
       ]
-    })
+    });
 
     this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
       userPool: this.userPool,
       userPoolClientName: 'MysfitsUserPoolClient'
-    })
+    });
+
+    new cdk.CfnOutput(this, "CognitoUserPool", {
+      description: "The Cognito User Pool",
+      value: this.userPool.userPoolId
+    });
+
+    new cdk.CfnOutput(this, "CognitoUserPoolClient", {
+      description: "The Cognito User Pool Client",
+      value: this.userPoolClient.userPoolClientId
+    });
   }
 }
 ```
@@ -132,11 +154,20 @@ Import your new `CognitoStack` definition into the `cdk.ts` file by inserting th
 import { CognitoStack } from '../lib/cognito-stack';
 ```
 
-Insert the following definition at the end your `cdk.ts` file, before the `app.synth();` statement
+Insert the following definition at the end your `cdk.ts` file.
 
 ```typescript
 const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
 ```
+
+With that done, now we want to deploy the Cognito resources.  Make sure your CDK application compiles without error and deploy your application to your AWS account.
+
+```sh
+npm run build
+cdk deploy MythicalMysfits-Cognito
+```
+
+From the output of the previous command, note down the Cognito User Pool ID and the Cognito User Pool Client ID as we'll need these at a later step.
 
 ### Adding a new REST API with Amazon API Gateway
 
@@ -192,6 +223,7 @@ import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { CiCdStack } from "../lib/cicd-stack";
 import { DynamoDbStack } from '../lib/dynamodb-stack';
+import { CognitoStack } from '../lib/cognito-stack';
 import { APIGatewayStack } from "../lib/apigateway-stack";
 
 const app = new cdk.App();
@@ -207,6 +239,7 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecsService: ecsStack.ecsService.service
 });
 const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService.service
 });
 const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
@@ -237,7 +270,7 @@ Now, within the constructor of our `APIGatewayStack` class, let's import the Net
 
 ```typescript
 const nlb = elbv2.NetworkLoadBalancer.fromNetworkLoadBalancerAttributes(this, 'NLB', {
-  loadBalancerArn: props.fargateService.loadBalancer.loadBalancerArn,
+  loadBalancerArn: props.loadBalancerArn,
 });
 ```
 
@@ -253,9 +286,7 @@ const vpcLink = new apigateway.VpcLink(this, 'VPCLink', {
 });
 ```
 
-Now, below the constructor, we will write one helper function to import an API specified in a swagger file. Make sure to replace the Cognito UserPool ID with the one saved earlier on, e.g. `us-east-1_ab12345YZ`.
-
-> **Note:** The `REPLACE_ME_COGNITO_USER_POOL_ID` is the **only** placeholder that needs to be replaced in this block of code. The remaining `REPLACE_ME` placeholders will be automatically replaced.
+Now, below the constructor, we will write one helper function to import an API specified in a swagger file.
 
 ```typescript
 private generateSwaggerSpec(dnsName: string, userPoolId:string, vpcLink: apigateway.VpcLink): string {
@@ -304,10 +335,6 @@ new cdk.CfnOutput(this, 'APIID', {
 Once you have finished, deploy your stack.
 
 ```sh
-npm run build
-```
-
-```sh
 cdk deploy MythicalMysfits-APIGateway
 ```
 
@@ -327,11 +354,11 @@ Let's take care of that next.
 To accommodate the new functionality to view Mysfit Profiles, like, and adopt them, we have included updated Python code for your backend Flask web service.  Let's overwrite your existing codebase with these files and push them into the repository:
 
 ```sh
-cp ~/environment/workshop/source/module-4/app/service/* ~/environment/MythicalMysfits-BackendRepository/service/
+cp ~/environment/workshop/source/module-4/app/service/* ~/environment/workshop/app/service/
 ```
 
 ```sh
-cd ~/environment/MythicalMysfits-BackendRepository
+cd ~/environment/workshop/app
 git add .
 git commit -m "Update service code backend to enable additional website features."
 git push
@@ -369,7 +396,6 @@ Now, let's update your S3 hosted website and deploy the `MythicalMysfits-Website
 
 ```sh
 cd ~/environment/workshop/cdk/
-npm run build
 cdk deploy MythicalMysfits-Website
 ```
 
