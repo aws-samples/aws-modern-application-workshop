@@ -336,7 +336,7 @@ Try to navigate to the URL displayed and see your website.
 
 ![mysfits-welcome](/images/module-1/mysfits-welcome.png)
 
-> **Note:** If you are not able to see the mysfits images, please allow *mixed content* in your browser settings.
+> **Note:** If you are not able to see the mysfits images, please [allow *mixed content* in your browser settings](https://docs.adobe.com/content/help/en/target/using/experiences/vec/troubleshoot-composer/mixed-content.html).
 
 Congratulations, you have created the basic static Mythical Mysfits Website!
 

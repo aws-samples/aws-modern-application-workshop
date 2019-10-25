@@ -18,7 +18,7 @@ export class CiCdStack extends cdk.Stack {
     const backendRepository = new codecommit.Repository(this, "BackendRepository", {
       repositoryName: "MythicalMysfits-BackendRepository"
     });
-    
+
     const codebuildProject = new codebuild.PipelineProject(this, "BuildProject", {
       projectName: "MythicalMysfitsServiceCodeBuildProject",
       environment: {
@@ -54,7 +54,7 @@ export class CiCdStack extends cdk.Stack {
     const sourceAction = new actions.CodeCommitSourceAction({
       actionName: "CodeCommit-Source",
       branch: "master",
-      trigger: actions.CodeCommitTrigger.POLL,
+      trigger: actions.CodeCommitTrigger.EVENTS,
       repository: backendRepository,
       output: sourceOutput
     });
@@ -88,7 +88,7 @@ export class CiCdStack extends cdk.Stack {
       stageName: "Deploy",
       actions: [deployAction]
     });
-    
+
     new cdk.CfnOutput(this, 'BackendRepositoryCloneUrlHttp', {
       description: 'Backend Repository CloneUrl HTTP',
       value: backendRepository.repositoryCloneUrlHttp

@@ -17,6 +17,7 @@ export class EcsStack extends cdk.Stack {
     super(scope, id);
 
     this.ecsCluster = new ecs.Cluster(this, "Cluster", {
+      clusterName: "MythicalMysfits-Cluster",
       vpc: props.vpc
     });
     this.ecsCluster.connections.allowFromAnyIpv4(ec2.Port.tcp(8080));

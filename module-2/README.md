@@ -149,21 +149,20 @@ All of the code required to run our service backend is stored within the `worksh
 
 Docker comes already installed on the Cloud9 IDE that you've created, so in order to build the docker image locally, all we need to do is run the following commands in the Cloud9 terminal:
 
-* Navigate to `~/environment/workshop/`
-
 ```sh
 cd ~/environment/workshop/
+mkdir app && cd app
 ```
 
-```sh
-mkdir ~/environment/workshop/app
-```
+Copy the application code:
 
 ```sh
 cp -R ~/environment/workshop/source/module-2/app ~/environment/workshop
 ```
 
-```
+Build your Docker image from the existing Dockerfile:
+
+```sh
 docker build . -t $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com/mythicalmysfits/service:latest
 ```
 
@@ -731,7 +730,7 @@ const sourceOutput = new codepipeline.Artifact();
 const sourceAction = new actions.CodeCommitSourceAction({
   actionName: "CodeCommit-Source",
   branch: "master",
-  trigger: actions.CodeCommitTrigger.POLL,
+  trigger: actions.CodeCommitTrigger.EVENTS,
   repository: backendRepository,
   output: sourceOutput
 });
@@ -914,9 +913,6 @@ Next change directories in your IDE to the environment directory using the termi
 
 ```sh
 cd ~/environment/workshop
-```
-
-```sh
 rm -rf app
 ```
 
@@ -934,11 +930,11 @@ cp -r ~/environment/workshop/source/module-2/app/* ~/environment/workshop/app
 
 #### Pushing a Code Change
 
-Now the completed service code that we used to create our Fargate service in the previous section is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working. 
+Now the completed service code that we used to create our Fargate service in the previous section is stored in the local repository that we just cloned from AWS CodeCommit.  Let's make a change to the Flask service before committing our changes, to demonstrate that the CI/CD pipeline we've created is working.
 
 _Perform the following actions_
 
-1. In Cloud9, open the file stored at `~/environment/workshop/app/service/mysfits-response.json` 
+1. In Cloud9, open the file stored at `~/environment/workshop/app/service/mysfits-response.json`
 2. Change the age of one of the mysfits to another value and save the file.
 
 After saving the file, change directories to the new repository directory:
@@ -956,6 +952,8 @@ git push
 ```
 
 After the change is pushed into the repository, you can open the CodePipeline service in the AWS Console to view your changes as they progress through the CI/CD pipeline. After committing your code change, it will take about 5 to 10 minutes for the changes to be deployed to your live service running in Fargate.  During this time, AWS CodePipeline will orchestrate triggering a pipeline execution when the changes have been checked into your CodeCommit repository, trigger your CodeBuild project to initiate a new build, and retrieve the docker image that was pushed to ECR by CodeBuild and perform an automated ECS [Update Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/update-service.html) action to connection drain the existing containers that are running in your service and replace them with the newly built image.  Refresh your Mythical Mysfits website in the browser to see that the changes have taken effect.
+
+> **Note:** If you are not able to see the mysfits images, please [allow *mixed content* in your browser settings](https://docs.adobe.com/content/help/en/target/using/experiences/vec/troubleshoot-composer/mixed-content.html).
 
 You can view the progress of your code change through the CodePipeline console here (no actions needed, just watch the automation in action!):
 [AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home)
