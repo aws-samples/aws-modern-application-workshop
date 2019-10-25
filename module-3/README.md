@@ -248,7 +248,7 @@ Now that we have our data included in the table, let's modify our application co
 The request is formed using the AWS Python SDK called **boto3**. This SDK is a powerful yet simple way to interact with AWS services via Python code. It enables you to use service client definitions and functions that have great symmetry with the AWS APIs and CLI commands you've already been executing as part of this workshop.  Translating those commands to working Python code is simple when using **boto3**.  To copy the new files into your CodeCommit repository directory, execute the following command in the terminal:
 
 ```sh
-cp ~/environment/workshop/source/module-3/app/service/* ~/environment/MythicalMysfits-BackendRepository/service/
+cp ~/environment/workshop/source/module-3/app/service/* ~/environment/workshop/app/service/
 ```
 
 #### Push the Updated Code into the CI/CD Pipeline
@@ -256,7 +256,7 @@ cp ~/environment/workshop/source/module-3/app/service/* ~/environment/MythicalMy
 Now, we need to check in these code changes to CodeCommit using the git command line client.  Run the following commands to check in the new code changes and kick of your CI/CD pipeline:
 
 ```sh
-cd ~/environment/MythicalMysfits-BackendRepository
+cd ~/environment/workshop/app
 git add .
 git commit -m "Add new integration to DynamoDB."
 git push
