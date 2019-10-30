@@ -475,6 +475,18 @@ const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
 });
 ```
 
+#### Creating a Service Linked Role for ECS
+
+If you have already used ECS in the past you can skip over this step and move on to the next step. If you have never used ECS before, we need to create an service linked role in IAM that grants the ECS service itself permissions to make ECS API requests within your account. This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling docker images, creating new tasks, etc.
+
+Without creating this role, the ECS service would not be granted permissions to perform the actions required. To create the role, execute the following command in the terminal:
+
+```sh
+aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
+```
+
+If the above returns an error about the role existing already, you can ignore it, as it would indicate the role has automatically been created in your account in the past.
+
 And now deploy the ECS stack:
 
 ```sh
