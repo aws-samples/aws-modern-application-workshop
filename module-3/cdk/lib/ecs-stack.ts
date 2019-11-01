@@ -29,6 +29,7 @@ export class EcsStack extends cdk.Stack {
       publicLoadBalancer: true,
       taskImageOptions: {
         enableLogging: true,
+        containerName: "MythicalMysfits-Service",
         containerPort: 8080,
         image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
       }

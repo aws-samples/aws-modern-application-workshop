@@ -390,6 +390,7 @@ this.ecsService = new ecsPatterns.NetworkLoadBalancedFargateService(this, "Servi
   publicLoadBalancer: true,
   taskImageOptions: {
     enableLogging: true,
+    containerName: "MythicalMysfits-Service",
     containerPort: 8080,
     image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
   }
