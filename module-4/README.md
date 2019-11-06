@@ -248,6 +248,7 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
   loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
+app.synth();
 ```
 
 Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory:
