@@ -108,7 +108,7 @@ new cdk.CfnOutput(this, "CognitoUserPoolClient", {
 });
 ```
 
-With that done, your `cognito_stack.ts` file should resemble the following.
+With that done, your `cognito-stack.ts` file should resemble the following.
 
 ```typescript
 import cdk = require("@aws-cdk/core");
@@ -257,7 +257,7 @@ Install the AWS CDK npm package for API Gateway by executing the following comma
 npm install --save-dev @aws-cdk/aws-apigateway
 ```
 
-Back in `APIGatewayStack.ts`, define the class imports for the code we will be writing:
+Back in `lib/apigateway-stack.ts`, define the class imports for the code we will be writing:
 
 ```typescript
 import cdk = require('@aws-cdk/core');
