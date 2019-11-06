@@ -148,6 +148,7 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDbStack.table
 });
+app.synth();
 ```
 
 We are not yet finished writing the `KinesisFirehoseStack` implementation but let's deploy what we have written so far:
