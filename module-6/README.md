@@ -133,6 +133,7 @@ new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDbStack.table
 });
 new XRayStack(app, "MythicalMysfits-XRay");
+app.synth();
 ```
 
 We are not yet finished writing the `XRayStack` implementation but let's deploy what we have written so far:
