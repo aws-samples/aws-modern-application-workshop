@@ -31,7 +31,7 @@ API Gateway will then pass traffic through to our NLB to be processed by our Fla
 
 #### Create the Cognito User Pool
 
-To create the **Cognito User Pool** where all of the Mythical Mysfits visitors will be stored, create a new TypeScript file which we will use to define the Cognito stack.
+To create the **Cognito User Pool** where all of the Mythical Mysfits visitors will be stored, create a new TypeScript file in the `workshop/cdk/lib` folder called `cognito-stack.ts` which we will use to define the Cognito stack.
 
 ```sh
 cd ~/environment/workshop/cdk
@@ -58,7 +58,7 @@ As we have done previously, we need to install the CDK NPM package for AWS Cogni
 npm install --save-dev @aws-cdk/aws-cognito
 ```
 
-At the top of the file, add the import statement for the AWS Cognito cdk library
+At the top of the `cognito-stack.ts` file, add the import statement for the AWS Cognito CDK library
 
 ```typescript
 import cognito = require("@aws-cdk/aws-cognito");
@@ -108,7 +108,7 @@ new cdk.CfnOutput(this, "CognitoUserPoolClient", {
 });
 ```
 
-With that done, your `cognito_stack.ts` file should resemble the following.
+With that done, your `cognito-stack.ts` file should resemble the following:
 
 ```typescript
 import cdk = require("@aws-cdk/core");
@@ -146,9 +146,9 @@ export class CognitoStack extends cdk.Stack {
 }
 ```
 
-OK, That is our Amazon Cognito resources defined.  Now, let's add this to our `cdk.ts` bootstrap file.
+OK, That is our Amazon Cognito resources defined.  Now, let's add this to our `workshop/cdk/bin/cdk.ts` bootstrap file.
 
-Import your new `CognitoStack` definition into the `cdk.ts` file by inserting the following `import` statement at the top of the file
+Import your new `CognitoStack` definition into the `cdk.ts` file by inserting the following `import` statement:
 
 ```typescript
 import { CognitoStack } from '../lib/cognito-stack';
@@ -158,6 +158,40 @@ Insert the following definition at the end your `cdk.ts` file.
 
 ```typescript
 const cognito = new CognitoStack(app,  "MythicalMysfits-Cognito");
+```
+
+With that done, your `bin/cdk.ts` file should resemble the following:
+
+```typescript
+#!/usr/bin/env node
+
+import cdk = require("@aws-cdk/core");
+import 'source-map-support/register';
+import { WebApplicationStack } from "../lib/web-application-stack";
+import { NetworkStack } from "../lib/network-stack";
+import { EcrStack } from "../lib/ecr-stack";
+import { EcsStack } from "../lib/ecs-stack";
+import { CiCdStack } from "../lib/cicd-stack";
+import { CognitoStack } from '../lib/cognito-stack';
+import { DynamoDbStack } from '../lib/dynamodb-stack';
+
+const app = new cdk.App();
+new WebApplicationStack(app, "MythicalMysfits-Website");
+const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
+const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
+const ecsStack = new EcsStack(app, "MythicalMysfits-ECS", {
+    vpc: networkStack.vpc,
+    ecrRepository: ecrStack.ecrRepository
+});
+new CiCdStack(app, "MythicalMysfits-CICD", {
+    ecrRepository: ecrStack.ecrRepository,
+    ecsService: ecsStack.ecsService.service
+});
+const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
+    vpc: networkStack.vpc,
+    fargateService: ecsStack.ecsService.service
+});
+const cognito = new CognitoStack(app, "MythicalMysfits-Cognito");
 ```
 
 With that done, now we want to deploy the Cognito resources.  Make sure your CDK application compiles without error and deploy your application to your AWS account.
@@ -248,7 +282,6 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
   loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
-app.synth();
 ```
 
 Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory:

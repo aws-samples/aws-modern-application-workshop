@@ -181,7 +181,6 @@ new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
 });
 new XRayStack(app, "MythicalMysfits-XRay");
 new SageMakerStack(app, "MythicalMysfits-SageMaker");
-app.synth();
 ```
 
 We are not yet finished writing the `SageMakerStack` implementation but let's deploy what we have written so far:

@@ -37,4 +37,3 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDbStack.table
 });
-app.synth();

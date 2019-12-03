@@ -20,4 +20,3 @@ new CiCdStack(app, "MythicalMysfits-CICD", {
     ecrRepository: ecrStack.ecrRepository,
     ecsService: ecsStack.ecsService.service
 });
-app.synth();

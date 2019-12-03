@@ -25,4 +25,3 @@ const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
     vpc: networkStack.vpc,
     fargateService: ecsStack.ecsService.service
 });
-app.synth();

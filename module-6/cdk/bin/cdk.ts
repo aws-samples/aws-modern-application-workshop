@@ -39,4 +39,3 @@ new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
     table: dynamoDbStack.table
 });
 new XRayStack(app, "MythicalMysfits-XRay");
-app.synth();

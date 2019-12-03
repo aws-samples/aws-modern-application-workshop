@@ -33,5 +33,3 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
   loadBalancerArn: ecsStack.ecsService.loadBalancer.loadBalancerArn,
   loadBalancerDnsName: ecsStack.ecsService.loadBalancer.loadBalancerDnsName
 });
-
-app.synth();

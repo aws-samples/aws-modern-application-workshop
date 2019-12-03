@@ -41,4 +41,3 @@ new KinesisFirehoseStack(app, "MythicalMysfits-KinesisFirehose", {
 });
 new XRayStack(app, "MythicalMysfits-XRay");
 new SageMakerStack(app, "MythicalMysfits-SageMaker");
-app.synth();
