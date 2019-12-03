@@ -86,7 +86,7 @@ This will create a Cognito UserPool and defines that all users who are registere
 
 The last set we have to perform is to define a Amazon Cognito User Pool Client, which our web application will use.
 
-Again, within the constructor _(after the super(scope, id); statement)_, define the Amazon Cognito UserPool Client
+Again, within the constructor _(after the declaration of userPool construct)_, define the Amazon Cognito UserPool Client
 
 ```typescript
 this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
