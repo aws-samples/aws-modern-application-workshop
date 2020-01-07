@@ -97,7 +97,7 @@ sudo yum install -y apache-maven
 * Build the application at `~/environment/module-2/app/service`
 
 ```
-cd ~/environment/aws-modern-application-workshop/module-2/app/servi
+cd ~/environment/aws-modern-application-workshop/module-2/app/service
 mvn clean install
 ```
 
