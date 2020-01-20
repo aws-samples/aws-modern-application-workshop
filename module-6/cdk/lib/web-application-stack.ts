@@ -19,15 +19,13 @@ export class WebApplicationStack extends cdk.Stack {
     });
 
     // Obtain the cloudfront origin access identity so that the s3 bucket may be restricted to it.
-    const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOrigin", {
-      cloudFrontOriginAccessIdentityConfig: {
+    const origin = new cloudfront.OriginAccessIdentity(this, "BucketOrigin", {
         comment: "mythical-mysfits"
-      }
     });
 
     // Restrict the S3 bucket via a bucket policy that only allows our CloudFront distribution
     bucket.grantRead(new iam.CanonicalUserPrincipal(
-      origin.attrS3CanonicalUserId
+      origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
     ));
 
     // Definition for a new CloudFront web distribution, which enforces traffic over HTTPS
@@ -47,7 +45,7 @@ export class WebApplicationStack extends cdk.Stack {
           originPath: `/web`,
           s3OriginSource: {
             s3BucketSource: bucket,
-            originAccessIdentityId: origin.ref
+            originAccessIdentity: origin
           }
         }
       ]

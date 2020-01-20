@@ -229,14 +229,14 @@ We want to restrict access to our S3 bucket, and only allow access from the Clou
 Within the `web-application-stack.ts` constructor write the folllowing code:
 
 ```typescript
-const origin = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, "BucketOrigin", {
-  cloudFrontOriginAccessIdentityConfig: {
+// Obtain the cloudfront origin access identity so that the s3 bucket may be restricted to it.
+const origin = new cloudfront.OriginAccessIdentity(this, "BucketOrigin", {
     comment: "mythical-mysfits"
-  }
 });
 
+// Restrict the S3 bucket via a bucket policy that only allows our CloudFront distribution
 bucket.grantRead(new iam.CanonicalUserPrincipal(
-  origin.attrS3CanonicalUserId
+  origin.cloudFrontOriginAccessIdentityS3CanonicalUserId
 ));
 ```
 
@@ -261,7 +261,7 @@ const cdn = new cloudfront.CloudFrontWebDistribution(this, "CloudFront", {
       originPath: `/web`,
       s3OriginSource: {
         s3BucketSource: bucket,
-        originAccessIdentityId: origin.ref
+        originAccessIdentity: origin
       }
     }
   ]
