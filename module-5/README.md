@@ -132,10 +132,10 @@ If successful, you will see the newly created `transformed-streaming.yml` file e
 
 #### Deploy the Stack using AWS CloudFormation
 
-Also returned by the SAM CLI command is the CloudFormation command needed to be executed to create our new full stack.  But because our stack creates IAM resources, you'll need to add one additional parameter to the command.  Execute the following command to deploy the streaming stack:
+Also returned by the SAM CLI command is the CloudFormation command needed to be executed to create our new full stack.  But because our stack creates IAM resources, you'll need to add one additional parameter to the command.  Execute the following command to deploy the streaming stack (this command also assumes your terminal is still in the repository working directory):
 
 ```
-aws cloudformation deploy --template-file /home/ec2-user/environment/MythicalMysfitsStreamingService-Repository/transformed-streaming.yml --stack-name MythicalMysfitsStreamingStack --capabilities CAPABILITY_IAM
+aws cloudformation deploy --template-file ./transformed-streaming.yml --stack-name MythicalMysfitsStreamingStack --capabilities CAPABILITY_IAM
 ```
 
 Once this stack creation is complete, the full real-time processing microservice will be created.  
