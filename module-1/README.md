@@ -100,7 +100,7 @@ aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html 
 Following the "principle of least privilege", access to buckets and objects is denied by default. You can verify that issuing a GET request:
 
 ```
-curl -I "https://REPLACE_ME_BUCKET_NAME.s3-$(aws configure get region).amazonaws.com/index.html"
+curl -I "https://REPLACE_ME_BUCKET_NAME.s3-website-$(aws configure get region).amazonaws.com/index.html"
 HTTP/1.1 403 Forbidden
 ```
 
@@ -142,7 +142,7 @@ aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/en
 Your S3 Object should now be accessible:
 
 ```
-curl -I "https://REPLACE_ME_BUCKET_NAME.s3-$(aws configure get region).amazonaws.com/index.html"
+curl -I "https://REPLACE_ME_BUCKET_NAME.s3-website-$(aws configure get region).amazonaws.com/index.html"
 HTTP/1.1 200 OK
 ```
 
