@@ -482,6 +482,7 @@
           url : mysfitsApi,
           type : 'POST',
           headers : {'Authorization' : idJwt },
+          dataType : 'text',
           success : function(response) {
             console.log("here" + mysfitId);
             callback(mysfitId);
@@ -516,6 +517,7 @@
           async : false,
           type : 'POST',
           headers : {'Authorization' : idJwt },
+          dataType : 'text',
           success : function(response) {
             callback();
           },
