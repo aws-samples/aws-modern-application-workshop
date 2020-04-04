@@ -267,7 +267,7 @@ Resources:
             Resource: '*'
 
   # This is a role which is used by the ECS tasks. Tasks in Amazon ECS define
-  # the containers that should be deployed togehter and the resources they
+  # the containers that should be deployed together and the resources they
   # require from a compute/memory perspective. So, the policies below will define
   # the IAM permissions that our Mythical Mysfits docker containers will have.
   # If you attempted to write any code for the Mythical Mysfits service that
