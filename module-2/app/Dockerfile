@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 RUN echo Updating existing packages, installing and upgrading python and pip.
 RUN apt-get update -y
 RUN apt-get install -y python-pip python-dev build-essential
