@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: This stack deploys the core network infrastructure and IAM resources
-             to be used for a service hosted in Amazon ECS using AWS Fargate.
+             to be used for a service hosted in Amazon ECS.
 
 Mappings:
   # Hard values for the subnet masks. These masks define
@@ -116,28 +116,53 @@ Resources:
 
   # Setup networking resources for the private subnets. Containers
   # in these subnets have only private IP addresses, and must use a NAT
-  # gateway to talk to the internet. We launch two NAT gateways, one for
+  # instance to talk to the internet. We launch two NAT instances, one for
   # each private subnet.
-  NatGatewayOneAttachment:
+  NatInstanceOneAttachment:
     Type: AWS::EC2::EIP
-    DependsOn: GatewayAttachement
+    DependsOn: NatInstanceOne
     Properties:
         Domain: vpc
-  NatGatewayTwoAttachment:
+        InstanceId: !Ref NatInstanceOne
+  NatInstanceTwoAttachment:
     Type: AWS::EC2::EIP
-    DependsOn: GatewayAttachement
+    DependsOn: NatInstanceTwo
     Properties:
         Domain: vpc
-  NatGatewayOne:
-    Type: AWS::EC2::NatGateway
+        InstanceId: !Ref NatInstanceTwo
+        
+  NatInstanceOne:
+    Type: AWS::EC2::Instance
+    DependsOn: GatewayAttachement
     Properties:
-      AllocationId: !GetAtt NatGatewayOneAttachment.AllocationId
-      SubnetId: !Ref PublicSubnetOne
-  NatGatewayTwo:
-    Type: AWS::EC2::NatGateway
+      ImageId: 'ami-02623b65d521fbd30'
+      InstanceType: 't2.nano'
+      NetworkInterfaces:
+        - GroupSet: 
+          - !Ref NatInstanceSecurityGroup
+          AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          DeleteOnTermination: true
+          SubnetId: !Ref PublicSubnetOne
+      KeyName: 'mythical-mysfits-key-pem'
+      SourceDestCheck: false
+      
+  NatInstanceTwo:
+    Type: AWS::EC2::Instance
+    DependsOn: GatewayAttachement
     Properties:
-      AllocationId: !GetAtt NatGatewayTwoAttachment.AllocationId
-      SubnetId: !Ref PublicSubnetTwo
+      ImageId: 'ami-02623b65d521fbd30'
+      InstanceType: 't2.nano'
+      NetworkInterfaces:
+        - GroupSet: 
+          - !Ref NatInstanceSecurityGroup
+          AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          DeleteOnTermination: true
+          SubnetId: !Ref PublicSubnetTwo
+      KeyName: 'mythical-mysfits-key-pem'
+      SourceDestCheck: false
+      
   PrivateRouteTableOne:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -147,12 +172,13 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableOne
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGatewayOne
+      InstanceId: !Ref NatInstanceOne
   PrivateRouteTableOneAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableOne
       SubnetId: !Ref PrivateSubnetOne
+      
   PrivateRouteTableTwo:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -162,7 +188,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableTwo
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGatewayTwo
+      InstanceId: !Ref NatInstanceTwo
   PrivateRouteTableTwoAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -207,7 +233,68 @@ Resources:
           # Allow access to NLB from anywhere on the internet
           - CidrIp: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
             IpProtocol: -1
-
+  
+  # EcsInstancesSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties: 
+  #     GroupDescription: Allow HTTP and HTTPS from the internet; allow SSH from pc
+  #     VpcId: !Ref 'VPC'
+  #     SecurityGroupIngress:
+  #         # Allow inbound HTTP traffic from anywhere
+  #         - CidrIp: 0.0.0.0/0
+  #           IpProtocol: tcp
+  #           FromPort: 80
+  #           ToPort: 80
+  #         # Allow inbound HTTPS traffic from anywhere
+  #         - CidrIp: 0.0.0.0/0
+  #           IpProtocol: tcp
+  #           FromPort: 443
+  #           ToPort: 443
+  #         # Allow inbound SSH access to the NAT instance from your home network (over the internet gateway)
+  #         # - CidrIp: YOUR_IP_ADDRESS
+  #         #   IpProtocol: tcp
+  #         #   FromPort: 22
+  #         #   ToPort: 22
+          
+  
+  NatInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable NAT instance to receive internet-bound traffic from instances in private subnets
+      VpcId: !Ref 'VPC'
+      SecurityGroupIngress:
+          # Allow inbound HTTP traffic from servers in private subnet one
+          - CidrIp: !FindInMap ['SubnetConfig', 'PrivateOne', 'CIDR']
+            IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+          # Allow inbound HTTP traffic from servers in private subnet two
+          - CidrIp: !FindInMap ['SubnetConfig', 'PrivateTwo', 'CIDR']
+            IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+          # Allow inbound HTTPS traffic from servers in private subnet one
+          - CidrIp: !FindInMap ['SubnetConfig', 'PrivateOne', 'CIDR']
+            IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+          # Allow inbound HTTPS traffic from servers in private subnet two
+          - CidrIp: !FindInMap ['SubnetConfig', 'PrivateTwo', 'CIDR']
+            IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+      SecurityGroupEgress:
+          # Allow outbound HTTP access to the internet
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+          # Allow outbound HTTPS access to the internet
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            
   # This is an IAM role which authorizes ECS to manage resources on your
   # account on your behalf, such as updating your load balancer with the
   # details of where your containers are, so that traffic can reach your

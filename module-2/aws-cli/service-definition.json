@@ -1,7 +1,7 @@
 {
   "serviceName": "MythicalMysfits-Service",
   "cluster": "MythicalMysfits-Cluster",
-  "launchType": "FARGATE",
+  "launchType": "EC2",
   "deploymentConfiguration": {
     "maximumPercent": 200,
     "minimumHealthyPercent": 0
@@ -25,6 +25,12 @@
       "containerName": "MythicalMysfits-Service",
       "containerPort": 8080,
       "targetGroupArn": "REPLACE_ME_NLB_TARGET_GROUP_ARN"
+    }
+  ],
+  "placementStrategy": [
+    {
+      "type": "spread",
+      "field": "attribute:ecs.availability-zone"
     }
   ]
 }

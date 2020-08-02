@@ -25,6 +25,21 @@
           max-width: 300px;
       	}
       }
+      /* silvi customization */
+      .parent {
+        height: auto;
+        display: grid;
+        grid-gap: 1rem;
+        /* grid-template-columns: repeat(3, 1fr); */
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      }
+      .sil-card {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        justify-content: space-between;
+      }
+      /* silvi customization */
     </style>
     <br>
     <div style="text-align: center">
@@ -80,14 +95,12 @@
     </div>
     <br>
     <div class="container">
-      <div id="mysfitsGrid" class="row" ng-controller="mysfitsListController">
-        <div class="col-md-4 border border-warning" ng-repeat="mysfit in mysfits">
-            <br>
-            <p align="center">
-              <strong> {{mysfit.name}}</strong>
+      <div id="mysfitsGrid" class="parent" ng-controller="mysfitsListController">
+          <div class="card sil-card" ng-repeat="mysfit in mysfits">
               <br>
-              <img src="{{mysfit.thumbImageUri}}" alt="{{mysfit.Name}}">
-              <br>
+              <p class="m-0" align="center">
+                <h3 class="text-center m-0"> {{mysfit.name}}</h3>
+                <img class="mx-auto" width="250px" src="{{mysfit.thumbImageUri}}" alt="{{mysfit.Name}}">
               <br>
               <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#profileModal" data-mysfitid="{{mysfit.mysfitId}}">View Profile</button>
             </p>
@@ -153,7 +166,7 @@
     var cognitoUserPoolId = 'REPLACE_ME';  // example: 'us-east-1_abcd12345'
     var cognitoUserPoolClientId = 'REPLACE_ME'; // example: 'abcd12345abcd12345abcd12345'
     var awsRegion = 'REPLACE_ME'; // example: 'us-east-1' or 'eu-west-1' etc.
-
+    
     var app = angular.module('mysfitsApp', []);
 
     var gridScope;

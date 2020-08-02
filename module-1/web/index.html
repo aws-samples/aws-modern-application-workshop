@@ -23,22 +23,35 @@
           max-width: 300px;
       	}
       }
+      /* silvi customization */
+      .parent {
+        height: auto;
+        display: grid;
+        grid-gap: 1rem;
+        /* grid-template-columns: repeat(3, 1fr); */
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      }
+      .sil-card {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        justify-content: space-between;
+      }
+      /* silvi customization */
     </style>
     <br>
     <div style="text-align: center">
       <img src="https://www.mythicalmysfits.com/images/mysfits_banner.gif" width="800px" align="center">
     </div>
     <div class="container">
-      <div id="mysfitsGrid" class="row" ng-controller="mysfitsListController">
-          <div class="col-md-4 border border-warning" ng-repeat="mysfit in mysfits">
+      <div id="mysfitsGrid" class="parent" ng-controller="mysfitsListController">
+          <div class="card sil-card" ng-repeat="mysfit in mysfits">
               <br>
-              <p align="center">
-                <strong> {{mysfit.name}}</strong>
-                <br>
-                <img src="{{mysfit.thumbImageUri}}" alt="{{mysfit.Name}}">
+              <p class="m-0" align="center">
+                <h3 class="text-center m-0"> {{mysfit.name}}</h3>
+                <img class="mx-auto" width="250px" src="{{mysfit.thumbImageUri}}" alt="{{mysfit.Name}}">
               </p>
               <p>
-                <br>
                 <b>Species:</b> {{mysfit.species}}
                 <br>
                 <b>Age:</b> {{mysfit.age}}

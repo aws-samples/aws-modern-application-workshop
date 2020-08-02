@@ -4,7 +4,7 @@
   "memory": "512",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
-    "FARGATE"
+    "EC2"
   ],
   "executionRoleArn": "REPLACE_ME_ECS_SERVICE_ROLE_ARN",
   "taskRoleArn": "REPLACE_ME_ECS_TASK_ROLE_ARN",

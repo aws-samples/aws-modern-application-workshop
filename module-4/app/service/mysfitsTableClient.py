@@ -6,7 +6,7 @@ from collections import defaultdict
 # create a DynamoDB client using boto3. The boto3 library will automatically
 # use the credentials associated with our ECS task role to communicate with
 # DynamoDB, so no credentials need to be stored/managed at all by our code!
-client = boto3.client('dynamodb')
+client = boto3.client('dynamodb', region_name='REPLACE_ME_REGION')
 
 def getAllMysfits():
 
