@@ -9,5 +9,5 @@ WORKDIR /MythicalMysfitsService
 RUN echo Installing Python packages listed in requirements.txt
 RUN pip install -r ./requirements.txt
 RUN echo Starting python and starting the Flask service...
-ENTRYPOINT ["python"]
+ENTRYPOINT ["python3"]
 CMD ["mythicalMysfitsService.py"]
