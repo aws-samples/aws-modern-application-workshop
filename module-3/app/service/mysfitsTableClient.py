@@ -105,6 +105,7 @@ if __name__ == "__main__":
         print(f'value is {args.value}')
 
         print('Getting filtered values')
+
         items = queryMysfitItems(args.filter, args.value)
     else:
         print("Getting all values")
