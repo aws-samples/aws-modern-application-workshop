@@ -21,7 +21,7 @@ def healthCheckResponse():
 def getMysfits():
 
     # read the mysfits JSON from the listed file.
-    response = Response(open("mysfits-response.json").read())
+    response = Response(open("mysfits-response.json", "rb").read())
 
     # set the Content-Type header so that the browser is aware that the response
     # is formatted as JSON and our frontend JavaScript code is able to
