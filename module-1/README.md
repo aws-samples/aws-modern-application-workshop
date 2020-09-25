@@ -99,17 +99,19 @@ One of the biggest benefits from AWS CDK is the principal of reusability - Being
 
 #### Install AWS CDK
 
-If you haven't already, install the AWS CDK in your Cloud9 environment using the following command:
-
-```sh
-npm install -g aws-cdk
-```
+> **Note:** Your Cloud9 environment comes with AWS CDK pre-installed. If the command below fails, you can install the AWS CDK in your Cloud9 environment using the following command:
+> 
+> ```sh
+> npm install -g aws-cdk
+> ```
 
 Run the following command to see the version number of the CDK:
 
 ```sh
 cdk --version
 ```
+
+Please note down the CDK version installed on your environment.
 
 #### Initialise CDK App folder
 
@@ -168,11 +170,17 @@ const app = new cdk.App();
 new WebApplicationStack(app, "MythicalMysfits-Website");
 ```
 
-Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory:
+Now we have the required files, let's go through defining the S3 and CloudFront infrastructure.  But before we do that, we must add references to the appropriate npm packages that we will be using. Execute the following command from the `workshop/cdk/` directory (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @types/node @aws-cdk/aws-cloudfront @aws-cdk/aws-iam @aws-cdk/aws-s3 @aws-cdk/aws-s3-deployment
+npm install --save-dev @types/node @aws-cdk/aws-cloudfront@CDK_VERSION @aws-cdk/aws-iam@CDK_VERSION @aws-cdk/aws-s3@CDK_VERSION @aws-cdk/aws-s3-deployment@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @types/node @aws-cdk/aws-cloudfront@1.63.0 @aws-cdk/aws-iam@1.63.0 @aws-cdk/aws-s3@1.63.0 @aws-cdk/aws-s3-deployment@1.63.0
+>```
 
 ### Copy the Web Application Code
 

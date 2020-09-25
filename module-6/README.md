@@ -51,11 +51,17 @@ export class XRayStack extends cdk.Stack {
 }
 ```
 
-The AWS CDK npm package for Lambda already includes support for X-Ray tracing. We do need to install the AWS CDK npm packages for SNS and Lambda:
+The AWS CDK npm package for Lambda already includes support for X-Ray tracing. We do need to install the AWS CDK npm packages for SNS and Lambda (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-sns @aws-cdk/aws-sns-subscriptions @aws-cdk/aws-lambda-event-sources
+npm install --save-dev @aws-cdk/aws-sns@CDK_VERSION @aws-cdk/aws-sns-subscriptions@CDK_VERSION @aws-cdk/aws-lambda-event-sources@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-sns@1.63.0 @aws-cdk/aws-sns-subscriptions@1.63.0 @aws-cdk/aws-lambda-event-sources@1.63.0
+>```
 
 Define the class imports for the code we will be writing:
 

@@ -75,11 +75,17 @@ const dynamoDbStack = new DynamoDbStack(app, "MythicalMysfits-DynamoDB", {
 });
 ```
 
-As we have done previously, we need to install the CDK NPM package for AWS DynamoDB:
+As we have done previously, we need to install the CDK NPM package for AWS DynamoDB (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-dynamodb
+npm install --save-dev @aws-cdk/aws-dynamodb@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-dynamodb@1.63.0
+>```
 
 Within the `dynamodb-stack.ts` file, import the required modules:
 

@@ -55,11 +55,17 @@ export class SageMakerStack extends cdk.Stack {
 }
 ```
 
-Next, we need to install the AWS CDK npm packages for SageMaker:
+Next, we need to install the AWS CDK npm packages for SageMaker (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-sagemaker
+npm install --save-dev @aws-cdk/aws-sagemaker@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-sagemaker@1.63.0
+>```
 
 Define the class imports for the code we will be writing:
 
@@ -235,7 +241,7 @@ cd ~/environment/
 git clone REPLACE_ME_WITH_ABOVE_CLONE_URL lambda-recommendations
 ```
 
-### Copy the Questions Service Code Base
+### Copy the Recommendations Service Code Base
 
 Now, let's move our working directory into this new repository:
 ```
@@ -260,7 +266,7 @@ Open `sagemaker-endpoints.json` and copy the EndpointName value that is prefixed
 
 Paste the EndpointValue name in the `recommendation.py` file and save the file.
 
-### Creating the Questions Service Stack
+### Creating the Recommendations Service Stack
 
 Change back into the `cdk` folder:
 

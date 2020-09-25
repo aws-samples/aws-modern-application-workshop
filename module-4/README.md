@@ -52,11 +52,17 @@ export class CognitoStack extends cdk.Stack {
 }
 ```
 
-As we have done previously, we need to install the CDK NPM package for AWS Cognito:
+As we have done previously, we need to install the CDK NPM package for AWS Cognito (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-cognito
+npm install --save-dev @aws-cdk/aws-cognito@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-cognito@1.63.0
+>```
 
 At the top of the `cognito-stack.ts` file, add the import statement for the AWS Cognito CDK library
 
@@ -284,11 +290,17 @@ new APIGatewayStack(app, "MythicalMysfits-APIGateway", {
 });
 ```
 
-Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory:
+Install the AWS CDK npm package for API Gateway by executing the following command from within the `workshop/cdk/` directory (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-apigateway
+npm install --save-dev @aws-cdk/aws-apigateway@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-apigateway@1.63.0
+>```
 
 Back in `APIGatewayStack.ts`, define the class imports for the code we will be writing:
 

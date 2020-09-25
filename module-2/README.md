@@ -76,11 +76,17 @@ const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 
 Now, we can define our VPC using AWS CDK.  Once again, AWS CDK makes the implementation of AWS Components and Services a breeze by providing you with high level abstractions.  Let's demonstrate this now.
 
-First, we need to install the CDK NPM packages for Amazon EC2 and AWS IAM:
+First, we need to install the CDK NPM packages for Amazon EC2 and AWS IAM (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ec2 @aws-cdk/aws-iam
+npm install --save-dev @aws-cdk/aws-ec2@CDK_VERSION @aws-cdk/aws-iam@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-ec2@1.63.0 @aws-cdk/aws-iam@1.63.0
+>```
 
 Within the `network-stack.ts` file, define the following VPC construct:
 
@@ -238,11 +244,17 @@ const networkStack = new NetworkStack(app, "MythicalMysfits-Network");
 const ecrStack = new EcrStack(app, "MythicalMysfits-ECR");
 ```
 
-Next, we need to install the CDK NPM packages for Amazon ECR:
+Next, we need to install the CDK NPM packages for Amazon ECR (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ecr
+npm install --save-dev @aws-cdk/aws-ecr@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-ecr@1.63.0
+>```
 
 Then we add the definition of our ECR repository to the EcrStack as follows:
 
@@ -302,11 +314,17 @@ Now,  we have an image available in ECR that we can deploy to a service hosted o
 
 First, we will create a **Cluster** in **Amazon Elastic Container Service (ECS)**. This represents the cluster of “servers” that your service containers will be deployed to.  Servers is in "quotations" because you will be using **AWS Fargate**. Fargate allows you to specify that your containers be deployed to a cluster without having to actually provision or manage any servers yourself.
 
-Now, let's define our ECS instance.  But first, we need to install the CDK NPM packages for AWS ECS, doing so like below:
+Now, let's define our ECS instance.  But first, we need to install the CDK NPM packages for AWS ECS, doing so like below (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-ecs @aws-cdk/aws-ecs-patterns
+npm install --save-dev @aws-cdk/aws-ecs@CDK_VERSION @aws-cdk/aws-ecs-patterns@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-ecs@1.63.0 @aws-cdk/aws-ecs-patterns@1.63.0
+>```
 
 As before, let's create a new file within the `lib` folder, this time called `ecs-stack.ts`.  
 
@@ -547,12 +565,18 @@ In this section, you will create a fully managed CI/CD stack that will automatic
 
 ### Create a CodeCommit repository for our backend service
 
-First, we need to install the CDK NPM packages for AWS CodeCommit:
+First, we need to install the CDK NPM packages for AWS CodeCommit (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
 cd ~/environment/workshop/cdk
-npm install --save-dev @aws-cdk/aws-codecommit
+npm install --save-dev @aws-cdk/aws-codecommit@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-codecommit@1.63.0
+>```
 
 As before, let's create a new file within the `lib` folder, this time called `cicd-stack.ts`.  
 
@@ -676,11 +700,17 @@ export class CiCdStack extends cdk.Stack {
 
 ### Creating the CI/CD Pipeline
 
-Let's install the CDK NPM package for AWS CodeBuild and AWS CodePipeline, execute the following command in the `workshop/cdk` directory:
+Let's install the CDK NPM package for AWS CodeBuild and AWS CodePipeline, execute the following command in the `workshop/cdk` directory (replace `CDK_VERSION` with the CDK version installed in your environment):
 
 ```sh
-npm install --save-dev @aws-cdk/aws-codebuild  @aws-cdk/aws-codepipeline  @aws-cdk/aws-codepipeline-actions
+npm install --save-dev @aws-cdk/aws-codebuild@CDK_VERSION  @aws-cdk/aws-codepipeline@CDK_VERSION  @aws-cdk/aws-codepipeline-actions@CDK_VERSION
 ```
+
+> If the CDK version installed in your environment is version 1.63.0, then the command to execute is:
+> 
+>```sh
+>npm install --save-dev @aws-cdk/aws-codebuild@1.63.0 @aws-cdk/aws-codepipeline@1.63.0 @aws-cdk/aws-codepipeline-actions@1.63.0
+>```
 
 Add the required library import statements to the `cicd-stack.ts` file:
 
