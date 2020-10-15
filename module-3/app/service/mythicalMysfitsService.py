@@ -5,6 +5,7 @@ import mysfitsTableClient
 # A very basic API created using Flask that has two possible routes for requests.
 
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 CORS(app)
 
 # The service basepath has a short response just to ensure that healthchecks
