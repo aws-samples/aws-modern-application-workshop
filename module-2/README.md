@@ -290,10 +290,10 @@ In your browser, go to the ECR Dashboard and verify you can see the ECR reposito
 
 #### Pushing the Docker Image to Amazon ECR
 
-In order to push container images into our new repository, we will need to obtain authentication credentials for our Docker client to the repository.  Run the following command, which will return a login command to retrieve credentials for our Docker client and then automatically execute it (include the full command including the $ below). 'Login Succeeded' will be reported if the command is successful.
+In order to push container images into our new repository, we will need to obtain authentication credentials for our Docker client to the repository.  Run the following command, which will return a login command to retrieve credentials for our Docker client and then automatically execute it. 'Login Succeeded' will be reported if the command is successful.
 
 ```sh
-$(aws ecr get-login --no-include-email)
+aws ecr get-login-password | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com
 ```
 
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:
@@ -803,7 +803,7 @@ const deployAction = new actions.EcsDeployAction({
 });
 ```
 
-Finally define the CodePipeline pipeline and stich all the stages/actions together:
+Finally define the CodePipeline pipeline and stitch all the stages/actions together:
 
 ```typescript
 const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
