@@ -54,7 +54,7 @@ def likeMysfit(mysfitId):
 
     return flaskResponse
 
-# indicate that the provided mysfit should be marked as adopted. 
+# indicate that the provided mysfit should be marked as adopted.
 @app.route("/mysfits/<mysfitId>/adopt", methods=['POST'])
 def adoptMysfit(mysfitId):
     serviceResponse = mysfitsTableClient.adoptMysfit(mysfitId)
