@@ -176,7 +176,7 @@ http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
 Verify that the static website is being served correctly:
 
 ```
-curl -I http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com"
+curl -I "http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com"
 HTTP/1.1 200 OK
 ```
 
