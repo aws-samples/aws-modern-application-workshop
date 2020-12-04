@@ -165,7 +165,7 @@ Now you can use the website endpoint to serve static content directly from your 
 
 For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
 ```
 
 For us-east-2 (Ohio) use:
