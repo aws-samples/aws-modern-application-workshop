@@ -1,4 +1,4 @@
-FROM java:8
+FROM public.ecr.aws/bitnami/java:1.8
 VOLUME /tmp
 ADD service/target/mythical-mysfits-1.0-SNAPSHOT.jar app.jar
 EXPOSE 8080
