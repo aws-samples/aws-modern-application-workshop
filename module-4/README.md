@@ -82,9 +82,9 @@ Now, within the constructor _(after the `super(scope, id);` statement)_, define 
 ```typescript
 this.userPool = new cognito.UserPool(this, 'UserPool', {
   userPoolName: 'MysfitsUserPool',
-  autoVerifiedAttributes: [
-    cognito.UserPoolAttribute.EMAIL
-  ]
+  autoVerify: {
+    email: true
+  }
 });
 ```
 
@@ -129,9 +129,9 @@ export class CognitoStack extends cdk.Stack {
 
     this.userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: 'MysfitsUserPool',
-      autoVerifiedAttributes: [
-        cognito.UserPoolAttribute.EMAIL
-      ]
+      autoVerify: {
+        email: true
+      }
     });
 
     this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
