@@ -32,10 +32,14 @@ Before we can create our service, we need to create the core infrastructure envi
 * [**A Security Group**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) - Allows your docker containers to receive traffic on port 8080 from the Internet through the Network Load Balancer.
 * [**IAM Roles**](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) - Identity and Access Management Roles are created. These will be used throughout the workshop to give AWS services or resources you create access to other AWS services like DynamoDB, S3, and more.
 
-To create these resources, run the following command in the Cloud9 terminal (will take ~10 minutes for stack to be created):
+To create these resources, run the following command in the Cloud9 terminal (will take ~10 minutes for stack to be created). **Please, choose only one according to your AWS account type (regular or Starter for students)**:
 
 ```
+# For regular AWS accounts
 aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabilities CAPABILITY_NAMED_IAM --template-body file://~/environment/aws-modern-application-workshop/module-2/cfn/core.yml   
+
+# For AWS Educate starter student accounts
+aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabilities CAPABILITY_NAMED_IAM --template-body file://~/environment/aws-modern-application-workshop/module-2/cfn/core-starter-account.yml   
 ```
 
 You can check on the status of your stack creation either via the AWS Console or by running the command:
@@ -144,7 +148,7 @@ aws ecr describe-images --repository-name mythicalmysfits/service
 
 ### Configuring the Service Prerequisites in Amazon ECS
 
-#### Create an ECS Cluster
+#### Create an ECS Cluster for Fargate (non-Starter Accounts)
 
 Now,  we have an image available in ECR that we can deploy to a service hosted on Amazon ECS using AWS Fargate.  The same service you tested locally via the terminal in Cloud9 as part of the last module will now be deployed in the cloud and publicly available behind a Network Load Balancer.  
 
@@ -154,6 +158,28 @@ To create a new cluster in ECS, run the following command:
 
 ```
 aws ecs create-cluster --cluster-name MythicalMysfits-Cluster
+```
+
+#### Create an ECS Cluster for EC2 (for AWS Starter Accounts)
+
+Starter accounts do not support Fargate. So, you will have to use EC2 to deploy your servers.
+
+First, we will create a new **capacity provider** that will manage the autoscaling group created in our Core Infrastructure. A JSON file has been provided that will serve as the input to the CLI command.
+
+Open `~/environment/aws-modern-application-workshop/module-2/aws-cli/capacity-provider-definition.json` in the IDE.
+
+Replace the indicated values with the appropriate ones from your created resources.  
+
+Then, run the command:
+
+```
+aws ecs create-capacity-provider --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/capacity-provider-definition.json
+```
+
+Then, create a new cluster in ECS:
+
+```
+aws ecs create-cluster --cluster-name MythicalMysfits-Cluster --capacity-providers MythicalMysfits-CapacityProvider
 ```
 
 #### Create an AWS CloudWatch Logs Group
@@ -166,7 +192,7 @@ To create the new log group in CloudWatch logs, run the following command:
 aws logs create-log-group --log-group-name mythicalmysfits-logs
 ```
 
-#### Register an ECS Task Definition
+#### Register an ECS Task Definition (AWS accounts)
 
 Now that we have a cluster created and a log group defined for where our container logs will be pushed to, we're ready to register an ECS **task definition**.  A task in ECS is a set of container images that should be scheduled together. A task definition declares that set of containers and the resources and configuration those containers require.  You will use the AWS CLI to create a new task definition for how your new container image should be scheduled to the ECS cluster we just created.  
 
@@ -182,6 +208,24 @@ Once you have replaced the values in `task-defintion.json` and saved it. Execute
 
 ```
 aws ecs register-task-definition --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition.json
+```
+
+#### Register an ECS Task Definition (AWS Starter accounts)
+
+Now that we have a cluster created and a log group defined for where our container logs will be pushed to, we're ready to register an ECS **task definition**.  A task in ECS is a set of container images that should be scheduled together. A task definition declares that set of containers and the resources and configuration those containers require.  You will use the AWS CLI to create a new task definition for how your new container image should be scheduled to the ECS cluster we just created.  
+
+A JSON file has been provided that will serve as the input to the CLI command.
+
+Open `~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition-starter-account.json` in the IDE.
+
+Replace the indicated values with the appropriate ones from your created resources.  
+
+These values will be pulled from the CloudFormation response you copied earlier as well as the docker image tag that you pushed earlier to ECR, eg: `REPLACE_ME_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/mythicalmysfits/service:latest`
+
+Once you have replaced the values in `task-defintion-starter-account.json` and saved it. Execute the following command to register a new task definition in ECS:
+
+```
+aws ecs register-task-definition --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/task-definition-starter-account.json
 ```
 
 ### Enabling a Load Balanced Fargate Service
@@ -231,7 +275,7 @@ aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
 If the above returns an error about the role existing already, you can ignore it, as it would indicate the role has automatically been created in your account in the past.
 
 
-#### Create the Service
+#### Create the Service using Fargate (AWS accounts)
 
 With the NLB created and configured, and the ECS service granted appropriate permissions, we're ready to create the actual ECS **service** where our containers will run and register themselves to the load balancer to receive traffic.  We have included a JSON file for the CLI input that is located at: `~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json`.  This file includes all of the configuration details for the service to be created, including indicating that this service should be launched with **AWS Fargate** - which means that you do not have to provision any servers within the targeted cluster.  The containers that are scheduled as part of the task used in this service will run on top of a cluster that is fully managed by AWS.
 
@@ -239,6 +283,18 @@ Open ```~/environment/aws-modern-application-workshop/module-2/aws-cli/service-d
 
 ```
 aws ecs create-service --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json
+```
+
+After your service is created, ECS will provision a new task that's running the container you've pushed to ECR, and register it to the created NLB.  
+
+#### Create the Service using EC2 (for AWS Starter accounts)
+
+With the NLB created and configured, and the ECS service granted appropriate permissions, we're ready to create the actual ECS **service** where our containers will run and register themselves to the load balancer to receive traffic.  We have included a JSON file for the CLI input that is located at: `~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition-starter-account.json`.  This file includes all of the configuration details for the service to be created, including indicating that this service should be launched with **AWS EC2** and **AWS EC2 Autoscaling**.
+
+Open ```~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition-starter-account.json``` in the IDE and replace the indicated values of `REPLACE_ME`. Save it, then run the following command to create the service:
+
+```
+aws ecs create-service --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition-starter-account.json
 ```
 
 After your service is created, ECS will provision a new task that's running the container you've pushed to ECR, and register it to the created NLB.  

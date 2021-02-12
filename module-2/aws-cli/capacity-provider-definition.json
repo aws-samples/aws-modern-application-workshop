@@ -1,0 +1,13 @@
+{
+    "name" : "MythicalMysfits-CapacityProvider",
+    "autoScalingGroupProvider": {
+        "autoScalingGroupArn": "REPLACE_ME_AUTOSCALING_GROUP",
+        "managedScaling": {
+            "maximumScalingStepSize": 1,
+            "minimumScalingStepSize": 1,
+            "status": "ENABLED",
+            "targetCapacity": 100
+        },
+        "managedTerminationProtection": "ENABLED"
+    }
+}

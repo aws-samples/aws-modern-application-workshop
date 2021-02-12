@@ -1,0 +1,41 @@
+{
+    "serviceName": "MythicalMysfits-Service",
+    "cluster": "MythicalMysfits-Cluster",
+    "capacityProviderStrategy": [
+        {
+            "capacityProvider": "MythicalMysfits-CapacityProvider",
+            "weight": 1
+        }
+    ],
+    "deploymentConfiguration": {
+        "maximumPercent": 200,
+        "minimumHealthyPercent": 100
+    },
+    "desiredCount": 1,
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "assignPublicIp": "DISABLED",
+            "securityGroups": [
+                "REPLACE_ME_SECURITY_GROUP_ID"
+            ],
+            "subnets": [
+                "REPLACE_ME_PRIVATE_SUBNET_ONE",
+                "REPLACE_ME_PRIVATE_SUBNET_TWO"
+            ]
+        }
+    },
+    "taskDefinition": "mythicalmysfitsservice",
+    "loadBalancers": [
+        {
+            "containerName": "MythicalMysfits-Service",
+            "containerPort": 8080,
+            "targetGroupArn": "REPLACE_ME_NLB_TARGET_GROUP_ARN"
+        }
+    ],
+    "placementStrategy": [
+        {
+            "type": "spread",
+            "field": "attribute:ecs.availability-zone"
+        }
+    ]
+}
