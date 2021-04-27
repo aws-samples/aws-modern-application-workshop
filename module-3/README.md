@@ -70,7 +70,7 @@ Now that we have our data included in the table, let's modify our application co
 The request is formed using the [AWS SDK for Java](https://aws.amazon.com/sdk-for-java/). The AWS SDKs are powerful yet simple clients to interact with AWS services in several programming environments. It enables you to use service client definitions and functions that have great symmetry with the AWS APIs and CLI commands you've already been executing as part of this workshop. To copy the new files into your CodeCommit repository directory, execute the following command in the terminal:
 
 ```
-cp ~/environment/aws-modern-application-workshop/module-3/app/service/* ~/environment/MythicalMysfitsService-Repository/service/
+cp -r ~/environment/aws-modern-application-workshop/module-3/app/service/* ~/environment/MythicalMysfitsService-Repository/service/
 ```
 
 You can review the code change to use the DynamoDB client classes for Java in the file `~/environment/aws-modern-application-workshop/module-3/app/service/src/main/java/com/example/MythicalMysfitsService.java`
