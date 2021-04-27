@@ -43,6 +43,8 @@ aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabili
 New-CFNStack -StackName MythicalMysfitsCoreStack -Capability CAPABILITY_NAMED_IAM -TemplateBody $(Get-Content $([io.path]::combine($(Get-Location), "module-2", "cfn", "core.yml")) | Out-String)
 ```
 
+If the script doesn't work make sure your terminal is still in aws-modern-application-workshop folder.
+
 You can check on the status of your stack creation either via the AWS Console or by running the command using either the AWS CLI or the PowerShell command:
 
 ```
@@ -253,7 +255,7 @@ aws ecs register-task-definition --cli-input-json file://module-2/aws-cli/task-d
 
 With a new task definition registered, we're ready to provision the infrastructure needed in our service stack. Rather than directly expose our service to the Internet, we will provision a **Network Load Balancer (NLB)** to sit in front of our service tier.  This enables our frontend code to communicate with a single DNS name while our backend service is free to provision containers elastically to meet scaling demands or to handle failures.
 
-To provision a new NLB, execute the following CLI command in your Visual Studio Code terminal (retrieve the subnetIds from the CloudFormation output you saved) using either the AWS CLI or the PowerShell command:
+To provision a new NLB, execute the following CLI command in your Visual Studio Code terminal (retrieve the subnetIds from the OutputValue for OutputKeys PublicSubnetOne and PublicSubnetTwo in the CloudFormation output you saved) using either the AWS CLI or the PowerShell command:
 
 `Bash`
 ```
@@ -278,6 +280,10 @@ Next, use the CLI or PowerShell command to create an NLB **target group**. A tar
 ```
 aws elbv2 create-target-group --name MythicalMysfits-TargetGroup --port 8080 --protocol TCP --target-type ip --vpc-id REPLACE_WITH_VPC_ID --health-check-interval-seconds 10 --health-check-path / --health-check-protocol HTTP --healthy-threshold-count 3 --unhealthy-threshold-count 3
 ```
+
+If you are using Git Bash on Windows you might encounter a validation error with the health check path.
+You'll have to run this command in Powershell ([thanks @vgribok](https://github.com/aws-samples/modernization-unicorn-store/issues/5#issue-470542702))
+
 `PowerShell`
 
 **Note:** This command autoretrieves your VPC ID.
@@ -410,7 +416,7 @@ amplify publish
 
 ### Creating the CI/CD Pipeline
 
-#### Create a S3 Bucket for Pipelie Artifacts
+#### Create a S3 Bucket for Pipeline Artifacts
 
 Now that you have a service up and running, you may think of code changes that you'd like to make to your .NET service.  It would be a bottleneck for your development speed if you had to go through all of the same steps above every time you wanted to deploy a new feature to your service. That's where Continuous Integration and Continuous Delivery or CI/CD come in!
 
@@ -469,6 +475,12 @@ aws codebuild create-project --cli-input-json file://module-2/aws-cli/code-build
 `PowerShell`
 
 **Note:** This PowerShell script attempts to retrieve values so that you don't need to replace anything. If the script fails, open the file and replace the variables with your values manually.
+**Note:** Before running this command you'll have to make sure there is a default AWS region configured with:
+```
+Get-DefaultAWSRegion | Select-Object -ExpandProperty Region
+```
+If not the command will run successfully but builds will fail.
+
 ```
 ./module-2/ps1/CreateCodeBuildProject.ps1
 ```

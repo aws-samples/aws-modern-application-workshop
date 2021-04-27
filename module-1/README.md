@@ -18,6 +18,9 @@ In this module, follow the instructions to set up your environment with Visual S
     * Pick a tool based on the environment you're more comfortable with:
         * Bash -- AWS CLI
         * PowerShell -- AWS Tools for PowerShell
+    * Configure tool to use your AWS account
+        * [AWS CLIz](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+        * [Powershell](https://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html)
 * [Node.js and NPM](https://nodejs.org/en/) - v12 or greater
 * [.NET Core 2.1](https://www.microsoft.com/net/download)
 * [Angular CLI](https://cli.angular.io/)
@@ -35,6 +38,11 @@ Type the following `git` command to clone the necessary code to complete this tu
 git clone https://github.com/aws-samples/aws-modern-application-workshop.git
 ```
 
+Make sure you are working on dotnet branch either on your favorite git client or using the following command:
+```
+git checkout origin/dotnet
+```
+
 After cloning the repository, click **Open Folder** in Visual Studio Code and find the directory you just cloned. It will be named `aws-modern-application-workshop`.
 
 
@@ -42,6 +50,11 @@ In the terminal, change directory to the newly cloned repository directory:
 
 ```
 cd aws-modern-application-workshop
+```
+
+In order to build the solution you will need to install all depedencies listed in package.json. Type:
+```
+npm install
 ```
 
 ### Creating a Static Website in Amazon S3

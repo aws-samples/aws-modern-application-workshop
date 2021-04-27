@@ -58,7 +58,7 @@ The CLI will ask you a few questions. Be sure to answer these specific questions
 * Start Command: `npm start`
 
 #### Create the Cognito User Pool With Amplify
-After finishing installation, setup, and initialization, we'll add user authentication to our Angular app that uses **Amazon Cognito**. In addition to authenticationm, Cognito offers other user management utilities.
+After finishing installation, setup, and initialization, we'll add user authentication to our Angular app that uses **Amazon Cognito**. In addition to authentication, Cognito offers other user management utilities.
 
 Run the following command to add authentication to the Angular app and also create the necessary resources in your AWS account:
 ```
@@ -89,8 +89,6 @@ aws apigateway create-vpc-link --name MysfitsApiVpcLink --target-arns REPLACE_ME
 ```
 New-AGVpcLink -Name MysfitsApiVpcLink -TargetArn $(Get-ELB2LoadBalancer -Name mysfits-nlb | Select-Object -ExpandProperty LoadBalancerArn)
 ```
-The response to the above will indicate that a new VPC link is being provisioned and is in `PENDING` state. Copy the indicated `id` for future use when we create our REST API in the next step.
-
 The response to the above will indicate that a new VPC link is being provisioned and is in `PENDING` state. Copy the indicated `id` for future use when we create our REST API in the next step.
 
 ```
