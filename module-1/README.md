@@ -128,7 +128,7 @@ We highly recommend that you never grant any kind of public access to your S3 bu
 
 When you are done with the workshop, you can prevent public access by deleting the bucket policy with the following command:
 ```
-aws s3api delete -bucket-policy --bucket REPLACE_ME_BUCKET_NAME 
+aws s3api delete-bucket-policy --bucket REPLACE_ME_BUCKET_NAME 
 ```
 
 **! Now that you know!**
