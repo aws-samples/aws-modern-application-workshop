@@ -224,6 +224,18 @@ aws elbv2 create-listener --default-actions TargetGroupArn=REPLACE_ME_NLB_TARGET
 
 ### Creating a Service with Fargate
 
+#### Creating a Service Linked Role for ECS
+
+If you have already used ECS in the past you can skip over this step and move on to the next step.  If you have never used ECS before, we need to create an **service linked role** in IAM that grants the ECS service itself permissions to make ECS API requests within your account.  This is required because when you create a service in ECS, the service will call APIs within your account to perform actions like pulling docker images, creating new tasks, etc.
+
+Without creating this role, the ECS service would not be granted permissions to perform the actions required.  To create the role, execute the following command in the terminal:
+
+```
+aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
+```
+
+If the above returns an error about the role existing already, you can ignore it, as it would indicate the role has automatically been created in your account in the past.
+
 #### Create the Service
 
 With the NLB created and configured, and the ECS service granted appropriate permissions, we're ready to create the actual ECS **service** where our containers will run and register themselves to the load balancer to receive traffic.  We have included a JSON file for the CLI input that is located at: `~/environment/aws-modern-application-workshop/module-2/aws-cli/service-definition.json`.  This file includes all of the configuration details for the service to be created, including indicating that this service should be launched with **AWS Fargate** - which means that you do not have to provision any servers within the targeted cluster.  The containers that are scheduled as part of the task used in this service will run on top of a cluster that is fully managed by AWS.
