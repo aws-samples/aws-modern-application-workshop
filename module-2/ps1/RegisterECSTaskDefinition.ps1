@@ -54,7 +54,7 @@ try {
     $image = "{0}.dkr.ecr.{1}.amazonaws.com/mythicalmysfits/service" -f $accountId, $region
     $essential = "true"
 
-    $protocol = "http"
+    $protocol = "tcp"
     $containerPort = "8080"
 
     $logDriver = "awslogs"
@@ -71,17 +71,17 @@ try {
         'Options'   = $opts; 
     }
 
-    $portMapping = @(
-        @{ 
+    $portMapping = [Amazon.ECS.Model.PortMapping[]]@(
+        [Amazon.ECS.Model.PortMapping]@{ 
             'Protocol'      = $protocol; 
             'ContainerPort' = $containerPort; 
         }
     )
     
     $containerDefinition = @{
-        'Name'             = $name; 
-        'Image'            = $image; 
-        'PortMappings'     = $portMapping; 
+        'Name'             = $name;
+        'Image'            = $image;
+        'PortMappings'     = $portMapping;
         'LogConfiguration' = $logConfiguration;
         'Essential'        = $essential
     }
