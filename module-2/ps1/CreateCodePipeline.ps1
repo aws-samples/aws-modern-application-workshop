@@ -40,9 +40,9 @@ try {
     ######## BEGIN VARIABLE BLOCK -- REPLACE ONLY IF SCRIPT ISN'T WORKING ##########
     $name = "MythicalMysfitsServiceCICDPipeline"
     $roleArn = Get-CFNStack -StackName MythicalMysfitsCoreStack | Select-Object -ExpandProperty Outputs | Select-Object ExportName, OutputValue | Where-Object { $_.ExportName -eq "MythicalMysfitsCoreStack:MythicalMysfitsServiceCodePipelineServiceRole" } | Select-Object -ExpandProperty OutputValue
-    
+
     $sourceStageActions = New-Object "System.Collections.Generic.List [Amazon.CodePipeline.Model.ActionDeclaration]"
-    $sourceStageAction = @{
+    $sourceStageAction = [Amazon.CodePipeline.Model.ActionDeclaration]@{
         inputArtifacts  = @();
         Name            = "Source";
         ActionTypeId    = @{
@@ -51,8 +51,8 @@ try {
             Version  = "1";
             Provider = "CodeCommit";
         };
-        OutputArtifacts = @(
-            @{
+        OutputArtifacts = [Amazon.CodePipeline.Model.OutputArtifact[]]@(
+            [Amazon.CodePipeline.Model.OutputArtifact]@{
                 Name = "MythicalMysfitsService-SourceArtifact"
             }
         );
@@ -67,7 +67,7 @@ try {
     };
 
     $buildStageActions = New-Object "System.Collections.Generic.List [Amazon.CodePipeline.Model.ActionDeclaration]"
-    $buildStageAction = @{
+    $buildStageAction = [Amazon.CodePipeline.Model.ActionDeclaration]@{
         Name            = "Build";
         Configuration   = $(ConvertTo-Dictionary -HashTable @{ProjectName = "MythicalMysfitsServiceCodeBuildProject"; })
         ActionTypeId    = @{
@@ -76,13 +76,13 @@ try {
             Version  = "1";
             Provider = "CodeBuild";
         }
-        OutputArtifacts = @(
-            @{
+        OutputArtifacts = [Amazon.CodePipeline.Model.OutputArtifact[]]@(
+            [Amazon.CodePipeline.Model.OutputArtifact]@{
                 Name = "MythicalMysfitsService-BuildArtifact";
             }
         );
-        inputArtifacts  = @(
-            @{
+        InputArtifacts  = [Amazon.CodePipeline.Model.InputArtifact[]]@(
+            [Amazon.CodePipeline.Model.InputArtifact]@{
                 Name = "MythicalMysfitsService-SourceArtifact";
             }
         );
@@ -103,8 +103,8 @@ try {
             Version  = "1";
             Provider = "ECS";
         };
-        InputArtifacts = @(
-            @{
+        InputArtifacts  = [Amazon.CodePipeline.Model.InputArtifact[]]@(
+            [Amazon.CodePipeline.Model.InputArtifact]@{
                 Name = "MythicalMysfitsService-BuildArtifact"
             }
         );
