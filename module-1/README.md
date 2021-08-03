@@ -100,7 +100,7 @@ aws s3 cp ~/environment/aws-modern-application-workshop/module-1/web/index.html 
 Following the "principle of least privilege", access to buckets and objects is denied by default. You can verify that issuing a GET request:
 
 ```
-curl -I "https://REPLACE_ME_BUCKET_NAME.s3-website-$(aws configure get region).amazonaws.com/index.html"
+curl -I "https://REPLACE_ME_BUCKET_NAME.s3.$(aws configure get region).amazonaws.com/index.html"
 HTTP/1.1 403 Forbidden
 ```
 
@@ -142,7 +142,7 @@ aws s3api put-bucket-policy --bucket REPLACE_ME_BUCKET_NAME --policy file://~/en
 Your S3 Object should now be accessible:
 
 ```
-curl -I "https://REPLACE_ME_BUCKET_NAME.s3-website-$(aws configure get region).amazonaws.com/index.html"
+curl -I "https://REPLACE_ME_BUCKET_NAME.s3.$(aws configure get region).amazonaws.com/index.html"
 HTTP/1.1 200 OK
 ```
 
@@ -151,7 +151,7 @@ HTTP/1.1 200 OK
 As you just verified, your bucket is ready to store and serve "objects" (a.k.a. files plus their metadata). However, a bucket behaves differently from usual webservers. For example, a GET request to the bucket HTTP endpoint would trigger a [List Objects](https://docs.aws.amazon.com/AmazonS3/latest/API/v2-RESTBucketGET.html) operation, instead of returning the root object. The bucket policy does not grant the ```s3:ListBucket```, so this request is denied:
 
 ```
-curl -I "https://REPLACE_ME_BUCKET_NAME.s3-$(aws configure get region).amazonaws.com"
+curl -I "https://REPLACE_ME_BUCKET_NAME.s3.$(aws configure get region).amazonaws.com"
 HTTP/1.1 403 Forbidden
 ```
 
@@ -161,22 +161,22 @@ Configuring [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest
 aws s3 website s3://REPLACE_ME_BUCKET_NAME --index-document index.html
 ```
 
-Now you can use the website endpoint to serve static content directly from your S3 Bucket. The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you  created the S3 bucket within (eg: us-east-1):
+Now you can use the website endpoint to serve static content directly from your S3 Bucket. The string to replace **REPLACE_ME_YOUR_REGION** should match whichever region you created the S3 bucket within (eg: us-east-1):
 
 For us-east-1 (N. Virginia), us-west-2 (Oregon), eu-west-1 (Ireland) use:
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com
+http://REPLACE_ME_BUCKET_NAME.s3.REPLACE_ME_YOUR_REGION.amazonaws.com
 ```
 
 For us-east-2 (Ohio) use:
 ```
-http://REPLACE_ME_BUCKET_NAME.s3-website.REPLACE_ME_YOUR_REGION.amazonaws.com
+http://REPLACE_ME_BUCKET_NAME.s3.REPLACE_ME_YOUR_REGION.amazonaws.com
 ```
 
 Verify that the static website is being served correctly:
 
 ```
-curl -I http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com"
+curl -I http://REPLACE_ME_BUCKET_NAME.s3.REPLACE_ME_YOUR_REGION.amazonaws.com"
 HTTP/1.1 200 OK
 ```
 
