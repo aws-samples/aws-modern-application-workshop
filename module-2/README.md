@@ -150,9 +150,14 @@ New-ECRRepository -RepositoryName mythicalmysfits/service
 The response to this command will contain additional metadata about the created repository.
 In order to push container images into our new repository, we will need to obtain authentication credentials for our Docker client to the repository.  Run the following command, which will return a login command to retrieve credentials for our Docker client and then automatically execute it (include the full command including the $ below). 'Login Succeeded' will be reported if the command is successful. Run the below command using either the AWS CLI or the PowerShell command:
 
-`Bash`
+`Bash: AWS CLI 1.1`
 ```
 $(aws ecr get-login --no-include-email)
+```
+`Bash: AWS CLI 2.0`
+```
+aws ecr get-login-password --region $(aws configure get region) | docker login --username AWS --password-stdin $(aws sts get-caller-identity --qu
+ery Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com
 ```
 `PowerShell`
 ```
