@@ -5,6 +5,9 @@ RUN apk update && apk add --no-cache git
 WORKDIR /go/src/app
 COPY ./service/ .
 
+RUN echo creating mod file
+RUN go mod init 
+
 RUN echo Fetching project dependencies
 RUN go get -d -v
 
