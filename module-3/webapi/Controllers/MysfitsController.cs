@@ -10,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace ModernWebAppNET.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/mysfits]")]
     [ApiController]
     public class MysfitsController : ControllerBase
     {

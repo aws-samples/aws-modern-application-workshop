@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace ModernWebAppNET.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/mysfits")]
     [ApiController]
     public class MysfitsController : ControllerBase
     {

@@ -152,11 +152,12 @@ In order to push container images into our new repository, we will need to obtai
 
 `Bash`
 ```
-$(aws ecr get-login --no-include-email)
+aws ecr get-login-password --region $(aws configure get region) | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$(aws configure get region).amazonaws.com
 ```
 `PowerShell`
 ```
-Invoke-Expression $(Get-ECRLoginCommand | Select-Object -ExpandProperty Command)
+(Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin $(Get-STSCallerIdentity | Select-Object -ExpandProperty Account).dkr.ecr.region.amazonaws.com
+
 ```
 
 Next, push the image you created to the ECR repository using the copied tag from above. Using this command, docker will push your image and all the images it depends on to Amazon ECR:

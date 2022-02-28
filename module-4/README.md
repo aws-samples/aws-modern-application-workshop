@@ -132,7 +132,7 @@ cd ./module-4/frontend/src/aws-exports.js
 CTRL-F through the file to search for the various places `REPLACE_ME` is located and awaiting your specific parameters.  Once the edits have been made, save the file and execute the following AWS CLI command:
 
 ```
-aws apigateway import-rest-api --parameters endpointConfigurationTypes=REGIONAL --body file://~/environment/aws-modern-application-workshop/module-4/aws-cli/api-swagger.json --fail-on-warnings
+aws apigateway import-rest-api --parameters endpointConfigurationTypes=REGIONAL --body file://module-4/aws-cli/api-swagger.json --fail-on-warnings
 ```
 
 Copy the response this command returns and save the `id` value for the next step:

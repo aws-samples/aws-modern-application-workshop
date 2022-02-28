@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ModernWebAppNET.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/mysfits")]
     [ApiController]
     public class MysfitsController : ControllerBase
     {
@@ -20,7 +20,14 @@ namespace ModernWebAppNET.Controllers
             using (StreamReader r = new StreamReader("./mysfits-response.json"))
             {
                 var json = r.ReadToEnd();
-                return new JsonResult(JObject.Parse(json));
+                var content = new ContentResult();
+
+                content.Content = json;
+                content.ContentType = "application/json";
+
+
+                return content;
+                //return new JsonResult(JObject.Parse(json)); 
             }
         }
 
