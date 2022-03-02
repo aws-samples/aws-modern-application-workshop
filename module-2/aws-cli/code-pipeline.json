@@ -23,7 +23,7 @@
                 }
               ],
               "configuration": {
-                "BranchName": "master",
+                "BranchName": "main",
                 "RepositoryName": "MythicalMysfitsService-Repository"
               },
               "runOrder": 1

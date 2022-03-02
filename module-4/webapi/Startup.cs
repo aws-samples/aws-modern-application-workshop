@@ -45,6 +45,8 @@ namespace ModernWebAppNET
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseRouting();
+
             if (env.IsDevelopment())
             {
                 app.UseCors(builder =>
@@ -61,7 +63,10 @@ namespace ModernWebAppNET
 
             app.UseHttpsRedirection();
             app.UseMiddleware<ErrorHandlingMiddleware>();
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

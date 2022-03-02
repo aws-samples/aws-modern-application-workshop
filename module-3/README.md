@@ -65,7 +65,7 @@ Also provided is a JSON file that can be used to batch insert a number of Mysfit
 
 `Bash`
 ```
-aws dynamodb batch-write-item --request-items file://~/environment/aws-modern-application-workshop/module-3/aws-cli/populate-dynamodb.json
+aws dynamodb batch-write-item --request-items file://module-3/aws-cli/populate-dynamodb.json
 ```
 `PowerShell`
 ```
@@ -133,6 +133,8 @@ Deploy your updated angular app by running the following PowerShell script or Ba
 ```
 ./module-3/deploy-frontend-scripts/Deploy-FrontEnd.ps1
 ```
+**Note:** If you have issues dimilar to `./node_modules/@angular/cli/bin/ng: No such file or directory` in your frontend deployment, go to the frontend directory and issue an `npm install` to locate dependencies
+
 **(Optional)**
 
 **Note:** If you used AWS Amplify to deploy your Angular app, use the following command to deploy your updated code:

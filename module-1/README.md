@@ -35,7 +35,7 @@ Open the terminal in Visual Studio Code, located under **View > Terminal**
 Type the following `git` command to clone the necessary code to complete this tutorial:
 
 ```
-git clone https://github.com/aws-samples/aws-modern-application-workshop.git
+git clone https://github.com/iamtgray/aws-modern-application-workshop.git
 ```
 
 Make sure you are working on dotnet branch either on your favorite git client or using the following command:
