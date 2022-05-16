@@ -33,7 +33,7 @@ In this workshop we are going to use the [AWS Command Line Interface](https://aw
 ## Before you begin
 If this is your first time using AWS, also visit our [Getting Started](https://aws.amazon.com/getting-started/) page and get familiar with using your AWS account.
 
-When you are redy, begin the workshop in the [Module 1: IDE Setup and Static Website Hosting](/module-1)
+When you are ready, begin the workshop in the [Module 1: IDE Setup and Static Website Hosting](/module-1)
 
 
 ## After you complete
